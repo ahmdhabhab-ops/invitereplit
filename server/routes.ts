@@ -3,41 +3,113 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertOrderSchema, insertSiteSettingsSchema } from "@shared/schema";
 import { z } from "zod";
-import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
+import bcrypt from "bcryptjs";
+import session from "express-session";
+import connectPg from "connect-pg-simple";
+
+// Admin credentials from environment variables
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "info@einvite.me";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "";
+
+// Validate admin credentials on startup
+if (!ADMIN_PASSWORD) {
+  console.warn("Warning: ADMIN_PASSWORD environment variable not set. Admin login will be disabled.");
+}
+
+// Extend session type
+declare module "express-session" {
+  interface SessionData {
+    isAdmin?: boolean;
+    adminEmail?: string;
+  }
+}
 
 // Middleware to check if user is admin
-const isAdmin: RequestHandler = async (req: any, res, next) => {
-  try {
-    const userEmail = req.user?.claims?.email;
-    if (!userEmail) {
-      return res.status(403).json({ error: "Not authorized" });
-    }
-    
-    const settings = await storage.getSiteSettings();
-    const adminEmails = settings?.adminEmails || [];
-    
-    // Allow if no admins set yet (first user becomes admin) or user is in admin list
-    if (adminEmails.length === 0 || adminEmails.includes(userEmail)) {
-      return next();
-    }
-    
-    return res.status(403).json({ error: "Not authorized to access admin resources" });
-  } catch (error) {
-    console.error("Error checking admin status:", error);
-    return res.status(500).json({ error: "Failed to verify admin status" });
+const isAdmin: RequestHandler = (req, res, next) => {
+  if (req.session?.isAdmin) {
+    return next();
   }
+  return res.status(401).json({ error: "Unauthorized. Please log in as admin." });
 };
 
 export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
-  // Setup Replit Auth
-  await setupAuth(app);
-  registerAuthRoutes(app);
+  // Setup session
+  const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
+  const pgStore = connectPg(session);
+  const sessionStore = new pgStore({
+    conString: process.env.DATABASE_URL,
+    createTableIfMissing: true,
+    ttl: sessionTtl,
+    tableName: "sessions",
+  });
+  
+  app.set("trust proxy", 1);
+  app.use(session({
+    secret: process.env.SESSION_SECRET!,
+    store: sessionStore,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: sessionTtl,
+    },
+  }));
+
+  // Admin login endpoint
+  app.post("/api/admin/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ error: "Email and password are required" });
+      }
+      
+      // Check if admin login is configured
+      if (!ADMIN_PASSWORD) {
+        return res.status(503).json({ error: "Admin login not configured" });
+      }
+      
+      // Verify credentials
+      if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
+        return res.status(401).json({ error: "Invalid email or password" });
+      }
+      
+      // Set session
+      req.session.isAdmin = true;
+      req.session.adminEmail = email;
+      
+      res.json({ success: true, email });
+    } catch (error) {
+      console.error("Error during admin login:", error);
+      res.status(500).json({ error: "Login failed" });
+    }
+  });
+
+  // Admin logout endpoint
+  app.post("/api/admin/logout", (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).json({ error: "Logout failed" });
+      }
+      res.json({ success: true });
+    });
+  });
+
+  // Check admin session
+  app.get("/api/admin/session", (req, res) => {
+    if (req.session?.isAdmin) {
+      res.json({ isAdmin: true, email: req.session.adminEmail });
+    } else {
+      res.json({ isAdmin: false });
+    }
+  });
 
   // Get all orders (for admin dashboard - protected with admin check)
-  app.get("/api/orders", isAuthenticated, isAdmin, async (req, res) => {
+  app.get("/api/orders", isAdmin, async (req, res) => {
     try {
       const orders = await storage.getOrders();
       res.json(orders);
@@ -81,9 +153,9 @@ export async function registerRoutes(
   });
 
   // Update order payment status (protected with admin check)
-  app.patch("/api/orders/:id/payment", isAuthenticated, isAdmin, async (req, res) => {
+  app.patch("/api/orders/:id/payment", isAdmin, async (req, res) => {
     try {
-      const { status } = req.body;
+      const status = req.body.status as string;
       if (!status || !["pending", "completed", "failed"].includes(status)) {
         return res.status(400).json({ error: "Invalid payment status" });
       }
@@ -115,7 +187,7 @@ export async function registerRoutes(
   });
 
   // Update site settings (protected - admin only)
-  app.patch("/api/settings", isAuthenticated, isAdmin, async (req: any, res) => {
+  app.patch("/api/settings", isAdmin, async (req, res) => {
     try {
       // Create a partial schema for validation
       const updateSettingsSchema = insertSiteSettingsSchema.partial();
@@ -132,23 +204,6 @@ export async function registerRoutes(
       }
       console.error("Error updating settings:", error);
       res.status(500).json({ error: "Failed to update settings" });
-    }
-  });
-
-  // Check if user is admin
-  app.get("/api/admin/check", isAuthenticated, async (req: any, res) => {
-    try {
-      const userEmail = req.user?.claims?.email;
-      const settings = await storage.getSiteSettings();
-      const adminEmails = settings?.adminEmails || [];
-      
-      // First authenticated user becomes admin if no admins exist
-      const isAdmin = adminEmails.length === 0 || adminEmails.includes(userEmail);
-      
-      res.json({ isAdmin, email: userEmail });
-    } catch (error) {
-      console.error("Error checking admin status:", error);
-      res.status(500).json({ error: "Failed to check admin status" });
     }
   });
 

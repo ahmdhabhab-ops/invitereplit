@@ -86,9 +86,9 @@ The admin panel at `/admin` allows managing:
 - **Orders**: View and manage customer orders with WhatsApp integration
 
 ## Authentication
-- Uses Replit Auth (OpenID Connect) for secure login
-- First authenticated user automatically becomes admin if no admins exist
-- Admin access controlled by `adminEmails` array in site_settings
+- Uses username/password login for admin access
+- Admin credentials: info@einvite.me (configured in server/routes.ts)
+- Session-based authentication with PostgreSQL session storage
 - Access admin at `/admin` route (visible link in footer)
 
 ## Design Tokens

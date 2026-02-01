@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { isUnauthorizedError } from "@/lib/auth-utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,7 +9,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { 
   ArrowLeft, 
   Save, 
@@ -20,7 +17,6 @@ import {
   Mail, 
   Share2, 
   FileText,
-  Users,
   Package,
   Loader2,
   ExternalLink,
@@ -28,20 +24,21 @@ import {
   Facebook,
   Instagram,
   X,
-  Linkedin
+  Linkedin,
+  LogIn
 } from "lucide-react";
 import { SiTiktok } from "react-icons/si";
 import type { SiteSettings, Order } from "@shared/schema";
 
 export default function AdminDashboard() {
-  const { user, isLoading: authLoading, isAuthenticated, logout } = useAuth();
   const { toast } = useToast();
   const [settings, setSettings] = useState<Partial<SiteSettings>>({});
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
 
-  // Check admin status
-  const { data: adminCheck, isLoading: adminCheckLoading } = useQuery<{ isAdmin: boolean; email: string }>({
-    queryKey: ["/api/admin/check"],
-    enabled: isAuthenticated,
+  // Check admin session
+  const { data: sessionData, isLoading: sessionLoading, refetch: refetchSession } = useQuery<{ isAdmin: boolean; email?: string }>({
+    queryKey: ["/api/admin/session"],
   });
 
   // Get site settings
@@ -49,10 +46,37 @@ export default function AdminDashboard() {
     queryKey: ["/api/settings"],
   });
 
-  // Get orders
+  // Get orders (only when admin is logged in)
   const { data: orders, isLoading: ordersLoading } = useQuery<Order[]>({
     queryKey: ["/api/orders"],
-    enabled: isAuthenticated && adminCheck?.isAdmin,
+    enabled: sessionData?.isAdmin === true,
+  });
+
+  // Login mutation
+  const loginMutation = useMutation({
+    mutationFn: async (data: { email: string; password: string }) => {
+      const res = await apiRequest("POST", "/api/admin/login", data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/session"] });
+      toast({ title: "Logged in successfully" });
+    },
+    onError: () => {
+      toast({ title: "Invalid email or password", variant: "destructive" });
+    },
+  });
+
+  // Logout mutation
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/admin/logout", {});
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/session"] });
+      toast({ title: "Logged out successfully" });
+    },
   });
 
   // Update settings mutation
@@ -65,12 +89,7 @@ export default function AdminDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/settings"] });
       toast({ title: "Settings saved successfully" });
     },
-    onError: (error: Error) => {
-      if (isUnauthorizedError(error)) {
-        toast({ title: "Session expired", description: "Please log in again", variant: "destructive" });
-        setTimeout(() => { window.location.href = "/api/login"; }, 500);
-        return;
-      }
+    onError: () => {
       toast({ title: "Failed to save settings", variant: "destructive" });
     },
   });
@@ -81,50 +100,14 @@ export default function AdminDashboard() {
     }
   }, [siteSettings]);
 
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      window.location.href = "/api/login";
-    }
-  }, [authLoading, isAuthenticated]);
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    loginMutation.mutate({ email: loginEmail, password: loginPassword });
+  };
 
-  if (authLoading || adminCheckLoading || settingsLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background" data-testid="admin-loading">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return null;
-  }
-
-  if (!adminCheck?.isAdmin) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Card className="max-w-md">
-          <CardHeader>
-            <CardTitle>Access Denied</CardTitle>
-            <CardDescription>You don't have permission to access the admin panel.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Your email: <span className="font-medium">{adminCheck?.email}</span>
-            </p>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => window.location.href = "/"} data-testid="button-go-home">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Go Home
-              </Button>
-              <Button variant="ghost" onClick={() => logout()} data-testid="button-logout">
-                Logout
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
 
   const handleSave = () => {
     updateSettingsMutation.mutate(settings);
@@ -153,21 +136,78 @@ export default function AdminDashboard() {
     updateField(key, features);
   };
 
-  const updateAdminEmail = (index: number, value: string) => {
-    const emails = [...(settings.adminEmails || [])];
-    emails[index] = value;
-    updateField("adminEmails", emails);
-  };
+  if (sessionLoading || settingsLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background" data-testid="admin-loading">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
-  const addAdminEmail = () => {
-    const emails = [...(settings.adminEmails || []), ""];
-    updateField("adminEmails", emails);
-  };
-
-  const removeAdminEmail = (index: number) => {
-    const emails = (settings.adminEmails || []).filter((_, i) => i !== index);
-    updateField("adminEmails", emails);
-  };
+  // Show login form if not authenticated
+  if (!sessionData?.isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4" data-testid="admin-login">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">Admin Login</CardTitle>
+            <CardDescription>Enter your credentials to access the admin dashboard</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={loginEmail}
+                  onChange={(e) => setLoginEmail(e.target.value)}
+                  placeholder="admin@example.com"
+                  required
+                  data-testid="input-login-email"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  required
+                  data-testid="input-login-password"
+                />
+              </div>
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={loginMutation.isPending}
+                data-testid="button-login"
+              >
+                {loginMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <LogIn className="h-4 w-4 mr-2" />
+                )}
+                Login
+              </Button>
+              <Button 
+                type="button"
+                variant="ghost" 
+                className="w-full"
+                onClick={() => window.location.href = "/"}
+                data-testid="button-back-to-home"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Home
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background" data-testid="admin-dashboard">
@@ -184,7 +224,7 @@ export default function AdminDashboard() {
             </Button>
             <div>
               <h1 className="text-xl font-semibold">Admin Dashboard</h1>
-              <p className="text-sm text-muted-foreground">{user?.email}</p>
+              <p className="text-sm text-muted-foreground">{sessionData.email}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -200,7 +240,12 @@ export default function AdminDashboard() {
               )}
               Save Changes
             </Button>
-            <Button variant="ghost" onClick={() => logout()} data-testid="button-logout">
+            <Button 
+              variant="ghost" 
+              onClick={handleLogout}
+              disabled={logoutMutation.isPending}
+              data-testid="button-logout"
+            >
               Logout
             </Button>
           </div>
@@ -308,41 +353,6 @@ export default function AdminDashboard() {
                     data-testid="input-customer-rating"
                   />
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  Admin Users
-                </CardTitle>
-                <CardDescription>
-                  Email addresses that can access this admin panel. Leave empty to allow any authenticated user.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {(settings.adminEmails || []).map((email, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <Input
-                      value={email}
-                      onChange={(e) => updateAdminEmail(index, e.target.value)}
-                      placeholder="admin@example.com"
-                      data-testid={`input-admin-email-${index}`}
-                    />
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      onClick={() => removeAdminEmail(index)}
-                      data-testid={`button-remove-admin-${index}`}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-                <Button variant="outline" onClick={addAdminEmail} data-testid="button-add-admin">
-                  Add Admin Email
-                </Button>
               </CardContent>
             </Card>
           </TabsContent>
@@ -552,7 +562,7 @@ export default function AdminDashboard() {
                         data-testid={`order-${order.id}`}
                       >
                         <div className="space-y-1">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-medium">{order.names}</span>
                             <Badge variant="outline">{order.packageType}</Badge>
                             <Badge variant="secondary">{order.eventType}</Badge>
