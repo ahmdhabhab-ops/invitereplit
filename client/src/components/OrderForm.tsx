@@ -48,6 +48,8 @@ import {
   ArrowLeft,
   Loader2,
   X,
+  Plus,
+  Trash2,
 } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 
@@ -72,10 +74,29 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
     defaultValues: {
       names: "",
       eventDate: "",
-      eventLocation: "",
-      mapLink: "",
+      locations: [{ name: "Main Venue", address: "", mapLink: "" }],
     },
   });
+
+  const locations = eventForm.watch("locations") || [];
+
+  const addLocation = () => {
+    const currentLocations = eventForm.getValues("locations");
+    eventForm.setValue("locations", [
+      ...currentLocations,
+      { name: "", address: "", mapLink: "" },
+    ]);
+  };
+
+  const removeLocation = (index: number) => {
+    const currentLocations = eventForm.getValues("locations");
+    if (currentLocations.length > 1) {
+      eventForm.setValue(
+        "locations",
+        currentLocations.filter((_, i) => i !== index)
+      );
+    }
+  };
 
   // Form for step 3
   const customizationForm = useForm<Customizations>({
@@ -314,47 +335,103 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                     )}
                   />
 
-                  <FormField
-                    control={eventForm.control}
-                    name="eventLocation"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2">
-                          <MapPin className="w-4 h-4" />
-                          Location
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="e.g., Grand Hotel, Beirut"
-                            {...field}
-                            data-testid="input-location"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={eventForm.control}
-                    name="mapLink"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2">
-                          <MapPin className="w-4 h-4" />
-                          Google Maps Link (Optional)
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="https://maps.google.com/..."
-                            {...field}
-                            data-testid="input-map-link"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {/* Multiple Locations */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <Label className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4" />
+                        Locations
+                      </Label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={addLocation}
+                        data-testid="button-add-location"
+                      >
+                        <Plus className="w-4 h-4 mr-1" />
+                        Add Location
+                      </Button>
+                    </div>
+                    
+                    {locations.map((_, index) => (
+                      <div
+                        key={index}
+                        className="p-4 border rounded-md bg-muted/30 space-y-3"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-muted-foreground">
+                            Location {index + 1}
+                          </span>
+                          {locations.length > 1 && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => removeLocation(index)}
+                              data-testid={`button-remove-location-${index}`}
+                            >
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            </Button>
+                          )}
+                        </div>
+                        
+                        <FormField
+                          control={eventForm.control}
+                          name={`locations.${index}.name`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs">Location Name</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="e.g., Church, Reception Venue"
+                                  {...field}
+                                  data-testid={`input-location-name-${index}`}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={eventForm.control}
+                          name={`locations.${index}.address`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs">Address</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="e.g., Grand Hotel, Beirut"
+                                  {...field}
+                                  data-testid={`input-location-address-${index}`}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={eventForm.control}
+                          name={`locations.${index}.mapLink`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs">Google Maps Link (Optional)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="https://maps.google.com/..."
+                                  {...field}
+                                  data-testid={`input-location-map-${index}`}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    ))}
+                  </div>
 
                   <div className="flex justify-end pt-4">
                     <Button type="button" onClick={handleStep1Submit} data-testid="button-next-step1">

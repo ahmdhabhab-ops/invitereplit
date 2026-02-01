@@ -26,8 +26,7 @@ export const orders = pgTable("orders", {
   // Step 1: Event Details
   names: text("names").notNull(),
   eventDate: text("event_date").notNull(),
-  eventLocation: text("event_location").notNull(),
-  mapLink: text("map_link"),
+  locations: jsonb("locations").$type<{ name: string; address: string; mapLink?: string }[]>().notNull(),
   
   // Step 2: Media (stored as JSON array of file paths/URLs)
   mediaUrls: jsonb("media_urls").$type<string[]>().default([]),
@@ -55,12 +54,20 @@ export const insertOrderSchema = createInsertSchema(orders).omit({
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
 export type Order = typeof orders.$inferSelect;
 
+// Location schema for multiple venues
+export const locationSchema = z.object({
+  name: z.string().min(1, "Please enter a location name"),
+  address: z.string().min(2, "Please enter the address"),
+  mapLink: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
+});
+
+export type Location = z.infer<typeof locationSchema>;
+
 // Form validation schemas for multi-step form
 export const eventDetailsSchema = z.object({
   names: z.string().min(2, "Please enter the names"),
   eventDate: z.string().min(1, "Please select a date"),
-  eventLocation: z.string().min(2, "Please enter the location"),
-  mapLink: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
+  locations: z.array(locationSchema).min(1, "Please add at least one location"),
 });
 
 export const customizationsSchema = z.object({
