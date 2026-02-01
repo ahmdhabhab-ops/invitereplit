@@ -130,15 +130,15 @@ export const pricingTiers = [
 // Sample invitations for the gallery
 export const sampleInvitations = {
   weddings: [
-    { id: "georges-rita", name: "Georges & Rita", url: "https://einvite.me/georges-rita" },
-    { id: "yyouhanna-vanessa", name: "Youhanna & Vanessa", url: "https://einvite.me/yyouhanna-vanessa" },
-    { id: "john-jane", name: "John & Jane", url: "https://einvite.me/john-jane" },
-    { id: "ahmad-rim", name: "Ahmad & Rim", url: "https://einvite.me/ahmad-rim" },
+    { id: "georges-rita", name: "Georges & Rita", url: "https://app.einvite.me/georges-rita" },
+    { id: "yyouhanna-vanessa", name: "Youhanna & Vanessa", url: "https://app.einvite.me/yyouhanna-vanessa" },
+    { id: "john-jane", name: "John & Jane", url: "https://app.einvite.me/john-jane" },
+    { id: "ahmad-rim", name: "Ahmad & Rim", url: "https://app.einvite.me/ahmad-rim" },
   ],
   events: [
-    { id: "dj-camp", name: "DJ Camp 2024", url: "https://einvite.me/dj-camp" },
+    { id: "dj-camp", name: "DJ Camp 2024", url: "https://app.einvite.me/dj-camp" },
   ],
   birthdays: [
-    { id: "itta", name: "Itta's Birthday", url: "https://einvite.me/itta" },
+    { id: "itta", name: "Itta's Birthday", url: "https://app.einvite.me/itta" },
   ],
 } as const;

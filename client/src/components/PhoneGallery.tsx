@@ -122,30 +122,14 @@ export function PhoneGallery() {
                         transition={{ duration: 0.3 }}
                         className="w-full h-full"
                       >
-                        {/* Screenshot placeholder with gradient */}
-                        <div className="w-full h-full bg-gradient-to-br from-primary/20 via-background to-secondary/30 flex flex-col items-center justify-center p-6 text-center">
-                          <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mb-6">
-                            <span className="font-serif text-3xl text-primary">
-                              {activeSample.name.charAt(0)}
-                            </span>
-                          </div>
-                          <h3 className="font-serif text-xl font-semibold text-foreground mb-2">
-                            {activeSample.name}
-                          </h3>
-                          <p className="text-sm text-muted-foreground mb-6 capitalize">
-                            {activeCategory.slice(0, -1)} Invitation
-                          </p>
-                          <a
-                            href={activeSample.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
-                            data-testid={`link-sample-${activeSample.id}`}
-                          >
-                            View Live
-                            <ExternalLink className="w-4 h-4" />
-                          </a>
-                        </div>
+                        <iframe
+                          src={activeSample.url}
+                          title={activeSample.name}
+                          className="w-full h-full border-0"
+                          loading="lazy"
+                          sandbox="allow-scripts allow-same-origin"
+                          data-testid={`iframe-sample-${activeSample.id}`}
+                        />
                       </motion.div>
                     </AnimatePresence>
                   </div>
