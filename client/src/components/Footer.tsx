@@ -1,5 +1,6 @@
 import { Heart, Mail, Phone, MapPin } from "lucide-react";
 import { SiInstagram, SiFacebook, SiWhatsapp } from "react-icons/si";
+import logoImage from "@assets/Logo_1769975575984.png";
 
 export function Footer() {
   const scrollToSection = (id: string) => {
@@ -16,9 +17,11 @@ export function Footer() {
           {/* Brand */}
           <div className="lg:col-span-1">
             <a href="/" className="inline-block mb-4" data-testid="link-footer-logo">
-              <span className="font-serif text-2xl font-semibold tracking-tight">
-                einvite<span className="text-primary">.me</span>
-              </span>
+              <img 
+                src={logoImage} 
+                alt="Einvite.me" 
+                className="h-8 w-auto"
+              />
             </a>
             <p className="text-muted-foreground text-sm leading-relaxed mb-6">
               Creating beautiful digital invitations for your special moments. 

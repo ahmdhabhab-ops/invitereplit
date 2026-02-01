@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import logoImage from "@assets/Logo_1769975575984.png";
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -37,12 +38,14 @@ export function Header() {
           {/* Logo */}
           <a
             href="/"
-            className="flex items-center gap-2"
+            className="flex items-center"
             data-testid="link-logo"
           >
-            <span className="font-serif text-2xl md:text-3xl font-semibold tracking-tight">
-              einvite<span className="text-primary">.me</span>
-            </span>
+            <img 
+              src={logoImage} 
+              alt="Einvite.me" 
+              className="h-8 md:h-10 w-auto"
+            />
           </a>
 
           {/* Desktop Navigation */}

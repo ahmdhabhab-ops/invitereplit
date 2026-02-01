@@ -1,10 +1,10 @@
 # einvite.me - Premium Digital Invitations Landing Page
 
 ## Overview
-A high-conversion landing page for "einvite.me" - a professional digital invitation service. The site features an elegant, wedding-premium design with soft whites, gold accents, and sage greens.
+A high-conversion landing page for "einvite.me" - a professional digital invitation service. The site features an elegant design with the official Einvite purple/violet brand colors.
 
 ## Key Features
-- **Hero Section**: Animated hero with floating decorative elements and CTAs
+- **Hero Section**: Animated hero with floating Lottie decorative elements and CTAs
 - **Sample Gallery**: Interactive mobile phone frame showcase with tabs for Weddings, Events, and Birthdays
 - **How It Works**: 4-step process visualization (Pick Plan → Fill Form → Design Review → Go Live)
 - **Pricing Section**: Three tiers (Essential $49, Premium $99, Royal $199)
@@ -13,6 +13,7 @@ A high-conversion landing page for "einvite.me" - a professional digital invitat
 ## Tech Stack
 - **Frontend**: React with TypeScript, Wouter for routing, TanStack Query for data fetching
 - **Styling**: Tailwind CSS with custom design tokens, Framer Motion for animations
+- **Animations**: Lottie-react for interactive vector animations
 - **Backend**: Express.js API with PostgreSQL database using Drizzle ORM
 - **UI Components**: Shadcn/ui component library
 
@@ -46,12 +47,13 @@ shared/
 - `PATCH /api/orders/:id/payment` - Update payment status
 
 ## Database Schema
-- **orders**: id, packageType, eventType, names, eventDate, eventLocation, mapLink, mediaUrls, songChoice, rsvpPreference, additionalNotes, contactName, contactEmail, contactPhone, paymentMethod, paymentStatus, createdAt
+- **orders**: id, packageType, eventType, names, eventDate, locations (JSONB array with name, address, mapLink), mediaUrls, songChoice, rsvpPreference, additionalNotes, contactName, contactEmail, contactPhone, paymentMethod, paymentStatus, createdAt
 
 ## Design Tokens
-- **Primary**: Gold accent (HSL 42° 75% 50%)
-- **Secondary**: Sage green (HSL 145° 30% 88%)
+- **Primary**: Einvite Purple/Violet (HSL 266° 86% 55%)
+- **Secondary**: Soft purple (HSL 280° 30% 92%)
 - **Fonts**: Montserrat (sans), Cormorant Garamond (serif)
+- **Logo**: Official Einvite logo (attached_assets/Logo_1769975575984.png)
 
 ## Running the Application
 The application runs on port 5000 with `npm run dev`. Database migrations can be pushed with `npm run db:push`.

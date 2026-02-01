@@ -1,6 +1,111 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Sparkles, Heart, Star } from "lucide-react";
+import Lottie from "lottie-react";
+
+// Simple envelope opening animation data
+const envelopeAnimation = {
+  v: "5.5.7",
+  fr: 30,
+  ip: 0,
+  op: 90,
+  w: 200,
+  h: 200,
+  assets: [],
+  layers: [
+    {
+      ddd: 0,
+      ind: 1,
+      ty: 4,
+      nm: "Envelope",
+      sr: 1,
+      ks: {
+        o: { a: 0, k: 100 },
+        r: { a: 0, k: 0 },
+        p: { a: 0, k: [100, 100, 0] },
+        a: { a: 0, k: [0, 0, 0] },
+        s: { a: 1, k: [
+          { i: { x: [0.5], y: [1] }, o: { x: [0.5], y: [0] }, t: 0, s: [80, 80, 100] },
+          { i: { x: [0.5], y: [1] }, o: { x: [0.5], y: [0] }, t: 45, s: [90, 90, 100] },
+          { t: 90, s: [80, 80, 100] }
+        ]}
+      },
+      shapes: [
+        {
+          ty: "gr",
+          it: [
+            { ty: "rc", d: 1, s: { a: 0, k: [80, 50] }, p: { a: 0, k: [0, 0] }, r: { a: 0, k: 5 } },
+            { ty: "st", c: { a: 0, k: [0.533, 0.282, 0.969, 1] }, o: { a: 0, k: 100 }, w: { a: 0, k: 3 } },
+            { ty: "fl", c: { a: 0, k: [0.533, 0.282, 0.969, 0.2] }, o: { a: 0, k: 100 } },
+            { ty: "tr", p: { a: 0, k: [0, 10] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 } }
+          ]
+        },
+        {
+          ty: "gr",
+          it: [
+            { ty: "sh", ks: { a: 1, k: [
+              { i: { x: 0.5, y: 1 }, o: { x: 0.5, y: 0 }, t: 0, s: [{ c: true, v: [[-40, -15], [0, 10], [40, -15]], i: [[0, 0], [0, 0], [0, 0]], o: [[0, 0], [0, 0], [0, 0]] }] },
+              { i: { x: 0.5, y: 1 }, o: { x: 0.5, y: 0 }, t: 45, s: [{ c: true, v: [[-40, -15], [0, -30], [40, -15]], i: [[0, 0], [0, 0], [0, 0]], o: [[0, 0], [0, 0], [0, 0]] }] },
+              { t: 90, s: [{ c: true, v: [[-40, -15], [0, 10], [40, -15]], i: [[0, 0], [0, 0], [0, 0]], o: [[0, 0], [0, 0], [0, 0]] }] }
+            ]}},
+            { ty: "st", c: { a: 0, k: [0.533, 0.282, 0.969, 1] }, o: { a: 0, k: 100 }, w: { a: 0, k: 3 } },
+            { ty: "fl", c: { a: 0, k: [0.533, 0.282, 0.969, 0.3] }, o: { a: 0, k: 100 } },
+            { ty: "tr", p: { a: 0, k: [0, 0] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 } }
+          ]
+        }
+      ]
+    }
+  ]
+};
+
+// Simple sparkle animation data
+const sparkleAnimation = {
+  v: "5.5.7",
+  fr: 30,
+  ip: 0,
+  op: 60,
+  w: 100,
+  h: 100,
+  assets: [],
+  layers: [
+    {
+      ddd: 0,
+      ind: 1,
+      ty: 4,
+      nm: "Sparkle",
+      sr: 1,
+      ks: {
+        o: { a: 1, k: [
+          { i: { x: [0.5], y: [1] }, o: { x: [0.5], y: [0] }, t: 0, s: [30] },
+          { i: { x: [0.5], y: [1] }, o: { x: [0.5], y: [0] }, t: 30, s: [100] },
+          { t: 60, s: [30] }
+        ]},
+        r: { a: 1, k: [
+          { i: { x: [0.5], y: [1] }, o: { x: [0.5], y: [0] }, t: 0, s: [0] },
+          { t: 60, s: [180] }
+        ]},
+        p: { a: 0, k: [50, 50, 0] },
+        a: { a: 0, k: [0, 0, 0] },
+        s: { a: 1, k: [
+          { i: { x: [0.5], y: [1] }, o: { x: [0.5], y: [0] }, t: 0, s: [80, 80, 100] },
+          { i: { x: [0.5], y: [1] }, o: { x: [0.5], y: [0] }, t: 30, s: [100, 100, 100] },
+          { t: 60, s: [80, 80, 100] }
+        ]}
+      },
+      shapes: [
+        {
+          ty: "gr",
+          it: [
+            { ty: "sr", sy: 1, d: 1, pt: { a: 0, k: 4 }, p: { a: 0, k: [0, 0] }, r: { a: 0, k: 0 }, ir: { a: 0, k: 8 }, is: { a: 0, k: 0 }, or: { a: 0, k: 20 }, os: { a: 0, k: 0 } },
+            { ty: "st", c: { a: 0, k: [0.533, 0.282, 0.969, 1] }, o: { a: 0, k: 100 }, w: { a: 0, k: 2 } },
+            { ty: "fl", c: { a: 0, k: [0.533, 0.282, 0.969, 0.6] }, o: { a: 0, k: 100 } },
+            { ty: "tr", p: { a: 0, k: [0, 0] }, a: { a: 0, k: [0, 0] }, s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 } }
+          ]
+        }
+      ]
+    }
+  ]
+};
 
 export function HeroSection() {
   const scrollToSection = (id: string) => {
@@ -34,34 +139,32 @@ export function HeroSection() {
         />
       </div>
 
-      {/* Floating decorative elements */}
+      {/* Floating decorative Lottie elements */}
       <motion.div
         animate={{
           y: [0, -15, 0],
-          rotate: [0, 5, 0],
         }}
         transition={{
           duration: 6,
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="absolute top-32 right-[15%] text-primary/30"
+        className="absolute top-24 right-[12%] opacity-60 hidden md:block"
       >
-        <Heart className="w-8 h-8" />
+        <Lottie animationData={envelopeAnimation} loop={true} className="w-24 h-24" />
       </motion.div>
       <motion.div
         animate={{
           y: [0, 15, 0],
-          rotate: [0, -5, 0],
         }}
         transition={{
           duration: 5,
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="absolute bottom-32 left-[15%] text-primary/30"
+        className="absolute bottom-40 left-[12%] opacity-50 hidden md:block"
       >
-        <Star className="w-6 h-6" />
+        <Lottie animationData={sparkleAnimation} loop={true} className="w-16 h-16" />
       </motion.div>
       <motion.div
         animate={{
@@ -72,9 +175,22 @@ export function HeroSection() {
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="absolute top-1/2 right-[10%] text-primary/20"
+        className="absolute top-1/3 left-[8%] opacity-40 hidden lg:block"
       >
-        <Sparkles className="w-10 h-10" />
+        <Lottie animationData={sparkleAnimation} loop={true} className="w-12 h-12" />
+      </motion.div>
+      <motion.div
+        animate={{
+          y: [0, 12, 0],
+        }}
+        transition={{
+          duration: 7,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        className="absolute bottom-1/4 right-[8%] opacity-50 hidden lg:block"
+      >
+        <Lottie animationData={envelopeAnimation} loop={true} className="w-20 h-20" />
       </motion.div>
 
       <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
