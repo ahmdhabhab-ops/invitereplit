@@ -10,12 +10,14 @@ A high-conversion landing page for "einvite.me" - a professional digital invitat
 - **Featured Events**: Showcase of event participation (Youth Leadership Forum 2024, Web Summit Qatar 2025)
 - **Pricing Section**: Three tiers (Essential $49, Premium $99, Royal $199)
 - **Multi-Step Order Form**: 4-step form for order submissions with WhatsApp payment integration
+- **Admin Dashboard**: Full content management for all site settings, pricing, contact info, and orders
 
 ## Tech Stack
 - **Frontend**: React with TypeScript, Wouter for routing, TanStack Query for data fetching
 - **Styling**: Tailwind CSS with custom design tokens, Framer Motion for animations
 - **Animations**: Lottie-react for interactive vector animations
 - **Backend**: Express.js API with PostgreSQL database using Drizzle ORM
+- **Authentication**: Replit Auth (OpenID Connect) for admin access
 - **UI Components**: Shadcn/ui component library
 
 ## Project Structure
@@ -29,31 +31,70 @@ client/
 │   │   ├── HowItWorks.tsx      # 4-step process section
 │   │   ├── PricingSection.tsx  # Pricing tiers
 │   │   ├── OrderForm.tsx       # Multi-step order form modal
-│   │   └── Footer.tsx          # Site footer
+│   │   └── Footer.tsx          # Site footer with dynamic settings
 │   ├── pages/
-│   │   └── LandingPage.tsx     # Main landing page
+│   │   ├── LandingPage.tsx     # Main landing page
+│   │   └── AdminDashboard.tsx  # Admin content management
+│   ├── hooks/
+│   │   └── use-auth.ts         # Authentication hook for Replit Auth
+│   ├── lib/
+│   │   └── auth-utils.ts       # Auth utility functions
 │   └── index.css               # Design tokens and theme
 server/
-├── db.ts               # Database connection
-├── storage.ts          # Storage interface with order operations
-├── routes.ts           # API endpoints
+├── db.ts                       # Database connection
+├── storage.ts                  # Storage interface with order/settings operations
+├── routes.ts                   # API endpoints with auth middleware
+├── replit_integrations/auth/   # Replit Auth integration files
 shared/
-└── schema.ts           # Data models, Zod schemas, pricing/sample data
+├── schema.ts                   # Data models, Zod schemas, pricing/sample data
+└── models/auth.ts              # Auth-related Drizzle models (users, sessions)
 ```
 
 ## API Endpoints
-- `GET /api/orders` - List all orders
+
+### Public Endpoints
+- `GET /api/settings` - Get site settings (for frontend)
+- `POST /api/orders` - Create new order (form submission)
 - `GET /api/orders/:id` - Get single order
-- `POST /api/orders` - Create new order
+
+### Protected Endpoints (require Replit Auth)
+- `GET /api/orders` - List all orders (admin)
 - `PATCH /api/orders/:id/payment` - Update payment status
+- `PATCH /api/settings` - Update site settings (admin only)
+- `GET /api/admin/check` - Check if user is admin
+- `GET /api/auth/user` - Get current authenticated user
+
+### Auth Endpoints
+- `/api/login` - Begin login flow
+- `/api/logout` - Begin logout flow
+- `/api/callback` - OAuth callback
 
 ## Database Schema
-- **orders**: id, packageType, eventType, names, eventDate, locations (JSONB array with name, address, mapLink), mediaUrls, songChoice, rsvpPreference, additionalNotes, contactName, contactEmail, contactPhone, paymentMethod, paymentStatus, createdAt
+
+### Tables
+- **users**: id, email, firstName, lastName, profileImageUrl, createdAt, updatedAt (Replit Auth)
+- **sessions**: sid, sess, expire (session storage)
+- **orders**: id, packageType, eventType, names, eventDate, locations (JSONB), mediaUrls, songChoice, rsvpPreference, additionalNotes, contactName, contactEmail, contactPhone, paymentMethod, paymentStatus, createdAt
+- **site_settings**: id, phoneNumber, email, whatsappNumber, facebookUrl, instagramUrl, twitterUrl, linkedinUrl, tiktokUrl, essentialPrice, essentialFeatures, premiumPrice, premiumFeatures, royalPrice, royalFeatures, heroTitle, heroSubtitle, heroBadge, happyCouplesCount, eventsCreatedCount, customerRating, adminEmails, updatedAt
+
+## Admin Dashboard Features
+The admin panel at `/admin` allows managing:
+- **General Settings**: Hero section content, statistics, admin user emails
+- **Pricing**: Package prices and features for Essential, Premium, Royal tiers
+- **Contact Info**: Phone, email, WhatsApp number
+- **Social Media**: Facebook, Instagram, X, LinkedIn, TikTok links
+- **Orders**: View and manage customer orders with WhatsApp integration
+
+## Authentication
+- Uses Replit Auth (OpenID Connect) for secure login
+- First authenticated user automatically becomes admin if no admins exist
+- Admin access controlled by `adminEmails` array in site_settings
+- Access admin at `/admin` route (visible link in footer)
 
 ## Design Tokens
 - **Primary**: Einvite Purple/Violet (HSL 266° 86% 55%)
 - **Secondary**: Soft purple (HSL 280° 30% 92%)
-- **Fonts**: Montserrat (sans), Cormorant Garamond (serif)
+- **Fonts**: Montserrat (sans), Cormorant Garabald (serif)
 - **Logo**: Official Einvite logo (attached_assets/Logo_1769975575984.png)
 
 ## Running the Application

@@ -1,14 +1,22 @@
-import { Heart, Mail, Phone, MapPin } from "lucide-react";
-import { SiInstagram, SiFacebook, SiWhatsapp } from "react-icons/si";
+import { Heart, Mail, Phone, MapPin, Settings } from "lucide-react";
+import { SiInstagram, SiFacebook, SiWhatsapp, SiTiktok, SiLinkedin } from "react-icons/si";
+import { useQuery } from "@tanstack/react-query";
 import logoImage from "@assets/Logo_1769975575984.png";
+import type { SiteSettings } from "@shared/schema";
 
 export function Footer() {
+  const { data: settings } = useQuery<SiteSettings>({
+    queryKey: ["/api/settings"],
+  });
+
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
     }
   };
+
+  const whatsappNumber = settings?.whatsappNumber?.replace(/[^0-9]/g, "") || "96181824782";
 
   return (
     <footer className="bg-card border-t border-border">
@@ -27,27 +35,31 @@ export function Footer() {
               Creating beautiful digital invitations for your special moments. 
               Elegant, interactive, and memorable.
             </p>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 flex-wrap">
+              {settings?.instagramUrl && (
+                <a
+                  href={settings.instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
+                  data-testid="link-instagram"
+                >
+                  <SiInstagram className="w-5 h-5" />
+                </a>
+              )}
+              {settings?.facebookUrl && (
+                <a
+                  href={settings.facebookUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
+                  data-testid="link-facebook"
+                >
+                  <SiFacebook className="w-5 h-5" />
+                </a>
+              )}
               <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
-                data-testid="link-instagram"
-              >
-                <SiInstagram className="w-5 h-5" />
-              </a>
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
-                data-testid="link-facebook"
-              >
-                <SiFacebook className="w-5 h-5" />
-              </a>
-              <a
-                href="https://wa.me/96170000000"
+                href={`https://wa.me/${whatsappNumber}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
@@ -55,6 +67,28 @@ export function Footer() {
               >
                 <SiWhatsapp className="w-5 h-5" />
               </a>
+              {settings?.linkedinUrl && (
+                <a
+                  href={settings.linkedinUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
+                  data-testid="link-linkedin"
+                >
+                  <SiLinkedin className="w-5 h-5" />
+                </a>
+              )}
+              {settings?.tiktokUrl && (
+                <a
+                  href={settings.tiktokUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
+                  data-testid="link-tiktok"
+                >
+                  <SiTiktok className="w-5 h-5" />
+                </a>
+              )}
             </div>
           </div>
 
@@ -123,11 +157,11 @@ export function Footer() {
             <ul className="space-y-3">
               <li className="flex items-center gap-3 text-muted-foreground text-sm">
                 <Mail className="w-4 h-4 shrink-0" />
-                <span>hello@einvite.me</span>
+                <span>{settings?.email || "info@einvite.me"}</span>
               </li>
               <li className="flex items-center gap-3 text-muted-foreground text-sm">
                 <Phone className="w-4 h-4 shrink-0" />
-                <span>+961 70 000 000</span>
+                <span>{settings?.phoneNumber || "+961 81 82 47 82"}</span>
               </li>
               <li className="flex items-start gap-3 text-muted-foreground text-sm">
                 <MapPin className="w-4 h-4 shrink-0 mt-0.5" />
@@ -142,9 +176,19 @@ export function Footer() {
           <p className="text-sm text-muted-foreground">
             {new Date().getFullYear()} einvite.me. All rights reserved.
           </p>
-          <p className="text-sm text-muted-foreground flex items-center gap-1">
-            Made with <Heart className="w-4 h-4 text-primary fill-primary" /> in Lebanon
-          </p>
+          <div className="flex items-center gap-4">
+            <a 
+              href="/admin" 
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+              data-testid="link-admin"
+            >
+              <Settings className="w-3 h-3" />
+              Admin
+            </a>
+            <p className="text-sm text-muted-foreground flex items-center gap-1">
+              Made with <Heart className="w-4 h-4 text-primary fill-primary" /> in Lebanon
+            </p>
+          </div>
         </div>
       </div>
     </footer>

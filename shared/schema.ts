@@ -3,19 +3,8 @@ import { pgTable, text, varchar, timestamp, jsonb, integer } from "drizzle-orm/p
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
-});
-
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-});
-
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
+// Export auth models
+export * from "./models/auth";
 
 // Order submissions for digital invitations
 export const orders = pgTable("orders", {
@@ -54,6 +43,77 @@ export const insertOrderSchema = createInsertSchema(orders).omit({
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
 export type Order = typeof orders.$inferSelect;
 
+// Site settings for admin panel
+export const siteSettings = pgTable("site_settings", {
+  id: varchar("id").primaryKey().default("main"),
+  
+  // Contact Info
+  phoneNumber: text("phone_number").default("+961 81 82 47 82"),
+  email: text("email").default("info@einvite.me"),
+  whatsappNumber: text("whatsapp_number").default("+96181824782"),
+  
+  // Social Media Links
+  facebookUrl: text("facebook_url").default("https://facebook.com/einviteme"),
+  instagramUrl: text("instagram_url").default("https://instagram.com/einviteme"),
+  twitterUrl: text("twitter_url").default("https://twitter.com/einviteme"),
+  linkedinUrl: text("linkedin_url"),
+  tiktokUrl: text("tiktok_url"),
+  
+  // Pricing
+  essentialPrice: integer("essential_price").default(49),
+  essentialFeatures: jsonb("essential_features").$type<string[]>().default([
+    "Single-page invitation design",
+    "Mobile responsive",
+    "Custom date & location",
+    "Shareable link",
+    "3 design revisions",
+  ]),
+  
+  premiumPrice: integer("premium_price").default(99),
+  premiumFeatures: jsonb("premium_features").$type<string[]>().default([
+    "Multi-page interactive design",
+    "Photo gallery integration",
+    "Background music",
+    "RSVP tracking",
+    "5 design revisions",
+    "Custom animations",
+  ]),
+  
+  royalPrice: integer("royal_price").default(199),
+  royalFeatures: jsonb("royal_features").$type<string[]>().default([
+    "Everything in Premium",
+    "Video backgrounds",
+    "Guest messaging",
+    "Live countdown timer",
+    "Unlimited revisions",
+    "Priority support",
+    "Custom domain option",
+  ]),
+  
+  // Hero Section
+  heroTitle: text("hero_title").default("Transform Your Celebrations"),
+  heroSubtitle: text("hero_subtitle").default("Beautiful, interactive digital invitations for your weddings, events, and celebrations. Share your special moments with elegance and style."),
+  heroBadge: text("hero_badge").default("#1 Digital Invitations in Lebanon"),
+  
+  // Stats
+  happyCouplesCount: text("happy_couples_count").default("500+"),
+  eventsCreatedCount: text("events_created_count").default("1000+"),
+  customerRating: text("customer_rating").default("4.9"),
+  
+  // Admin emails (users who can access admin panel)
+  adminEmails: jsonb("admin_emails").$type<string[]>().default([]),
+  
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertSiteSettingsSchema = createInsertSchema(siteSettings).omit({
+  id: true,
+  updatedAt: true,
+});
+
+export type InsertSiteSettings = z.infer<typeof insertSiteSettingsSchema>;
+export type SiteSettings = typeof siteSettings.$inferSelect;
+
 // Location schema for multiple venues
 export const locationSchema = z.object({
   name: z.string().min(1, "Please enter a location name"),
@@ -87,7 +147,7 @@ export type EventDetails = z.infer<typeof eventDetailsSchema>;
 export type Customizations = z.infer<typeof customizationsSchema>;
 export type ContactPayment = z.infer<typeof contactPaymentSchema>;
 
-// Pricing tiers
+// Pricing tiers (static defaults, can be overridden by site settings)
 export const pricingTiers = [
   {
     id: "essential",
