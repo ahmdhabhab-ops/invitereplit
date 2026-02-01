@@ -144,7 +144,7 @@ export function HeroSection() {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white shadow-md shadow-purple-100 border border-purple-100 mb-8"
           >
             <Sparkles className="w-4 h-4 text-purple-500" />
-            <span className="text-sm font-medium text-purple-700">Premium Digital Invitations</span>
+            <span className="text-sm font-medium text-purple-700">#1 Digital Invitations in Lebanon</span>
           </motion.div>
 
           <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold leading-tight mb-6 text-gray-900">
