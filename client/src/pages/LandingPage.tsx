@@ -3,6 +3,7 @@ import { Header } from "@/components/Header";
 import { HeroSection } from "@/components/HeroSection";
 import { PhoneGallery } from "@/components/PhoneGallery";
 import { HowItWorks } from "@/components/HowItWorks";
+import { FeaturedEvents } from "@/components/FeaturedEvents";
 import { PricingSection } from "@/components/PricingSection";
 import { OrderForm } from "@/components/OrderForm";
 import { Footer } from "@/components/Footer";
@@ -25,6 +26,7 @@ export default function LandingPage() {
         <HeroSection />
         <PhoneGallery />
         <HowItWorks />
+        <FeaturedEvents />
         <PricingSection onSelectPackage={handleSelectPackage} />
       </main>
       <Footer />

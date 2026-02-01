@@ -7,6 +7,7 @@ A high-conversion landing page for "einvite.me" - a professional digital invitat
 - **Hero Section**: Animated hero with floating Lottie decorative elements and CTAs
 - **Sample Gallery**: Interactive mobile phone frame showcase with tabs for Weddings, Events, and Birthdays
 - **How It Works**: 4-step process visualization (Pick Plan → Fill Form → Design Review → Go Live)
+- **Featured Events**: Showcase of event participation (Youth Leadership Forum 2024, Web Summit Qatar 2025)
 - **Pricing Section**: Three tiers (Essential $49, Premium $99, Royal $199)
 - **Multi-Step Order Form**: 4-step form for order submissions with WhatsApp payment integration
 
