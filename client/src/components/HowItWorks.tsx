@@ -357,8 +357,8 @@ export function HowItWorks() {
                         className="w-24 h-24"
                       />
                     </div>
-                    <div className="absolute -top-3 -right-3 w-10 h-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold shadow-lg">
-                      {step.number}
+                    <div className="absolute -top-3 -right-3 w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg">
+                      <span className="text-white text-sm font-bold">{step.number}</span>
                     </div>
                   </div>
 
