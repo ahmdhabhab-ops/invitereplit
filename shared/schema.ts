@@ -171,6 +171,59 @@ export type EventDetails = z.infer<typeof eventDetailsSchema>;
 export type Customizations = z.infer<typeof customizationsSchema>;
 export type ContactPayment = z.infer<typeof contactPaymentSchema>;
 
+// Job openings for careers page
+export const jobOpenings = pgTable("job_openings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  department: text("department").notNull(), // design, development, marketing, operations
+  location: text("location").notNull(), // Beirut, Remote, Hybrid
+  type: text("type").notNull(), // full-time, part-time, contract, internship
+  description: text("description").notNull(),
+  requirements: jsonb("requirements").$type<string[]>().notNull(),
+  responsibilities: jsonb("responsibilities").$type<string[]>().notNull(),
+  benefits: jsonb("benefits").$type<string[]>(),
+  salaryRange: text("salary_range"), // e.g., "$40k-$60k"
+  isActive: text("is_active").default("true"), // true or false as string
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertJobOpeningSchema = createInsertSchema(jobOpenings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertJobOpening = z.infer<typeof insertJobOpeningSchema>;
+export type JobOpening = typeof jobOpenings.$inferSelect;
+
+// Job applications from candidates
+export const jobApplications = pgTable("job_applications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  jobId: varchar("job_id").notNull(),
+  fullName: text("full_name").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone").notNull(),
+  resumeUrl: text("resume_url"), // URL to uploaded resume
+  portfolioUrl: text("portfolio_url"),
+  linkedinUrl: text("linkedin_url"),
+  coverLetter: text("cover_letter"),
+  yearsOfExperience: text("years_of_experience"),
+  status: text("status").default("new"), // new, reviewed, interviewing, offered, hired, rejected
+  notes: text("notes"), // Admin notes
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertJobApplicationSchema = createInsertSchema(jobApplications).omit({
+  id: true,
+  status: true,
+  notes: true,
+  createdAt: true,
+});
+
+export type InsertJobApplication = z.infer<typeof insertJobApplicationSchema>;
+export type JobApplication = typeof jobApplications.$inferSelect;
+
 // Pricing tiers (static defaults, can be overridden by site settings)
 export const pricingTiers = [
   {

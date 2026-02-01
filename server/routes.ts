@@ -1,7 +1,7 @@
 import type { Express, RequestHandler } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertOrderSchema, insertSiteSettingsSchema, insertPartnershipRequestSchema } from "@shared/schema";
+import { insertOrderSchema, insertSiteSettingsSchema, insertPartnershipRequestSchema, insertJobOpeningSchema, insertJobApplicationSchema } from "@shared/schema";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import session from "express-session";
@@ -253,6 +253,149 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error updating partnership request:", error);
       res.status(500).json({ error: "Failed to update partnership request" });
+    }
+  });
+
+  // ========== Job Opening Endpoints ==========
+  
+  // Get all job openings (public - only active jobs, admin - all jobs)
+  app.get("/api/jobs", async (req, res) => {
+    try {
+      const activeOnly = !req.session?.isAdmin;
+      const jobs = await storage.getJobOpenings(activeOnly);
+      res.json(jobs);
+    } catch (error) {
+      console.error("Error fetching jobs:", error);
+      res.status(500).json({ error: "Failed to fetch job openings" });
+    }
+  });
+
+  // Get single job opening (public)
+  app.get("/api/jobs/:id", async (req, res) => {
+    try {
+      const job = await storage.getJobOpening(req.params.id);
+      if (!job) {
+        return res.status(404).json({ error: "Job not found" });
+      }
+      // Non-admins can only see active jobs
+      if (!req.session?.isAdmin && job.isActive !== "true") {
+        return res.status(404).json({ error: "Job not found" });
+      }
+      res.json(job);
+    } catch (error) {
+      console.error("Error fetching job:", error);
+      res.status(500).json({ error: "Failed to fetch job" });
+    }
+  });
+
+  // Create job opening (admin only)
+  app.post("/api/jobs", isAdmin, async (req, res) => {
+    try {
+      const validatedData = insertJobOpeningSchema.parse(req.body);
+      const job = await storage.createJobOpening(validatedData);
+      res.status(201).json(job);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation failed", details: error.errors });
+      }
+      console.error("Error creating job:", error);
+      res.status(500).json({ error: "Failed to create job opening" });
+    }
+  });
+
+  // Update job opening (admin only)
+  app.patch("/api/jobs/:id", isAdmin, async (req, res) => {
+    try {
+      const updateSchema = insertJobOpeningSchema.partial();
+      const validatedData = updateSchema.parse(req.body);
+      const job = await storage.updateJobOpening(req.params.id, validatedData);
+      if (!job) {
+        return res.status(404).json({ error: "Job not found" });
+      }
+      res.json(job);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation failed", details: error.errors });
+      }
+      console.error("Error updating job:", error);
+      res.status(500).json({ error: "Failed to update job opening" });
+    }
+  });
+
+  // Delete job opening (admin only)
+  app.delete("/api/jobs/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteJobOpening(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting job:", error);
+      res.status(500).json({ error: "Failed to delete job opening" });
+    }
+  });
+
+  // ========== Job Application Endpoints ==========
+  
+  // Submit job application (public)
+  app.post("/api/applications", async (req, res) => {
+    try {
+      const validatedData = insertJobApplicationSchema.parse(req.body);
+      // Verify job exists and is active
+      const job = await storage.getJobOpening(validatedData.jobId);
+      if (!job || job.isActive !== "true") {
+        return res.status(400).json({ error: "Invalid or inactive job posting" });
+      }
+      const application = await storage.createJobApplication(validatedData);
+      res.status(201).json(application);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation failed", details: error.errors });
+      }
+      console.error("Error submitting application:", error);
+      res.status(500).json({ error: "Failed to submit application" });
+    }
+  });
+
+  // Get all applications (admin only)
+  app.get("/api/applications", isAdmin, async (req, res) => {
+    try {
+      const jobId = req.query.jobId as string | undefined;
+      const applications = await storage.getJobApplications(jobId);
+      res.json(applications);
+    } catch (error) {
+      console.error("Error fetching applications:", error);
+      res.status(500).json({ error: "Failed to fetch applications" });
+    }
+  });
+
+  // Get single application (admin only)
+  app.get("/api/applications/:id", isAdmin, async (req, res) => {
+    try {
+      const application = await storage.getJobApplication(req.params.id);
+      if (!application) {
+        return res.status(404).json({ error: "Application not found" });
+      }
+      res.json(application);
+    } catch (error) {
+      console.error("Error fetching application:", error);
+      res.status(500).json({ error: "Failed to fetch application" });
+    }
+  });
+
+  // Update application status (admin only)
+  app.patch("/api/applications/:id/status", isAdmin, async (req, res) => {
+    try {
+      const { status, notes } = req.body;
+      if (!status || !["new", "reviewed", "interviewing", "offered", "hired", "rejected"].includes(status)) {
+        return res.status(400).json({ error: "Invalid status" });
+      }
+      const application = await storage.updateJobApplicationStatus(req.params.id, status, notes);
+      if (!application) {
+        return res.status(404).json({ error: "Application not found" });
+      }
+      res.json(application);
+    } catch (error) {
+      console.error("Error updating application:", error);
+      res.status(500).json({ error: "Failed to update application" });
     }
   });
 

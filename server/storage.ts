@@ -1,6 +1,6 @@
-import { type Order, type InsertOrder, type SiteSettings, type InsertSiteSettings, type PartnershipRequest, type InsertPartnershipRequest, orders, siteSettings, partnershipRequests } from "@shared/schema";
+import { type Order, type InsertOrder, type SiteSettings, type InsertSiteSettings, type PartnershipRequest, type InsertPartnershipRequest, type JobOpening, type InsertJobOpening, type JobApplication, type InsertJobApplication, orders, siteSettings, partnershipRequests, jobOpenings, jobApplications } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
   // Order operations
@@ -17,6 +17,19 @@ export interface IStorage {
   getPartnershipRequests(): Promise<PartnershipRequest[]>;
   createPartnershipRequest(request: InsertPartnershipRequest): Promise<PartnershipRequest>;
   updatePartnershipRequestStatus(id: string, status: string): Promise<PartnershipRequest | undefined>;
+  
+  // Job opening operations
+  getJobOpenings(activeOnly?: boolean): Promise<JobOpening[]>;
+  getJobOpening(id: string): Promise<JobOpening | undefined>;
+  createJobOpening(job: InsertJobOpening): Promise<JobOpening>;
+  updateJobOpening(id: string, job: Partial<InsertJobOpening>): Promise<JobOpening | undefined>;
+  deleteJobOpening(id: string): Promise<boolean>;
+  
+  // Job application operations
+  getJobApplications(jobId?: string): Promise<JobApplication[]>;
+  getJobApplication(id: string): Promise<JobApplication | undefined>;
+  createJobApplication(application: InsertJobApplication): Promise<JobApplication>;
+  updateJobApplicationStatus(id: string, status: string, notes?: string): Promise<JobApplication | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -83,6 +96,69 @@ export class DatabaseStorage implements IStorage {
       .where(eq(partnershipRequests.id, id))
       .returning();
     return request;
+  }
+
+  // Job opening operations
+  async getJobOpenings(activeOnly: boolean = false): Promise<JobOpening[]> {
+    if (activeOnly) {
+      return db.select().from(jobOpenings).where(eq(jobOpenings.isActive, "true")).orderBy(desc(jobOpenings.createdAt));
+    }
+    return db.select().from(jobOpenings).orderBy(desc(jobOpenings.createdAt));
+  }
+
+  async getJobOpening(id: string): Promise<JobOpening | undefined> {
+    const [job] = await db.select().from(jobOpenings).where(eq(jobOpenings.id, id));
+    return job;
+  }
+
+  async createJobOpening(job: InsertJobOpening): Promise<JobOpening> {
+    const [created] = await db.insert(jobOpenings).values(job as any).returning();
+    return created;
+  }
+
+  async updateJobOpening(id: string, job: Partial<InsertJobOpening>): Promise<JobOpening | undefined> {
+    const [updated] = await db
+      .update(jobOpenings)
+      .set({ ...job, updatedAt: new Date() } as any)
+      .where(eq(jobOpenings.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteJobOpening(id: string): Promise<boolean> {
+    const result = await db.delete(jobOpenings).where(eq(jobOpenings.id, id));
+    return true;
+  }
+
+  // Job application operations
+  async getJobApplications(jobId?: string): Promise<JobApplication[]> {
+    if (jobId) {
+      return db.select().from(jobApplications).where(eq(jobApplications.jobId, jobId)).orderBy(desc(jobApplications.createdAt));
+    }
+    return db.select().from(jobApplications).orderBy(desc(jobApplications.createdAt));
+  }
+
+  async getJobApplication(id: string): Promise<JobApplication | undefined> {
+    const [application] = await db.select().from(jobApplications).where(eq(jobApplications.id, id));
+    return application;
+  }
+
+  async createJobApplication(application: InsertJobApplication): Promise<JobApplication> {
+    const [created] = await db.insert(jobApplications).values(application as any).returning();
+    return created;
+  }
+
+  async updateJobApplicationStatus(id: string, status: string, notes?: string): Promise<JobApplication | undefined> {
+    const updateData: any = { status };
+    if (notes !== undefined) {
+      updateData.notes = notes;
+    }
+    const [updated] = await db
+      .update(jobApplications)
+      .set(updateData)
+      .where(eq(jobApplications.id, id))
+      .returning();
+    return updated;
   }
 }
 

@@ -9,6 +9,21 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { 
   ArrowLeft, 
   Save, 
@@ -25,16 +40,55 @@ import {
   Instagram,
   X,
   Linkedin,
-  LogIn
+  LogIn,
+  Briefcase,
+  Users,
+  Handshake,
+  Plus,
+  Pencil,
+  Trash2,
+  Eye
 } from "lucide-react";
 import { SiTiktok } from "react-icons/si";
-import type { SiteSettings, Order } from "@shared/schema";
+import type { SiteSettings, Order, JobOpening, JobApplication, PartnershipRequest } from "@shared/schema";
+
+type JobFormData = {
+  title: string;
+  department: string;
+  location: string;
+  type: string;
+  description: string;
+  requirements: string[];
+  responsibilities: string[];
+  benefits: string[];
+  salaryRange: string;
+  isActive: string;
+};
+
+const defaultJobForm: JobFormData = {
+  title: "",
+  department: "",
+  location: "",
+  type: "full-time",
+  description: "",
+  requirements: [""],
+  responsibilities: [""],
+  benefits: [""],
+  salaryRange: "",
+  isActive: "true",
+};
 
 export default function AdminDashboard() {
   const { toast } = useToast();
   const [settings, setSettings] = useState<Partial<SiteSettings>>({});
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
+  
+  // Job management state
+  const [showJobDialog, setShowJobDialog] = useState(false);
+  const [editingJob, setEditingJob] = useState<JobOpening | null>(null);
+  const [jobForm, setJobForm] = useState<JobFormData>(defaultJobForm);
+  const [viewingApplication, setViewingApplication] = useState<JobApplication | null>(null);
 
   // Check admin session
   const { data: sessionData, isLoading: sessionLoading, refetch: refetchSession } = useQuery<{ isAdmin: boolean; email?: string }>({
@@ -49,6 +103,24 @@ export default function AdminDashboard() {
   // Get orders (only when admin is logged in)
   const { data: orders, isLoading: ordersLoading } = useQuery<Order[]>({
     queryKey: ["/api/orders"],
+    enabled: sessionData?.isAdmin === true,
+  });
+
+  // Get job openings (only when admin is logged in)
+  const { data: jobs, isLoading: jobsLoading } = useQuery<JobOpening[]>({
+    queryKey: ["/api/jobs"],
+    enabled: sessionData?.isAdmin === true,
+  });
+
+  // Get job applications (only when admin is logged in)
+  const { data: applications, isLoading: applicationsLoading } = useQuery<JobApplication[]>({
+    queryKey: ["/api/applications"],
+    enabled: sessionData?.isAdmin === true,
+  });
+
+  // Get partnership requests (only when admin is logged in)
+  const { data: partnershipRequests, isLoading: partnershipsLoading } = useQuery<PartnershipRequest[]>({
+    queryKey: ["/api/partnership-requests"],
     enabled: sessionData?.isAdmin === true,
   });
 
@@ -94,6 +166,86 @@ export default function AdminDashboard() {
     },
   });
 
+  // Create job mutation
+  const createJobMutation = useMutation({
+    mutationFn: async (job: JobFormData) => {
+      const res = await apiRequest("POST", "/api/jobs", job);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/jobs"] });
+      toast({ title: "Job created successfully" });
+      setShowJobDialog(false);
+      setJobForm(defaultJobForm);
+    },
+    onError: () => {
+      toast({ title: "Failed to create job", variant: "destructive" });
+    },
+  });
+
+  // Update job mutation
+  const updateJobMutation = useMutation({
+    mutationFn: async ({ id, job }: { id: string; job: Partial<JobFormData> }) => {
+      const res = await apiRequest("PATCH", `/api/jobs/${id}`, job);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/jobs"] });
+      toast({ title: "Job updated successfully" });
+      setShowJobDialog(false);
+      setEditingJob(null);
+      setJobForm(defaultJobForm);
+    },
+    onError: () => {
+      toast({ title: "Failed to update job", variant: "destructive" });
+    },
+  });
+
+  // Delete job mutation
+  const deleteJobMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await apiRequest("DELETE", `/api/jobs/${id}`, {});
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/jobs"] });
+      toast({ title: "Job deleted successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to delete job", variant: "destructive" });
+    },
+  });
+
+  // Update application status mutation
+  const updateApplicationStatusMutation = useMutation({
+    mutationFn: async ({ id, status, notes }: { id: string; status: string; notes?: string }) => {
+      const res = await apiRequest("PATCH", `/api/applications/${id}/status`, { status, notes });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/applications"] });
+      toast({ title: "Application status updated" });
+    },
+    onError: () => {
+      toast({ title: "Failed to update status", variant: "destructive" });
+    },
+  });
+
+  // Update partnership request status mutation
+  const updatePartnershipStatusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const res = await apiRequest("PATCH", `/api/partnership-requests/${id}/status`, { status });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/partnership-requests"] });
+      toast({ title: "Partnership status updated" });
+    },
+    onError: () => {
+      toast({ title: "Failed to update status", variant: "destructive" });
+    },
+  });
+
   useEffect(() => {
     if (siteSettings) {
       setSettings(siteSettings);
@@ -134,6 +286,71 @@ export default function AdminDashboard() {
     const key = `${tier}Features` as keyof SiteSettings;
     const features = ((settings[key] as string[]) || []).filter((_, i) => i !== index);
     updateField(key, features);
+  };
+
+  // Job form handlers
+  const openCreateJobDialog = () => {
+    setEditingJob(null);
+    setJobForm(defaultJobForm);
+    setShowJobDialog(true);
+  };
+
+  const openEditJobDialog = (job: JobOpening) => {
+    setEditingJob(job);
+    setJobForm({
+      title: job.title,
+      department: job.department,
+      location: job.location,
+      type: job.type,
+      description: job.description,
+      requirements: (job.requirements as string[]) || [""],
+      responsibilities: (job.responsibilities as string[]) || [""],
+      benefits: (job.benefits as string[]) || [""],
+      salaryRange: job.salaryRange || "",
+      isActive: job.isActive || "true",
+    });
+    setShowJobDialog(true);
+  };
+
+  const handleSaveJob = () => {
+    // Clean up empty strings from arrays
+    const cleanedForm = {
+      ...jobForm,
+      requirements: jobForm.requirements.filter(r => r.trim()),
+      responsibilities: jobForm.responsibilities.filter(r => r.trim()),
+      benefits: jobForm.benefits.filter(b => b.trim()),
+    };
+
+    if (editingJob) {
+      updateJobMutation.mutate({ id: editingJob.id, job: cleanedForm });
+    } else {
+      createJobMutation.mutate(cleanedForm);
+    }
+  };
+
+  const updateJobFormField = (field: keyof JobFormData, value: any) => {
+    setJobForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  const updateJobFormArray = (field: "requirements" | "responsibilities" | "benefits", index: number, value: string) => {
+    setJobForm(prev => {
+      const arr = [...prev[field]];
+      arr[index] = value;
+      return { ...prev, [field]: arr };
+    });
+  };
+
+  const addJobFormArrayItem = (field: "requirements" | "responsibilities" | "benefits") => {
+    setJobForm(prev => ({ ...prev, [field]: [...prev[field], ""] }));
+  };
+
+  const removeJobFormArrayItem = (field: "requirements" | "responsibilities" | "benefits", index: number) => {
+    setJobForm(prev => ({ ...prev, [field]: prev[field].filter((_, i) => i !== index) }));
+  };
+
+  const getJobTitle = (jobId: string) => {
+    const job = jobs?.find(j => j.id === jobId);
+    return job?.title || "Unknown Position";
   };
 
   if (sessionLoading || settingsLoading) {
@@ -253,8 +470,24 @@ export default function AdminDashboard() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="general" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 max-w-2xl">
+        <Tabs defaultValue="orders" className="space-y-6">
+          <TabsList className="flex flex-wrap gap-2 h-auto p-2">
+            <TabsTrigger value="orders" className="flex items-center gap-2" data-testid="tab-orders">
+              <FileText className="h-4 w-4" />
+              Orders
+            </TabsTrigger>
+            <TabsTrigger value="jobs" className="flex items-center gap-2" data-testid="tab-jobs">
+              <Briefcase className="h-4 w-4" />
+              Jobs
+            </TabsTrigger>
+            <TabsTrigger value="candidates" className="flex items-center gap-2" data-testid="tab-candidates">
+              <Users className="h-4 w-4" />
+              Candidates
+            </TabsTrigger>
+            <TabsTrigger value="partnerships" className="flex items-center gap-2" data-testid="tab-partnerships">
+              <Handshake className="h-4 w-4" />
+              Partnerships
+            </TabsTrigger>
             <TabsTrigger value="general" className="flex items-center gap-2" data-testid="tab-general">
               <Settings className="h-4 w-4" />
               General
@@ -270,10 +503,6 @@ export default function AdminDashboard() {
             <TabsTrigger value="social" className="flex items-center gap-2" data-testid="tab-social">
               <Share2 className="h-4 w-4" />
               Social
-            </TabsTrigger>
-            <TabsTrigger value="orders" className="flex items-center gap-2" data-testid="tab-orders">
-              <FileText className="h-4 w-4" />
-              Orders
             </TabsTrigger>
           </TabsList>
 
@@ -542,10 +771,10 @@ export default function AdminDashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <FileText className="h-5 w-5" />
-                  Recent Orders
+                  Customer Orders
                 </CardTitle>
                 <CardDescription>
-                  View and manage customer orders
+                  View all customer orders and client information
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -558,20 +787,23 @@ export default function AdminDashboard() {
                     {orders.map((order) => (
                       <div 
                         key={order.id} 
-                        className="flex items-center justify-between p-4 border rounded-md"
+                        className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-md gap-4"
                         data-testid={`order-${order.id}`}
                       >
-                        <div className="space-y-1">
+                        <div className="space-y-1 flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-medium">{order.names}</span>
                             <Badge variant="outline">{order.packageType}</Badge>
                             <Badge variant="secondary">{order.eventType}</Badge>
                           </div>
+                          <p className="text-sm font-medium text-foreground">
+                            {order.contactName}
+                          </p>
                           <p className="text-sm text-muted-foreground">
                             {order.contactEmail} | {order.contactPhone}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : "N/A"}
+                            Event: {order.eventDate} | Ordered: {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : "N/A"}
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
@@ -603,8 +835,524 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* Jobs Tab */}
+          <TabsContent value="jobs" className="space-y-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between gap-4 flex-wrap">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Briefcase className="h-5 w-5" />
+                    Job Openings
+                  </CardTitle>
+                  <CardDescription>
+                    Manage job postings for your careers page
+                  </CardDescription>
+                </div>
+                <Button onClick={openCreateJobDialog} data-testid="button-create-job">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Job
+                </Button>
+              </CardHeader>
+              <CardContent>
+                {jobsLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : jobs && jobs.length > 0 ? (
+                  <div className="space-y-4">
+                    {jobs.map((job) => (
+                      <div 
+                        key={job.id} 
+                        className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-md gap-4"
+                        data-testid={`job-${job.id}`}
+                      >
+                        <div className="space-y-1 flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-medium">{job.title}</span>
+                            <Badge variant={job.isActive === "true" ? "default" : "secondary"}>
+                              {job.isActive === "true" ? "Active" : "Inactive"}
+                            </Badge>
+                            <Badge variant="outline">{job.type}</Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            {job.department} | {job.location}
+                            {job.salaryRange && ` | ${job.salaryRange}`}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Created: {job.createdAt ? new Date(job.createdAt).toLocaleDateString() : "N/A"}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => openEditJobDialog(job)}
+                            data-testid={`button-edit-job-${job.id}`}
+                          >
+                            <Pencil className="h-4 w-4 mr-1" />
+                            Edit
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => deleteJobMutation.mutate(job.id)}
+                            disabled={deleteJobMutation.isPending}
+                            data-testid={`button-delete-job-${job.id}`}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-muted-foreground py-8" data-testid="no-jobs-message">
+                    No job openings yet. Click "Add Job" to create one.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Candidates Tab */}
+          <TabsContent value="candidates" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Job Applications
+                </CardTitle>
+                <CardDescription>
+                  Review and manage candidate applications
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {applicationsLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : applications && applications.length > 0 ? (
+                  <div className="space-y-4">
+                    {applications.map((app) => (
+                      <div 
+                        key={app.id} 
+                        className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-md gap-4"
+                        data-testid={`application-${app.id}`}
+                      >
+                        <div className="space-y-1 flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-medium">{app.fullName}</span>
+                            <Badge variant={
+                              app.status === "hired" ? "default" :
+                              app.status === "rejected" ? "destructive" :
+                              app.status === "interviewing" || app.status === "offered" ? "default" :
+                              "secondary"
+                            }>
+                              {app.status}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-primary font-medium">
+                            Applied for: {getJobTitle(app.jobId)}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {app.email} | {app.phone}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Experience: {app.yearsOfExperience || "Not specified"} | Applied: {app.createdAt ? new Date(app.createdAt).toLocaleDateString() : "N/A"}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Select
+                            value={app.status || "new"}
+                            onValueChange={(value) => updateApplicationStatusMutation.mutate({ id: app.id, status: value })}
+                          >
+                            <SelectTrigger className="w-[130px]" data-testid={`select-status-${app.id}`}>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="new">New</SelectItem>
+                              <SelectItem value="reviewed">Reviewed</SelectItem>
+                              <SelectItem value="interviewing">Interviewing</SelectItem>
+                              <SelectItem value="offered">Offered</SelectItem>
+                              <SelectItem value="hired">Hired</SelectItem>
+                              <SelectItem value="rejected">Rejected</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => setViewingApplication(app)}
+                            data-testid={`button-view-${app.id}`}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            View
+                          </Button>
+                          {app.resumeUrl && (
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => window.open(app.resumeUrl!, "_blank")}
+                              data-testid={`button-resume-${app.id}`}
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-muted-foreground py-8" data-testid="no-applications-message">
+                    No applications yet
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Partnerships Tab */}
+          <TabsContent value="partnerships" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Handshake className="h-5 w-5" />
+                  Partnership Requests
+                </CardTitle>
+                <CardDescription>
+                  Manage partnership applications from event planners
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {partnershipsLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : partnershipRequests && partnershipRequests.length > 0 ? (
+                  <div className="space-y-4">
+                    {partnershipRequests.map((req) => (
+                      <div 
+                        key={req.id} 
+                        className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-md gap-4"
+                        data-testid={`partnership-${req.id}`}
+                      >
+                        <div className="space-y-1 flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-medium">{req.companyName}</span>
+                            <Badge variant={
+                              req.status === "approved" ? "default" :
+                              req.status === "rejected" ? "destructive" :
+                              req.status === "contacted" ? "secondary" :
+                              "outline"
+                            }>
+                              {req.status}
+                            </Badge>
+                            <Badge variant="secondary">{req.eventsPerYear} events/year</Badge>
+                          </div>
+                          <p className="text-sm font-medium">{req.contactName}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {req.email} | {req.phone}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Events: {(req.eventTypes as string[]).join(", ")} | Applied: {req.createdAt ? new Date(req.createdAt).toLocaleDateString() : "N/A"}
+                          </p>
+                          {req.message && (
+                            <p className="text-sm text-muted-foreground mt-2 italic">"{req.message}"</p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Select
+                            value={req.status || "pending"}
+                            onValueChange={(value) => updatePartnershipStatusMutation.mutate({ id: req.id, status: value })}
+                          >
+                            <SelectTrigger className="w-[130px]" data-testid={`select-partnership-status-${req.id}`}>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pending">Pending</SelectItem>
+                              <SelectItem value="contacted">Contacted</SelectItem>
+                              <SelectItem value="approved">Approved</SelectItem>
+                              <SelectItem value="rejected">Rejected</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          {req.website && (
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => window.open(req.website!, "_blank")}
+                              data-testid={`button-website-${req.id}`}
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-muted-foreground py-8" data-testid="no-partnerships-message">
+                    No partnership requests yet
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
       </main>
+
+      {/* Job Create/Edit Dialog */}
+      <Dialog open={showJobDialog} onOpenChange={(open) => { if (!open) { setShowJobDialog(false); setEditingJob(null); setJobForm(defaultJobForm); } }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editingJob ? "Edit Job" : "Create New Job"}</DialogTitle>
+            <DialogDescription>
+              {editingJob ? "Update the job posting details" : "Fill in the details for the new job opening"}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Job Title *</Label>
+                <Input
+                  value={jobForm.title}
+                  onChange={(e) => updateJobFormField("title", e.target.value)}
+                  placeholder="e.g., Senior Designer"
+                  data-testid="input-job-title"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Department *</Label>
+                <Select value={jobForm.department} onValueChange={(v) => updateJobFormField("department", v)}>
+                  <SelectTrigger data-testid="select-department">
+                    <SelectValue placeholder="Select department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Design">Design</SelectItem>
+                    <SelectItem value="Development">Development</SelectItem>
+                    <SelectItem value="Marketing">Marketing</SelectItem>
+                    <SelectItem value="Operations">Operations</SelectItem>
+                    <SelectItem value="Sales">Sales</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Location *</Label>
+                <Select value={jobForm.location} onValueChange={(v) => updateJobFormField("location", v)}>
+                  <SelectTrigger data-testid="select-location">
+                    <SelectValue placeholder="Select location" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Beirut">Beirut</SelectItem>
+                    <SelectItem value="Remote">Remote</SelectItem>
+                    <SelectItem value="Hybrid">Hybrid</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Job Type *</Label>
+                <Select value={jobForm.type} onValueChange={(v) => updateJobFormField("type", v)}>
+                  <SelectTrigger data-testid="select-type">
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="full-time">Full-time</SelectItem>
+                    <SelectItem value="part-time">Part-time</SelectItem>
+                    <SelectItem value="contract">Contract</SelectItem>
+                    <SelectItem value="internship">Internship</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Salary Range</Label>
+                <Input
+                  value={jobForm.salaryRange}
+                  onChange={(e) => updateJobFormField("salaryRange", e.target.value)}
+                  placeholder="e.g., $40k-$60k"
+                  data-testid="input-salary"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select value={jobForm.isActive} onValueChange={(v) => updateJobFormField("isActive", v)}>
+                  <SelectTrigger data-testid="select-active">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="true">Active</SelectItem>
+                    <SelectItem value="false">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Description *</Label>
+              <Textarea
+                value={jobForm.description}
+                onChange={(e) => updateJobFormField("description", e.target.value)}
+                placeholder="Job description..."
+                className="min-h-[80px]"
+                data-testid="input-description"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Requirements</Label>
+              {jobForm.requirements.map((req, i) => (
+                <div key={i} className="flex gap-2">
+                  <Input
+                    value={req}
+                    onChange={(e) => updateJobFormArray("requirements", i, e.target.value)}
+                    placeholder="Add requirement"
+                    data-testid={`input-requirement-${i}`}
+                  />
+                  <Button variant="ghost" size="icon" onClick={() => removeJobFormArrayItem("requirements", i)}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              <Button variant="outline" size="sm" onClick={() => addJobFormArrayItem("requirements")}>
+                Add Requirement
+              </Button>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Responsibilities</Label>
+              {jobForm.responsibilities.map((resp, i) => (
+                <div key={i} className="flex gap-2">
+                  <Input
+                    value={resp}
+                    onChange={(e) => updateJobFormArray("responsibilities", i, e.target.value)}
+                    placeholder="Add responsibility"
+                    data-testid={`input-responsibility-${i}`}
+                  />
+                  <Button variant="ghost" size="icon" onClick={() => removeJobFormArrayItem("responsibilities", i)}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              <Button variant="outline" size="sm" onClick={() => addJobFormArrayItem("responsibilities")}>
+                Add Responsibility
+              </Button>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Benefits</Label>
+              {jobForm.benefits.map((benefit, i) => (
+                <div key={i} className="flex gap-2">
+                  <Input
+                    value={benefit}
+                    onChange={(e) => updateJobFormArray("benefits", i, e.target.value)}
+                    placeholder="Add benefit"
+                    data-testid={`input-benefit-${i}`}
+                  />
+                  <Button variant="ghost" size="icon" onClick={() => removeJobFormArrayItem("benefits", i)}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              <Button variant="outline" size="sm" onClick={() => addJobFormArrayItem("benefits")}>
+                Add Benefit
+              </Button>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowJobDialog(false); setEditingJob(null); setJobForm(defaultJobForm); }}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSaveJob}
+              disabled={createJobMutation.isPending || updateJobMutation.isPending || !jobForm.title || !jobForm.department || !jobForm.location || !jobForm.description}
+              data-testid="button-save-job"
+            >
+              {(createJobMutation.isPending || updateJobMutation.isPending) && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {editingJob ? "Update Job" : "Create Job"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Application Dialog */}
+      <Dialog open={!!viewingApplication} onOpenChange={(open) => { if (!open) setViewingApplication(null); }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Application Details</DialogTitle>
+            <DialogDescription>
+              {viewingApplication?.fullName}'s application
+            </DialogDescription>
+          </DialogHeader>
+          
+          {viewingApplication && (
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-muted-foreground">Name</p>
+                  <p className="font-medium">{viewingApplication.fullName}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Position</p>
+                  <p className="font-medium">{getJobTitle(viewingApplication.jobId)}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Email</p>
+                  <p className="font-medium">{viewingApplication.email}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Phone</p>
+                  <p className="font-medium">{viewingApplication.phone}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Experience</p>
+                  <p className="font-medium">{viewingApplication.yearsOfExperience || "Not specified"}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Status</p>
+                  <Badge variant="outline">{viewingApplication.status}</Badge>
+                </div>
+              </div>
+
+              {viewingApplication.coverLetter && (
+                <div>
+                  <p className="text-muted-foreground text-sm mb-1">Cover Letter</p>
+                  <p className="text-sm bg-muted p-3 rounded-md">{viewingApplication.coverLetter}</p>
+                </div>
+              )}
+
+              <div className="flex gap-2 flex-wrap">
+                {viewingApplication.resumeUrl && (
+                  <Button variant="outline" size="sm" onClick={() => window.open(viewingApplication.resumeUrl!, "_blank")}>
+                    <ExternalLink className="h-4 w-4 mr-1" /> Resume
+                  </Button>
+                )}
+                {viewingApplication.portfolioUrl && (
+                  <Button variant="outline" size="sm" onClick={() => window.open(viewingApplication.portfolioUrl!, "_blank")}>
+                    <ExternalLink className="h-4 w-4 mr-1" /> Portfolio
+                  </Button>
+                )}
+                {viewingApplication.linkedinUrl && (
+                  <Button variant="outline" size="sm" onClick={() => window.open(viewingApplication.linkedinUrl!, "_blank")}>
+                    <Linkedin className="h-4 w-4 mr-1" /> LinkedIn
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setViewingApplication(null)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

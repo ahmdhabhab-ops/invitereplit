@@ -11,7 +11,8 @@ A high-conversion landing page for "einvite.me" - a professional digital invitat
 - **Pricing Section**: Three tiers (Essential $49, Premium $99, Royal $199)
 - **Multi-Step Order Form**: 4-step form for order submissions with WhatsApp payment integration
 - **Event Planners Page**: Partnership program for event professionals with tiered discounts (15%, 25%, 40%)
-- **Admin Dashboard**: Full content management for all site settings, pricing, contact info, and orders
+- **Careers Page**: Job listings with application form for candidates to apply
+- **Admin Dashboard**: Full content management for site settings, pricing, jobs, candidates, partnerships, and orders
 
 ## Tech Stack
 - **Frontend**: React with TypeScript, Wouter for routing, TanStack Query for data fetching
@@ -57,26 +58,38 @@ shared/
 - `GET /api/settings` - Get site settings (for frontend)
 - `POST /api/orders` - Create new order (form submission)
 - `GET /api/orders/:id` - Get single order
+- `GET /api/jobs` - Get active job openings
+- `GET /api/jobs/:id` - Get single job opening
+- `POST /api/applications` - Submit job application
+- `POST /api/partnership-requests` - Submit partnership request
 
-### Protected Endpoints (require Replit Auth)
+### Protected Endpoints (require Admin Login)
 - `GET /api/orders` - List all orders (admin)
 - `PATCH /api/orders/:id/payment` - Update payment status
 - `PATCH /api/settings` - Update site settings (admin only)
-- `GET /api/admin/check` - Check if user is admin
-- `GET /api/auth/user` - Get current authenticated user
+- `GET /api/jobs` - Get all job openings including inactive (admin)
+- `POST /api/jobs` - Create new job opening
+- `PATCH /api/jobs/:id` - Update job opening
+- `DELETE /api/jobs/:id` - Delete job opening
+- `GET /api/applications` - Get all job applications
+- `PATCH /api/applications/:id/status` - Update application status
+- `GET /api/partnership-requests` - Get all partnership requests
+- `PATCH /api/partnership-requests/:id/status` - Update partnership status
 
 ### Auth Endpoints
-- `/api/login` - Begin login flow
-- `/api/logout` - Begin logout flow
-- `/api/callback` - OAuth callback
+- `POST /api/admin/login` - Admin login with email/password
+- `POST /api/admin/logout` - Admin logout
+- `GET /api/admin/session` - Check admin session status
 
 ## Database Schema
 
 ### Tables
-- **users**: id, email, firstName, lastName, profileImageUrl, createdAt, updatedAt (Replit Auth)
-- **sessions**: sid, sess, expire (session storage)
+- **sessions**: sid, sess, expire (session storage for admin authentication)
 - **orders**: id, packageType, eventType, names, eventDate, locations (JSONB), mediaUrls, songChoice, rsvpPreference, additionalNotes, contactName, contactEmail, contactPhone, paymentMethod, paymentStatus, createdAt
 - **site_settings**: id, phoneNumber, email, whatsappNumber, facebookUrl, instagramUrl, twitterUrl, linkedinUrl, tiktokUrl, essentialPrice, essentialFeatures, premiumPrice, premiumFeatures, royalPrice, royalFeatures, heroTitle, heroSubtitle, heroBadge, happyCouplesCount, eventsCreatedCount, customerRating, adminEmails, updatedAt
+- **partnership_requests**: id, companyName, contactName, email, phone, website, eventsPerYear, eventTypes (JSONB), message, status, createdAt
+- **job_openings**: id, title, department, location, type, description, requirements (JSONB), responsibilities (JSONB), benefits (JSONB), salaryRange, isActive, createdAt, updatedAt
+- **job_applications**: id, jobId, fullName, email, phone, resumeUrl, portfolioUrl, linkedinUrl, coverLetter, yearsOfExperience, status, notes, createdAt
 
 ## Admin Dashboard Features
 The admin panel at `/admin` allows managing:
