@@ -71,6 +71,13 @@ export function Header() {
             >
               Pricing
             </button>
+            <a
+              href="/event-planners"
+              className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+              data-testid="link-event-planners"
+            >
+              Event Planners
+            </a>
             <Button
               onClick={() => scrollToSection("pricing")}
               className="font-medium"
@@ -125,6 +132,13 @@ export function Header() {
               >
                 Pricing
               </button>
+              <a
+                href="/event-planners"
+                className="text-left py-3 px-4 text-sm font-medium text-primary hover:bg-muted rounded-md transition-colors"
+                data-testid="link-event-planners-mobile"
+              >
+                Event Planners
+              </a>
               <Button
                 onClick={() => scrollToSection("pricing")}
                 className="mt-2 font-medium"

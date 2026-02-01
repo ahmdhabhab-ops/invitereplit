@@ -43,6 +43,30 @@ export const insertOrderSchema = createInsertSchema(orders).omit({
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
 export type Order = typeof orders.$inferSelect;
 
+// Partnership requests for event planners
+export const partnershipRequests = pgTable("partnership_requests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  companyName: text("company_name").notNull(),
+  contactName: text("contact_name").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone").notNull(),
+  website: text("website"),
+  eventsPerYear: text("events_per_year").notNull(), // 1-10, 11-50, 51-100, 100+
+  eventTypes: jsonb("event_types").$type<string[]>().notNull(), // weddings, corporate, birthdays, etc.
+  message: text("message"),
+  status: text("status").default("pending"), // pending, contacted, approved, rejected
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertPartnershipRequestSchema = createInsertSchema(partnershipRequests).omit({
+  id: true,
+  status: true,
+  createdAt: true,
+});
+
+export type InsertPartnershipRequest = z.infer<typeof insertPartnershipRequestSchema>;
+export type PartnershipRequest = typeof partnershipRequests.$inferSelect;
+
 // Site settings for admin panel
 export const siteSettings = pgTable("site_settings", {
   id: varchar("id").primaryKey().default("main"),

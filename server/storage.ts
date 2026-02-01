@@ -1,4 +1,4 @@
-import { type Order, type InsertOrder, type SiteSettings, type InsertSiteSettings, orders, siteSettings } from "@shared/schema";
+import { type Order, type InsertOrder, type SiteSettings, type InsertSiteSettings, type PartnershipRequest, type InsertPartnershipRequest, orders, siteSettings, partnershipRequests } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 
@@ -12,6 +12,11 @@ export interface IStorage {
   // Site settings operations
   getSiteSettings(): Promise<SiteSettings | undefined>;
   upsertSiteSettings(settings: Partial<InsertSiteSettings>): Promise<SiteSettings>;
+  
+  // Partnership request operations
+  getPartnershipRequests(): Promise<PartnershipRequest[]>;
+  createPartnershipRequest(request: InsertPartnershipRequest): Promise<PartnershipRequest>;
+  updatePartnershipRequestStatus(id: string, status: string): Promise<PartnershipRequest | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -60,6 +65,24 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return created;
     }
+  }
+
+  async getPartnershipRequests(): Promise<PartnershipRequest[]> {
+    return db.select().from(partnershipRequests);
+  }
+
+  async createPartnershipRequest(request: InsertPartnershipRequest): Promise<PartnershipRequest> {
+    const [partnershipRequest] = await db.insert(partnershipRequests).values(request as any).returning();
+    return partnershipRequest;
+  }
+
+  async updatePartnershipRequestStatus(id: string, status: string): Promise<PartnershipRequest | undefined> {
+    const [request] = await db
+      .update(partnershipRequests)
+      .set({ status })
+      .where(eq(partnershipRequests.id, id))
+      .returning();
+    return request;
   }
 }
 

@@ -10,6 +10,7 @@ A high-conversion landing page for "einvite.me" - a professional digital invitat
 - **Featured Events**: Showcase of event participation (Youth Leadership Forum 2024, Web Summit Qatar 2025)
 - **Pricing Section**: Three tiers (Essential $49, Premium $99, Royal $199)
 - **Multi-Step Order Form**: 4-step form for order submissions with WhatsApp payment integration
+- **Event Planners Page**: Partnership program for event professionals with tiered discounts (15%, 25%, 40%)
 - **Admin Dashboard**: Full content management for all site settings, pricing, contact info, and orders
 
 ## Tech Stack

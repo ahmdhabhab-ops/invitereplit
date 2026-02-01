@@ -1,7 +1,7 @@
 import type { Express, RequestHandler } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertOrderSchema, insertSiteSettingsSchema } from "@shared/schema";
+import { insertOrderSchema, insertSiteSettingsSchema, insertPartnershipRequestSchema } from "@shared/schema";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import session from "express-session";
@@ -204,6 +204,55 @@ export async function registerRoutes(
       }
       console.error("Error updating settings:", error);
       res.status(500).json({ error: "Failed to update settings" });
+    }
+  });
+
+  // Partnership request endpoints
+  // Create new partnership request (public)
+  app.post("/api/partnership-requests", async (req, res) => {
+    try {
+      const validatedData = insertPartnershipRequestSchema.parse(req.body);
+      const request = await storage.createPartnershipRequest(validatedData);
+      res.status(201).json(request);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: error.errors 
+        });
+      }
+      console.error("Error creating partnership request:", error);
+      res.status(500).json({ error: "Failed to submit partnership request" });
+    }
+  });
+
+  // Get all partnership requests (admin only)
+  app.get("/api/partnership-requests", isAdmin, async (req, res) => {
+    try {
+      const requests = await storage.getPartnershipRequests();
+      res.json(requests);
+    } catch (error) {
+      console.error("Error fetching partnership requests:", error);
+      res.status(500).json({ error: "Failed to fetch partnership requests" });
+    }
+  });
+
+  // Update partnership request status (admin only)
+  app.patch("/api/partnership-requests/:id/status", isAdmin, async (req, res) => {
+    try {
+      const status = req.body.status as string;
+      if (!status || !["pending", "contacted", "approved", "rejected"].includes(status)) {
+        return res.status(400).json({ error: "Invalid status" });
+      }
+      
+      const request = await storage.updatePartnershipRequestStatus(req.params.id, status);
+      if (!request) {
+        return res.status(404).json({ error: "Partnership request not found" });
+      }
+      res.json(request);
+    } catch (error) {
+      console.error("Error updating partnership request:", error);
+      res.status(500).json({ error: "Failed to update partnership request" });
     }
   });
 

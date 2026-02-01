@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import LandingPage from "@/pages/LandingPage";
 import AdminDashboard from "@/pages/AdminDashboard";
+import EventPlanners from "@/pages/EventPlanners";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -12,6 +13,7 @@ function Router() {
     <Switch>
       <Route path="/" component={LandingPage} />
       <Route path="/admin" component={AdminDashboard} />
+      <Route path="/event-planners" component={EventPlanners} />
       <Route component={NotFound} />
     </Switch>
   );
