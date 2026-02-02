@@ -127,6 +127,57 @@ export const siteSettings = pgTable("site_settings", {
   // Admin emails (users who can access admin panel)
   adminEmails: jsonb("admin_emails").$type<string[]>().default([]),
   
+  // Event Planners Page Content
+  eventPlannersHeroTitle: text("event_planners_hero_title").default("Partner With Einvite"),
+  eventPlannersHeroSubtitle: text("event_planners_hero_subtitle").default("Join our exclusive partner program and offer your clients stunning digital invitations at special rates. Grow your business while providing premium service."),
+  eventPlannersBadge: text("event_planners_badge").default("For Event Professionals"),
+  eventPlannersHeroFeatures: jsonb("event_planners_hero_features").$type<string[]>().default([
+    "Up to 40% Discount",
+    "Priority Support",
+    "White Label Options",
+  ]),
+  
+  // Partner Benefits
+  eventPlannersBenefits: jsonb("event_planners_benefits").$type<{ title: string; description: string }[]>().default([
+    { title: "Exclusive Discounts", description: "Up to 40% off on all invitation packages for your clients" },
+    { title: "Priority Support", description: "Dedicated account manager and 24/7 priority customer support" },
+    { title: "Fast Turnaround", description: "Rush delivery options with guaranteed 24-48 hour turnaround" },
+    { title: "White Label Options", description: "Co-branded invitations with your company logo and branding" },
+    { title: "Premium Features", description: "Access to exclusive templates and design elements" },
+    { title: "Partner Recognition", description: "Featured in our partner directory and referral program" },
+  ]),
+  
+  // Partner Tiers
+  eventPlannersSilverName: text("event_planners_silver_name").default("Silver Partner"),
+  eventPlannersSilverEvents: text("event_planners_silver_events").default("1-10 events/year"),
+  eventPlannersSilverDiscount: text("event_planners_silver_discount").default("15%"),
+  eventPlannersSilverFeatures: jsonb("event_planners_silver_features").$type<string[]>().default([
+    "10% discount on all packages",
+    "Standard support",
+    "Partner badge",
+  ]),
+  
+  eventPlannersGoldName: text("event_planners_gold_name").default("Gold Partner"),
+  eventPlannersGoldEvents: text("event_planners_gold_events").default("11-50 events/year"),
+  eventPlannersGoldDiscount: text("event_planners_gold_discount").default("25%"),
+  eventPlannersGoldFeatures: jsonb("event_planners_gold_features").$type<string[]>().default([
+    "25% discount on all packages",
+    "Priority support",
+    "White label option",
+    "Custom templates",
+  ]),
+  
+  eventPlannersPlatinumName: text("event_planners_platinum_name").default("Platinum Partner"),
+  eventPlannersPlatinumEvents: text("event_planners_platinum_events").default("50+ events/year"),
+  eventPlannersPlatinumDiscount: text("event_planners_platinum_discount").default("40%"),
+  eventPlannersPlatinumFeatures: jsonb("event_planners_platinum_features").$type<string[]>().default([
+    "40% discount on all packages",
+    "Dedicated account manager",
+    "Free rush delivery",
+    "Co-marketing opportunities",
+    "API access",
+  ]),
+  
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
