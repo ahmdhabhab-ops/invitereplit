@@ -8,6 +8,8 @@ import AdminDashboard from "@/pages/AdminDashboard";
 import EventPlanners from "@/pages/EventPlanners";
 import Careers from "@/pages/Careers";
 import AboutUs from "@/pages/AboutUs";
+import WeddingInvitationsLebanon from "@/pages/WeddingInvitationsLebanon";
+import BirthdayEventInvites from "@/pages/BirthdayEventInvites";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -18,6 +20,8 @@ function Router() {
       <Route path="/event-planners" component={EventPlanners} />
       <Route path="/careers" component={Careers} />
       <Route path="/about" component={AboutUs} />
+      <Route path="/wedding-invitations-lebanon" component={WeddingInvitationsLebanon} />
+      <Route path="/birthday-event-invites" component={BirthdayEventInvites} />
       <Route component={NotFound} />
     </Switch>
   );
