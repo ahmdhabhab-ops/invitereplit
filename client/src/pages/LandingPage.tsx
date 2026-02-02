@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Header } from "@/components/Header";
 import { HeroSection } from "@/components/HeroSection";
 import { PhoneGallery } from "@/components/PhoneGallery";
+import { PromoVideo } from "@/components/PromoVideo";
 import { HowItWorks } from "@/components/HowItWorks";
 import { FeaturedEvents } from "@/components/FeaturedEvents";
 import { PricingSection } from "@/components/PricingSection";
@@ -27,6 +28,7 @@ export default function LandingPage() {
       <main>
         <HeroSection />
         <PhoneGallery />
+        <PromoVideo />
         <HowItWorks />
         <FeaturedEvents />
         <PricingSection onSelectPackage={handleSelectPackage} />
