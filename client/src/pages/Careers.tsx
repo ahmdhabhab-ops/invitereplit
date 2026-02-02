@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,6 +17,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import {
   Dialog,
@@ -44,7 +45,11 @@ import {
   Loader2,
   Users,
   Sparkles,
-  Heart
+  Heart,
+  Upload,
+  FileText,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react";
 import type { JobOpening } from "@shared/schema";
 import logoImage from "@assets/Logo_1769975575984.png";
@@ -53,7 +58,7 @@ const applicationFormSchema = z.object({
   fullName: z.string().min(2, "Please enter your full name"),
   email: z.string().email("Please enter a valid email"),
   phone: z.string().min(8, "Please enter a valid phone number"),
-  resumeUrl: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
+  resumeUrl: z.string().optional().or(z.literal("")),
   portfolioUrl: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
   linkedinUrl: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
   coverLetter: z.string().optional(),
@@ -99,6 +104,10 @@ export default function Careers() {
   const [selectedJob, setSelectedJob] = useState<JobOpening | null>(null);
   const [showApplicationForm, setShowApplicationForm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [expandedJobs, setExpandedJobs] = useState<Set<string>>(new Set());
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [uploadingResume, setUploadingResume] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: jobs = [], isLoading } = useQuery<JobOpening[]>({
     queryKey: ["/api/jobs"],
@@ -117,6 +126,60 @@ export default function Careers() {
       yearsOfExperience: "",
     },
   });
+
+  const toggleJobExpand = (jobId: string) => {
+    setExpandedJobs(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(jobId)) {
+        newSet.delete(jobId);
+      } else {
+        newSet.add(jobId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain', 'application/rtf'];
+    if (!allowedTypes.includes(file.type)) {
+      toast({ title: "Please upload a PDF, DOC, DOCX, TXT, or RTF file", variant: "destructive" });
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ title: "File size must be less than 10MB", variant: "destructive" });
+      return;
+    }
+
+    setResumeFile(file);
+    setUploadingResume(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("resume", file);
+
+      const response = await fetch("/api/upload/resume", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Upload failed");
+      }
+
+      const data = await response.json();
+      form.setValue("resumeUrl", data.url);
+      toast({ title: "Resume uploaded successfully!" });
+    } catch (error) {
+      toast({ title: "Failed to upload resume. Please try again.", variant: "destructive" });
+      setResumeFile(null);
+    } finally {
+      setUploadingResume(false);
+    }
+  };
 
   const submitMutation = useMutation({
     mutationFn: async (data: ApplicationFormData & { jobId: string }) => {
@@ -141,6 +204,7 @@ export default function Careers() {
     setSelectedJob(job);
     setShowApplicationForm(true);
     setSubmitted(false);
+    setResumeFile(null);
     form.reset();
   };
 
@@ -148,6 +212,7 @@ export default function Careers() {
     setShowApplicationForm(false);
     setSelectedJob(null);
     setSubmitted(false);
+    setResumeFile(null);
     form.reset();
   };
 
@@ -243,49 +308,105 @@ export default function Careers() {
             </Card>
           ) : (
             <div className="grid gap-4">
-              {jobs.map((job) => (
-                <Card 
-                  key={job.id} 
-                  className="hover-elevate cursor-pointer transition-all"
-                  data-testid={`job-card-${job.id}`}
-                >
-                  <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-xl font-semibold">{job.title}</h3>
-                          <JobTypeLabel type={job.type} />
-                        </div>
-                        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Building2 className="h-4 w-4" />
-                            {job.department}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <MapPin className="h-4 w-4" />
-                            {job.location}
-                          </span>
-                          {job.salaryRange && (
+              {jobs.map((job) => {
+                const isExpanded = expandedJobs.has(job.id);
+                return (
+                  <Card 
+                    key={job.id} 
+                    className="hover-elevate transition-all"
+                    data-testid={`job-card-${job.id}`}
+                  >
+                    <CardContent className="p-6">
+                      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h3 className="text-xl font-semibold">{job.title}</h3>
+                            <JobTypeLabel type={job.type} />
+                          </div>
+                          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                             <span className="flex items-center gap-1">
-                              <Clock className="h-4 w-4" />
-                              {job.salaryRange}
+                              <Building2 className="h-4 w-4" />
+                              {job.department}
                             </span>
+                            <span className="flex items-center gap-1">
+                              <MapPin className="h-4 w-4" />
+                              {job.location}
+                            </span>
+                            {job.salaryRange && (
+                              <span className="flex items-center gap-1">
+                                <Clock className="h-4 w-4" />
+                                {job.salaryRange}
+                              </span>
+                            )}
+                          </div>
+                          <div className="mt-3">
+                            <p className={`text-muted-foreground ${!isExpanded ? 'line-clamp-2' : ''}`}>
+                              {job.description}
+                            </p>
+                            {job.description && job.description.length > 150 && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => toggleJobExpand(job.id)}
+                                className="mt-2 p-0 h-auto text-primary hover:text-primary/80"
+                                data-testid={`button-expand-${job.id}`}
+                              >
+                                {isExpanded ? (
+                                  <>
+                                    Show Less <ChevronUp className="h-4 w-4 ml-1" />
+                                  </>
+                                ) : (
+                                  <>
+                                    Read More <ChevronDown className="h-4 w-4 ml-1" />
+                                  </>
+                                )}
+                              </Button>
+                            )}
+                          </div>
+                          {isExpanded && (
+                            <div className="mt-4 space-y-4">
+                              {(job.requirements as string[])?.length > 0 && (
+                                <div>
+                                  <h4 className="font-medium text-sm mb-2">Requirements:</h4>
+                                  <ul className="text-sm text-muted-foreground space-y-1">
+                                    {(job.requirements as string[]).map((req, i) => (
+                                      <li key={i} className="flex items-start gap-2">
+                                        <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                                        <span>{req}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                              {(job.responsibilities as string[])?.length > 0 && (
+                                <div>
+                                  <h4 className="font-medium text-sm mb-2">Responsibilities:</h4>
+                                  <ul className="text-sm text-muted-foreground space-y-1">
+                                    {(job.responsibilities as string[]).map((resp, i) => (
+                                      <li key={i} className="flex items-start gap-2">
+                                        <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                                        <span>{resp}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
                           )}
                         </div>
-                        <p className="text-muted-foreground mt-3 line-clamp-2">{job.description}</p>
+                        <Button 
+                          onClick={() => handleApply(job)}
+                          className="shrink-0"
+                          data-testid={`button-apply-${job.id}`}
+                        >
+                          Apply Now
+                          <ArrowRight className="h-4 w-4 ml-2" />
+                        </Button>
                       </div>
-                      <Button 
-                        onClick={() => handleApply(job)}
-                        className="shrink-0"
-                        data-testid={`button-apply-${job.id}`}
-                      >
-                        Apply Now
-                        <ArrowRight className="h-4 w-4 ml-2" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           )}
         </div>
@@ -421,19 +542,47 @@ export default function Careers() {
                         />
                       </div>
 
-                      <FormField
-                        control={form.control}
-                        name="resumeUrl"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Resume URL</FormLabel>
-                            <FormControl>
-                              <Input placeholder="https://drive.google.com/..." {...field} data-testid="input-resume" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      <FormItem>
+                        <FormLabel>Resume / CV *</FormLabel>
+                        <FormControl>
+                          <div className="space-y-2">
+                            <input
+                              type="file"
+                              ref={fileInputRef}
+                              onChange={handleFileChange}
+                              accept=".pdf,.doc,.docx,.txt,.rtf"
+                              className="hidden"
+                              data-testid="input-resume-file"
+                            />
+                            <div
+                              onClick={() => fileInputRef.current?.click()}
+                              className="border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors"
+                            >
+                              {uploadingResume ? (
+                                <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                                  <Loader2 className="h-5 w-5 animate-spin" />
+                                  <span>Uploading...</span>
+                                </div>
+                              ) : resumeFile ? (
+                                <div className="flex items-center justify-center gap-2 text-primary">
+                                  <FileText className="h-5 w-5" />
+                                  <span className="font-medium">{resumeFile.name}</span>
+                                  <Check className="h-4 w-4 text-green-500" />
+                                </div>
+                              ) : (
+                                <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                                  <Upload className="h-8 w-8" />
+                                  <span>Click to upload your resume</span>
+                                  <span className="text-xs">PDF, DOC, DOCX, TXT, RTF (Max 10MB)</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </FormControl>
+                        <FormDescription>
+                          Upload your resume to apply for this position
+                        </FormDescription>
+                      </FormItem>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <FormField
