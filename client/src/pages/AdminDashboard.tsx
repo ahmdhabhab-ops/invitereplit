@@ -1166,39 +1166,49 @@ export default function AdminDashboard() {
                 <CardDescription>Manage the 6 partner benefits displayed on the page</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {(settings.eventPlannersBenefits || [
-                  { title: "", description: "" },
-                  { title: "", description: "" },
-                  { title: "", description: "" },
-                  { title: "", description: "" },
-                  { title: "", description: "" },
-                  { title: "", description: "" },
-                ]).map((benefit, index) => (
-                  <div key={index} className="space-y-2 border-b pb-4 last:border-b-0">
-                    <Label className="font-semibold">Benefit {index + 1}</Label>
-                    <Input
-                      value={benefit.title}
-                      onChange={(e) => {
-                        const newBenefits = [...(settings.eventPlannersBenefits || [])];
-                        newBenefits[index] = { ...newBenefits[index], title: e.target.value };
-                        setSettings({ ...settings, eventPlannersBenefits: newBenefits });
-                      }}
-                      placeholder="Benefit title"
-                      data-testid={`input-benefit-title-${index}`}
-                    />
-                    <Textarea
-                      value={benefit.description}
-                      onChange={(e) => {
-                        const newBenefits = [...(settings.eventPlannersBenefits || [])];
-                        newBenefits[index] = { ...newBenefits[index], description: e.target.value };
-                        setSettings({ ...settings, eventPlannersBenefits: newBenefits });
-                      }}
-                      placeholder="Benefit description"
-                      className="min-h-[60px]"
-                      data-testid={`input-benefit-description-${index}`}
-                    />
-                  </div>
-                ))}
+                {(() => {
+                  const defaultBenefits = [
+                    { title: "", description: "" },
+                    { title: "", description: "" },
+                    { title: "", description: "" },
+                    { title: "", description: "" },
+                    { title: "", description: "" },
+                    { title: "", description: "" },
+                  ];
+                  const benefits = settings.eventPlannersBenefits && settings.eventPlannersBenefits.length >= 6 
+                    ? settings.eventPlannersBenefits 
+                    : defaultBenefits;
+                  return benefits.map((benefit, index) => (
+                    <div key={index} className="space-y-2 border-b pb-4 last:border-b-0">
+                      <Label className="font-semibold">Benefit {index + 1}</Label>
+                      <Input
+                        value={benefit.title || ""}
+                        onChange={(e) => {
+                          const currentBenefits = settings.eventPlannersBenefits && settings.eventPlannersBenefits.length >= 6
+                            ? [...settings.eventPlannersBenefits]
+                            : [...defaultBenefits];
+                          currentBenefits[index] = { ...currentBenefits[index], title: e.target.value };
+                          setSettings({ ...settings, eventPlannersBenefits: currentBenefits });
+                        }}
+                        placeholder="Benefit title"
+                        data-testid={`input-benefit-title-${index}`}
+                      />
+                      <Textarea
+                        value={benefit.description || ""}
+                        onChange={(e) => {
+                          const currentBenefits = settings.eventPlannersBenefits && settings.eventPlannersBenefits.length >= 6
+                            ? [...settings.eventPlannersBenefits]
+                            : [...defaultBenefits];
+                          currentBenefits[index] = { ...currentBenefits[index], description: e.target.value };
+                          setSettings({ ...settings, eventPlannersBenefits: currentBenefits });
+                        }}
+                        placeholder="Benefit description"
+                        className="min-h-[60px]"
+                        data-testid={`input-benefit-description-${index}`}
+                      />
+                    </div>
+                  ));
+                })()}
               </CardContent>
             </Card>
 

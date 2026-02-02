@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import type { SiteSettings } from "@shared/schema";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -63,64 +64,55 @@ const eventTypeOptions = [
   { id: "other", label: "Other Events" },
 ];
 
-const partnerBenefits = [
-  {
-    icon: Percent,
-    title: "Exclusive Discounts",
-    description: "Up to 40% off on all invitation packages for your clients",
-  },
-  {
-    icon: Headphones,
-    title: "Priority Support",
-    description: "Dedicated account manager and 24/7 priority customer support",
-  },
-  {
-    icon: Zap,
-    title: "Fast Turnaround",
-    description: "Rush delivery options with guaranteed 24-48 hour turnaround",
-  },
-  {
-    icon: Users,
-    title: "White Label Options",
-    description: "Co-branded invitations with your company logo and branding",
-  },
-  {
-    icon: Star,
-    title: "Premium Features",
-    description: "Access to exclusive templates and design elements",
-  },
-  {
-    icon: Award,
-    title: "Partner Recognition",
-    description: "Featured in our partner directory and referral program",
-  },
-];
-
-const partnerTiers = [
-  {
-    name: "Silver Partner",
-    events: "1-10 events/year",
-    discount: "15%",
-    features: ["10% discount on all packages", "Standard support", "Partner badge"],
-  },
-  {
-    name: "Gold Partner",
-    events: "11-50 events/year",
-    discount: "25%",
-    features: ["25% discount on all packages", "Priority support", "White label option", "Custom templates"],
-    popular: true,
-  },
-  {
-    name: "Platinum Partner",
-    events: "50+ events/year",
-    discount: "40%",
-    features: ["40% discount on all packages", "Dedicated account manager", "Free rush delivery", "Co-marketing opportunities", "API access"],
-  },
-];
+const benefitIcons = [Percent, Headphones, Zap, Users, Star, Award];
 
 export default function EventPlanners() {
   const { toast } = useToast();
   const [submitted, setSubmitted] = useState(false);
+
+  const { data: settings } = useQuery<SiteSettings>({
+    queryKey: ["/api/settings"],
+  });
+
+  // Dynamic content from settings
+  const heroTitle = settings?.eventPlannersHeroTitle || "Partner With Einvite";
+  const heroSubtitle = settings?.eventPlannersHeroSubtitle || "Join our exclusive partner program and offer your clients stunning digital invitations at special rates. Grow your business while providing premium service.";
+  const heroBadge = settings?.eventPlannersBadge || "For Event Professionals";
+  const heroFeatures = settings?.eventPlannersHeroFeatures || ["Up to 40% Discount", "Priority Support", "White Label Options"];
+  
+  const partnerBenefits = (settings?.eventPlannersBenefits || [
+    { title: "Exclusive Discounts", description: "Up to 40% off on all invitation packages for your clients" },
+    { title: "Priority Support", description: "Dedicated account manager and 24/7 priority customer support" },
+    { title: "Fast Turnaround", description: "Rush delivery options with guaranteed 24-48 hour turnaround" },
+    { title: "White Label Options", description: "Co-branded invitations with your company logo and branding" },
+    { title: "Premium Features", description: "Access to exclusive templates and design elements" },
+    { title: "Partner Recognition", description: "Featured in our partner directory and referral program" },
+  ]).map((benefit, index) => ({
+    ...benefit,
+    icon: benefitIcons[index] || Star,
+  }));
+
+  const partnerTiers = [
+    {
+      name: settings?.eventPlannersSilverName || "Silver Partner",
+      events: settings?.eventPlannersSilverEvents || "1-10 events/year",
+      discount: settings?.eventPlannersSilverDiscount || "15%",
+      features: settings?.eventPlannersSilverFeatures || ["10% discount on all packages", "Standard support", "Partner badge"],
+    },
+    {
+      name: settings?.eventPlannersGoldName || "Gold Partner",
+      events: settings?.eventPlannersGoldEvents || "11-50 events/year",
+      discount: settings?.eventPlannersGoldDiscount || "25%",
+      features: settings?.eventPlannersGoldFeatures || ["25% discount on all packages", "Priority support", "White label option", "Custom templates"],
+      popular: true,
+    },
+    {
+      name: settings?.eventPlannersPlatinumName || "Platinum Partner",
+      events: settings?.eventPlannersPlatinumEvents || "50+ events/year",
+      discount: settings?.eventPlannersPlatinumDiscount || "40%",
+      features: settings?.eventPlannersPlatinumFeatures || ["40% discount on all packages", "Dedicated account manager", "Free rush delivery", "Co-marketing opportunities", "API access"],
+    },
+  ];
 
   const form = useForm<PartnershipFormData>({
     resolver: zodResolver(partnershipFormSchema),
@@ -180,28 +172,29 @@ export default function EventPlanners() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full mb-6">
             <Building2 className="h-4 w-4" />
-            <span className="text-sm font-medium">For Event Professionals</span>
+            <span className="text-sm font-medium">{heroBadge}</span>
           </div>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-            Partner With <span className="text-primary">Einvite</span>
+            {heroTitle.includes("Einvite") ? (
+              <>
+                {heroTitle.split("Einvite")[0]}
+                <span className="text-primary">Einvite</span>
+                {heroTitle.split("Einvite")[1]}
+              </>
+            ) : (
+              heroTitle
+            )}
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
-            Join our exclusive partner program and offer your clients stunning digital invitations 
-            at special rates. Grow your business while providing premium service.
+            {heroSubtitle}
           </p>
-          <div className="flex items-center justify-center gap-8 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-primary" />
-              <span>Up to 40% Discount</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-primary" />
-              <span>Priority Support</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-primary" />
-              <span>White Label Options</span>
-            </div>
+          <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8 text-sm text-muted-foreground">
+            {heroFeatures.map((feature, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <Check className="h-5 w-5 text-primary" />
+                <span>{feature}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
