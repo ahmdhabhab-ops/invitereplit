@@ -32,17 +32,16 @@ export function PromoVideo() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="relative rounded-xl overflow-hidden shadow-2xl bg-card border border-border"
         >
-          <div className="aspect-video">
+          <div className="flex justify-center py-8">
             <iframe
-              src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Fshare%2Fv%2F17pNvSdqMR%2F&show_text=false&t=0"
-              width="100%"
-              height="100%"
+              src="https://www.facebook.com/plugins/video.php?height=476&href=https%3A%2F%2Fwww.facebook.com%2F61562775291878%2Fvideos%2F1248730203593712%2F&show_text=false&width=267&t=0"
+              width="267"
+              height="476"
               style={{ border: "none", overflow: "hidden" }}
               scrolling="no"
               frameBorder="0"
               allowFullScreen={true}
               allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-              className="absolute inset-0 w-full h-full"
               data-testid="promo-video-iframe"
             />
           </div>
