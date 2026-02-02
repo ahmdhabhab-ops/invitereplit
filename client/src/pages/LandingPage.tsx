@@ -5,6 +5,7 @@ import { PhoneGallery } from "@/components/PhoneGallery";
 import { HowItWorks } from "@/components/HowItWorks";
 import { FeaturedEvents } from "@/components/FeaturedEvents";
 import { PricingSection } from "@/components/PricingSection";
+import { WhyChooseUs } from "@/components/WhyChooseUs";
 import { OrderForm } from "@/components/OrderForm";
 import { Footer } from "@/components/Footer";
 
@@ -28,6 +29,7 @@ export default function LandingPage() {
         <HowItWorks />
         <FeaturedEvents />
         <PricingSection onSelectPackage={handleSelectPackage} />
+        <WhyChooseUs />
       </main>
       <Footer />
       
