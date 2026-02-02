@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Play } from "lucide-react";
+import promoVideo from "@assets/AQOWSCYZqd_AOpGXrLIJf90CHlkdcoONDBN_-tAPQ5MZxWPh8SgEdzkW1fk3mH_1770007142069.mp4";
 
 export function PromoVideo() {
   return (
@@ -33,18 +34,15 @@ export function PromoVideo() {
           className="relative rounded-xl overflow-hidden shadow-2xl bg-card border border-border"
         >
           <div className="flex justify-center py-8">
-            <iframe
-              src="https://www.facebook.com/plugins/video.php?height=314&href=https%3A%2F%2Fwww.facebook.com%2F61562775291878%2Fvideos%2F1248730203593712%2F&show_text=false&width=560&t=0"
-              width="560"
-              height="314"
-              style={{ border: "none", overflow: "hidden" }}
-              scrolling="no"
-              frameBorder="0"
-              allowFullScreen={true}
-              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-              className="rounded-lg max-w-full"
-              data-testid="promo-video-iframe"
-            />
+            <video
+              src={promoVideo}
+              controls
+              className="rounded-lg max-w-full w-full max-h-[500px]"
+              data-testid="promo-video"
+              playsInline
+            >
+              Your browser does not support the video tag.
+            </video>
           </div>
         </motion.div>
 
