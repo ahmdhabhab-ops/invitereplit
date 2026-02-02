@@ -34,14 +34,15 @@ export function PromoVideo() {
         >
           <div className="flex justify-center py-8">
             <iframe
-              src="https://www.facebook.com/plugins/video.php?height=476&href=https%3A%2F%2Fwww.facebook.com%2F61562775291878%2Fvideos%2F1248730203593712%2F&show_text=false&width=267&t=0"
-              width="267"
-              height="476"
+              src="https://www.facebook.com/plugins/video.php?height=720&href=https%3A%2F%2Fwww.facebook.com%2F61562775291878%2Fvideos%2F1248730203593712%2F&show_text=false&width=405&t=0"
+              width="405"
+              height="720"
               style={{ border: "none", overflow: "hidden" }}
               scrolling="no"
               frameBorder="0"
               allowFullScreen={true}
               allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+              className="rounded-lg max-w-full"
               data-testid="promo-video-iframe"
             />
           </div>
