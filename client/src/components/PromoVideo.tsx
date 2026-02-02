@@ -15,7 +15,7 @@ export function PromoVideo() {
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
             <Play className="w-4 h-4" />
-            Watch Our Story
+            Watch Our Video
           </div>
           <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-4">
             See Our Wedding Invitations in Action
