@@ -49,8 +49,18 @@ import {
   Upload,
   FileText,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Share2,
+  Link,
+  Mail
 } from "lucide-react";
+import { SiWhatsapp } from "react-icons/si";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { JobOpening } from "@shared/schema";
 import logoImage from "@assets/Logo_1769975575984.png";
 
@@ -137,6 +147,33 @@ export default function Careers() {
       }
       return newSet;
     });
+  };
+
+  const getJobShareUrl = (jobId: string) => {
+    return `${window.location.origin}/careers?job=${jobId}`;
+  };
+
+  const handleCopyLink = async (job: JobOpening) => {
+    const url = getJobShareUrl(job.id);
+    try {
+      await navigator.clipboard.writeText(url);
+      toast({ title: "Link copied to clipboard!" });
+    } catch (error) {
+      toast({ title: "Failed to copy link", variant: "destructive" });
+    }
+  };
+
+  const handleShareWhatsApp = (job: JobOpening) => {
+    const url = getJobShareUrl(job.id);
+    const text = `Check out this job opportunity at Einvite: ${job.title} - ${job.department}\n\n${url}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  };
+
+  const handleShareEmail = (job: JobOpening) => {
+    const url = getJobShareUrl(job.id);
+    const subject = `Job Opportunity: ${job.title} at Einvite`;
+    const body = `Hi,\n\nI found this interesting job opportunity and thought you might be interested:\n\nPosition: ${job.title}\nDepartment: ${job.department}\nLocation: ${job.location}\n\nApply here: ${url}\n\nBest regards`;
+    window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -394,14 +431,49 @@ export default function Careers() {
                             </div>
                           )}
                         </div>
-                        <Button 
-                          onClick={() => handleApply(job)}
-                          className="shrink-0"
-                          data-testid={`button-apply-${job.id}`}
-                        >
-                          Apply Now
-                          <ArrowRight className="h-4 w-4 ml-2" />
-                        </Button>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button 
+                                variant="outline" 
+                                size="icon"
+                                data-testid={`button-share-${job.id}`}
+                              >
+                                <Share2 className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem 
+                                onClick={() => handleCopyLink(job)}
+                                data-testid={`share-copy-${job.id}`}
+                              >
+                                <Link className="h-4 w-4 mr-2" />
+                                Copy Link
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                onClick={() => handleShareWhatsApp(job)}
+                                data-testid={`share-whatsapp-${job.id}`}
+                              >
+                                <SiWhatsapp className="h-4 w-4 mr-2" />
+                                Share on WhatsApp
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                onClick={() => handleShareEmail(job)}
+                                data-testid={`share-email-${job.id}`}
+                              >
+                                <Mail className="h-4 w-4 mr-2" />
+                                Share via Email
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                          <Button 
+                            onClick={() => handleApply(job)}
+                            data-testid={`button-apply-${job.id}`}
+                          >
+                            Apply Now
+                            <ArrowRight className="h-4 w-4 ml-2" />
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
