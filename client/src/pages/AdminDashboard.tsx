@@ -504,6 +504,10 @@ export default function AdminDashboard() {
               <Share2 className="h-4 w-4" />
               Social
             </TabsTrigger>
+            <TabsTrigger value="event-planners" className="flex items-center gap-2" data-testid="tab-event-planners">
+              <Handshake className="h-4 w-4" />
+              Event Planners Page
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="general" className="space-y-6">
@@ -1096,6 +1100,265 @@ export default function AdminDashboard() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Event Planners Page Content */}
+          <TabsContent value="event-planners" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Hero Section</CardTitle>
+                <CardDescription>Customize the hero section of the Event Planners page</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="eventPlannersBadge">Badge Text</Label>
+                  <Input
+                    id="eventPlannersBadge"
+                    value={settings.eventPlannersBadge || ""}
+                    onChange={(e) => setSettings({ ...settings, eventPlannersBadge: e.target.value })}
+                    placeholder="For Event Professionals"
+                    data-testid="input-event-planners-badge"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="eventPlannersHeroTitle">Hero Title</Label>
+                  <Input
+                    id="eventPlannersHeroTitle"
+                    value={settings.eventPlannersHeroTitle || ""}
+                    onChange={(e) => setSettings({ ...settings, eventPlannersHeroTitle: e.target.value })}
+                    placeholder="Partner With Einvite"
+                    data-testid="input-event-planners-hero-title"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="eventPlannersHeroSubtitle">Hero Subtitle</Label>
+                  <Textarea
+                    id="eventPlannersHeroSubtitle"
+                    value={settings.eventPlannersHeroSubtitle || ""}
+                    onChange={(e) => setSettings({ ...settings, eventPlannersHeroSubtitle: e.target.value })}
+                    placeholder="Join our exclusive partner program..."
+                    className="min-h-[80px]"
+                    data-testid="input-event-planners-hero-subtitle"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Hero Features (3 bullet points)</Label>
+                  {(settings.eventPlannersHeroFeatures || ["", "", ""]).map((feature, index) => (
+                    <Input
+                      key={index}
+                      value={feature}
+                      onChange={(e) => {
+                        const newFeatures = [...(settings.eventPlannersHeroFeatures || ["", "", ""])];
+                        newFeatures[index] = e.target.value;
+                        setSettings({ ...settings, eventPlannersHeroFeatures: newFeatures });
+                      }}
+                      placeholder={`Feature ${index + 1}`}
+                      data-testid={`input-event-planners-hero-feature-${index}`}
+                    />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Partner Benefits</CardTitle>
+                <CardDescription>Manage the 6 partner benefits displayed on the page</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {(settings.eventPlannersBenefits || [
+                  { title: "", description: "" },
+                  { title: "", description: "" },
+                  { title: "", description: "" },
+                  { title: "", description: "" },
+                  { title: "", description: "" },
+                  { title: "", description: "" },
+                ]).map((benefit, index) => (
+                  <div key={index} className="space-y-2 border-b pb-4 last:border-b-0">
+                    <Label className="font-semibold">Benefit {index + 1}</Label>
+                    <Input
+                      value={benefit.title}
+                      onChange={(e) => {
+                        const newBenefits = [...(settings.eventPlannersBenefits || [])];
+                        newBenefits[index] = { ...newBenefits[index], title: e.target.value };
+                        setSettings({ ...settings, eventPlannersBenefits: newBenefits });
+                      }}
+                      placeholder="Benefit title"
+                      data-testid={`input-benefit-title-${index}`}
+                    />
+                    <Textarea
+                      value={benefit.description}
+                      onChange={(e) => {
+                        const newBenefits = [...(settings.eventPlannersBenefits || [])];
+                        newBenefits[index] = { ...newBenefits[index], description: e.target.value };
+                        setSettings({ ...settings, eventPlannersBenefits: newBenefits });
+                      }}
+                      placeholder="Benefit description"
+                      className="min-h-[60px]"
+                      data-testid={`input-benefit-description-${index}`}
+                    />
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Silver Partner Tier</CardTitle>
+                <CardDescription>Configure the Silver partner tier details</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label>Tier Name</Label>
+                    <Input
+                      value={settings.eventPlannersSilverName || ""}
+                      onChange={(e) => setSettings({ ...settings, eventPlannersSilverName: e.target.value })}
+                      placeholder="Silver Partner"
+                      data-testid="input-silver-name"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Events Range</Label>
+                    <Input
+                      value={settings.eventPlannersSilverEvents || ""}
+                      onChange={(e) => setSettings({ ...settings, eventPlannersSilverEvents: e.target.value })}
+                      placeholder="1-10 events/year"
+                      data-testid="input-silver-events"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Discount</Label>
+                    <Input
+                      value={settings.eventPlannersSilverDiscount || ""}
+                      onChange={(e) => setSettings({ ...settings, eventPlannersSilverDiscount: e.target.value })}
+                      placeholder="15%"
+                      data-testid="input-silver-discount"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Features (one per line)</Label>
+                  <Textarea
+                    value={(settings.eventPlannersSilverFeatures || []).join("\n")}
+                    onChange={(e) => setSettings({ ...settings, eventPlannersSilverFeatures: e.target.value.split("\n").filter(f => f.trim()) })}
+                    placeholder="10% discount on all packages&#10;Standard support&#10;Partner badge"
+                    className="min-h-[100px]"
+                    data-testid="input-silver-features"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Gold Partner Tier</CardTitle>
+                <CardDescription>Configure the Gold partner tier details (Most Popular)</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label>Tier Name</Label>
+                    <Input
+                      value={settings.eventPlannersGoldName || ""}
+                      onChange={(e) => setSettings({ ...settings, eventPlannersGoldName: e.target.value })}
+                      placeholder="Gold Partner"
+                      data-testid="input-gold-name"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Events Range</Label>
+                    <Input
+                      value={settings.eventPlannersGoldEvents || ""}
+                      onChange={(e) => setSettings({ ...settings, eventPlannersGoldEvents: e.target.value })}
+                      placeholder="11-50 events/year"
+                      data-testid="input-gold-events"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Discount</Label>
+                    <Input
+                      value={settings.eventPlannersGoldDiscount || ""}
+                      onChange={(e) => setSettings({ ...settings, eventPlannersGoldDiscount: e.target.value })}
+                      placeholder="25%"
+                      data-testid="input-gold-discount"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Features (one per line)</Label>
+                  <Textarea
+                    value={(settings.eventPlannersGoldFeatures || []).join("\n")}
+                    onChange={(e) => setSettings({ ...settings, eventPlannersGoldFeatures: e.target.value.split("\n").filter(f => f.trim()) })}
+                    placeholder="25% discount on all packages&#10;Priority support&#10;White label option"
+                    className="min-h-[100px]"
+                    data-testid="input-gold-features"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Platinum Partner Tier</CardTitle>
+                <CardDescription>Configure the Platinum partner tier details</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label>Tier Name</Label>
+                    <Input
+                      value={settings.eventPlannersPlatinumName || ""}
+                      onChange={(e) => setSettings({ ...settings, eventPlannersPlatinumName: e.target.value })}
+                      placeholder="Platinum Partner"
+                      data-testid="input-platinum-name"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Events Range</Label>
+                    <Input
+                      value={settings.eventPlannersPlatinumEvents || ""}
+                      onChange={(e) => setSettings({ ...settings, eventPlannersPlatinumEvents: e.target.value })}
+                      placeholder="50+ events/year"
+                      data-testid="input-platinum-events"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Discount</Label>
+                    <Input
+                      value={settings.eventPlannersPlatinumDiscount || ""}
+                      onChange={(e) => setSettings({ ...settings, eventPlannersPlatinumDiscount: e.target.value })}
+                      placeholder="40%"
+                      data-testid="input-platinum-discount"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Features (one per line)</Label>
+                  <Textarea
+                    value={(settings.eventPlannersPlatinumFeatures || []).join("\n")}
+                    onChange={(e) => setSettings({ ...settings, eventPlannersPlatinumFeatures: e.target.value.split("\n").filter(f => f.trim()) })}
+                    placeholder="40% discount on all packages&#10;Dedicated account manager&#10;Free rush delivery"
+                    className="min-h-[100px]"
+                    data-testid="input-platinum-features"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Button
+              onClick={() => updateSettingsMutation.mutate(settings)}
+              disabled={updateSettingsMutation.isPending}
+              className="w-full"
+              data-testid="button-save-event-planners"
+            >
+              {updateSettingsMutation.isPending ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4 mr-2" />
+              )}
+              Save Event Planners Settings
+            </Button>
           </TabsContent>
         </Tabs>
       </main>
