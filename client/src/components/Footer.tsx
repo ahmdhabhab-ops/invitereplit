@@ -1,4 +1,5 @@
-import { Heart, Mail, Phone, MapPin, Settings } from "lucide-react";
+import { Heart, Mail, Phone, MapPin } from "lucide-react";
+import { Link } from "wouter";
 import { SiInstagram, SiFacebook, SiWhatsapp, SiTiktok, SiLinkedin } from "react-icons/si";
 import { useQuery } from "@tanstack/react-query";
 import logoImage from "@assets/Logo_1769975575984.png";
@@ -125,6 +126,15 @@ export function Footer() {
                   Pricing
                 </button>
               </li>
+              <li>
+                <Link
+                  href="/about"
+                  className="text-muted-foreground hover:text-foreground transition-colors text-sm"
+                  data-testid="link-footer-about"
+                >
+                  About Us
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -176,19 +186,9 @@ export function Footer() {
           <p className="text-sm text-muted-foreground">
             {new Date().getFullYear()} einvite.me. All rights reserved.
           </p>
-          <div className="flex items-center gap-4">
-            <a 
-              href="/admin" 
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
-              data-testid="link-admin"
-            >
-              <Settings className="w-3 h-3" />
-              Admin
-            </a>
-            <p className="text-sm text-muted-foreground flex items-center gap-1">
-              Made with <Heart className="w-4 h-4 text-primary fill-primary" /> in Lebanon
-            </p>
-          </div>
+          <p className="text-sm text-muted-foreground flex items-center gap-1">
+            Made with <Heart className="w-4 h-4 text-primary fill-primary" /> in Lebanon
+          </p>
         </div>
       </div>
     </footer>

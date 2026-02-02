@@ -7,6 +7,7 @@ import LandingPage from "@/pages/LandingPage";
 import AdminDashboard from "@/pages/AdminDashboard";
 import EventPlanners from "@/pages/EventPlanners";
 import Careers from "@/pages/Careers";
+import AboutUs from "@/pages/AboutUs";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -16,6 +17,7 @@ function Router() {
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/event-planners" component={EventPlanners} />
       <Route path="/careers" component={Careers} />
+      <Route path="/about" component={AboutUs} />
       <Route component={NotFound} />
     </Switch>
   );
