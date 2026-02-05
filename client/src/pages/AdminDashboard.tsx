@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -24,6 +23,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarGroupContent,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+  SidebarHeader,
+  SidebarFooter,
+} from "@/components/ui/sidebar";
 import { 
   ArrowLeft, 
   Save, 
@@ -47,12 +60,24 @@ import {
   Plus,
   Pencil,
   Trash2,
-  Eye
+  Eye,
+  Receipt,
+  LayoutDashboard,
+  MapPin,
+  Music,
+  MessageSquare,
+  Calendar,
+  User,
+  Clock,
+  ChevronRight,
+  LogOut,
+  Home,
+  Image
 } from "lucide-react";
 import { SiTiktok } from "react-icons/si";
 import type { SiteSettings, Order, JobOpening, JobApplication, PartnershipRequest } from "@shared/schema";
 import { InvoiceManager } from "@/components/InvoiceManager";
-import { Receipt } from "lucide-react";
+import logoPath from "@assets/Logo_1769975575984.png";
 
 type JobFormData = {
   title: string;
@@ -80,11 +105,43 @@ const defaultJobForm: JobFormData = {
   isActive: "true",
 };
 
+type ActiveSection = 
+  | "dashboard" 
+  | "orders" 
+  | "invoices" 
+  | "jobs" 
+  | "candidates" 
+  | "partnerships" 
+  | "general" 
+  | "pricing" 
+  | "contact" 
+  | "social" 
+  | "event-planners";
+
+const menuItems = [
+  { id: "dashboard" as ActiveSection, label: "Dashboard", icon: LayoutDashboard },
+  { id: "orders" as ActiveSection, label: "Orders", icon: FileText },
+  { id: "invoices" as ActiveSection, label: "Invoices", icon: Receipt },
+  { id: "jobs" as ActiveSection, label: "Job Openings", icon: Briefcase },
+  { id: "candidates" as ActiveSection, label: "Candidates", icon: Users },
+  { id: "partnerships" as ActiveSection, label: "Partnerships", icon: Handshake },
+];
+
+const settingsItems = [
+  { id: "general" as ActiveSection, label: "General", icon: Settings },
+  { id: "pricing" as ActiveSection, label: "Pricing", icon: DollarSign },
+  { id: "contact" as ActiveSection, label: "Contact", icon: Mail },
+  { id: "social" as ActiveSection, label: "Social Media", icon: Share2 },
+  { id: "event-planners" as ActiveSection, label: "Event Planners Page", icon: Handshake },
+];
+
 export default function AdminDashboard() {
   const { toast } = useToast();
   const [settings, setSettings] = useState<Partial<SiteSettings>>({});
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
+  const [activeSection, setActiveSection] = useState<ActiveSection>("dashboard");
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   
   // Job management state
   const [showJobDialog, setShowJobDialog] = useState(false);
@@ -358,7 +415,10 @@ export default function AdminDashboard() {
   if (sessionLoading || settingsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background" data-testid="admin-loading">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="text-center space-y-4">
+          <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" />
+          <p className="text-muted-foreground">Loading admin portal...</p>
+        </div>
       </div>
     );
   }
@@ -366,11 +426,14 @@ export default function AdminDashboard() {
   // Show login form if not authenticated
   if (!sessionData?.isAdmin) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4" data-testid="admin-login">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Admin Login</CardTitle>
-            <CardDescription>Enter your credentials to access the admin dashboard</CardDescription>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-primary/10 p-4" data-testid="admin-login">
+        <Card className="w-full max-w-md shadow-xl border-0">
+          <CardHeader className="text-center pb-2">
+            <div className="flex justify-center mb-4">
+              <img src={logoPath} alt="Einvite" className="h-12" />
+            </div>
+            <CardTitle className="text-2xl">Admin Portal</CardTitle>
+            <CardDescription>Sign in to manage your Einvite dashboard</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
@@ -381,8 +444,9 @@ export default function AdminDashboard() {
                   type="email"
                   value={loginEmail}
                   onChange={(e) => setLoginEmail(e.target.value)}
-                  placeholder="admin@example.com"
+                  placeholder="admin@einvite.me"
                   required
+                  className="h-11"
                   data-testid="input-login-email"
                 />
               </div>
@@ -395,12 +459,13 @@ export default function AdminDashboard() {
                   onChange={(e) => setLoginPassword(e.target.value)}
                   placeholder="Enter your password"
                   required
+                  className="h-11"
                   data-testid="input-login-password"
                 />
               </div>
               <Button 
                 type="submit" 
-                className="w-full" 
+                className="w-full h-11" 
                 disabled={loginMutation.isPending}
                 data-testid="button-login"
               >
@@ -409,7 +474,7 @@ export default function AdminDashboard() {
                 ) : (
                   <LogIn className="h-4 w-4 mr-2" />
                 )}
-                Login
+                Sign In
               </Button>
               <Button 
                 type="button"
@@ -428,95 +493,621 @@ export default function AdminDashboard() {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-background" data-testid="admin-dashboard">
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between gap-4 flex-wrap">
-          <div className="flex items-center gap-3">
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => window.location.href = "/"}
-              data-testid="button-back-home"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
+  const sidebarStyle = {
+    "--sidebar-width": "280px",
+    "--sidebar-width-icon": "60px",
+  };
+
+  // Dashboard overview stats
+  const stats = {
+    totalOrders: orders?.length || 0,
+    pendingOrders: orders?.filter(o => o.paymentStatus === "pending").length || 0,
+    totalJobs: jobs?.length || 0,
+    activeJobs: jobs?.filter(j => j.isActive === "true").length || 0,
+    totalApplications: applications?.length || 0,
+    newApplications: applications?.filter(a => a.status === "new").length || 0,
+    totalPartnerships: partnershipRequests?.length || 0,
+    pendingPartnerships: partnershipRequests?.filter(p => p.status === "pending").length || 0,
+  };
+
+  const renderContent = () => {
+    switch (activeSection) {
+      case "dashboard":
+        return (
+          <div className="space-y-6">
             <div>
-              <h1 className="text-xl font-semibold">Admin Dashboard</h1>
-              <p className="text-sm text-muted-foreground">{sessionData.email}</p>
+              <h2 className="text-2xl font-bold tracking-tight">Dashboard Overview</h2>
+              <p className="text-muted-foreground">Welcome back! Here's what's happening with your business.</p>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button 
-              onClick={handleSave} 
-              disabled={updateSettingsMutation.isPending}
-              data-testid="button-save-settings"
-            >
-              {updateSettingsMutation.isPending ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Save className="h-4 w-4 mr-2" />
-              )}
-              Save Changes
-            </Button>
-            <Button 
-              variant="ghost" 
-              onClick={handleLogout}
-              disabled={logoutMutation.isPending}
-              data-testid="button-logout"
-            >
-              Logout
-            </Button>
-          </div>
-        </div>
-      </header>
+            
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <Card className="hover-elevate cursor-pointer" onClick={() => setActiveSection("orders")}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.totalOrders}</div>
+                  <p className="text-xs text-muted-foreground">{stats.pendingOrders} pending payment</p>
+                </CardContent>
+              </Card>
+              
+              <Card className="hover-elevate cursor-pointer" onClick={() => setActiveSection("jobs")}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Job Openings</CardTitle>
+                  <Briefcase className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.totalJobs}</div>
+                  <p className="text-xs text-muted-foreground">{stats.activeJobs} active positions</p>
+                </CardContent>
+              </Card>
+              
+              <Card className="hover-elevate cursor-pointer" onClick={() => setActiveSection("candidates")}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Applications</CardTitle>
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.totalApplications}</div>
+                  <p className="text-xs text-muted-foreground">{stats.newApplications} new applications</p>
+                </CardContent>
+              </Card>
+              
+              <Card className="hover-elevate cursor-pointer" onClick={() => setActiveSection("partnerships")}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Partnership Requests</CardTitle>
+                  <Handshake className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.totalPartnerships}</div>
+                  <p className="text-xs text-muted-foreground">{stats.pendingPartnerships} pending review</p>
+                </CardContent>
+              </Card>
+            </div>
 
-      <main className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="orders" className="space-y-6">
-          <TabsList className="flex flex-wrap gap-2 h-auto p-2">
-            <TabsTrigger value="orders" className="flex items-center gap-2" data-testid="tab-orders">
-              <FileText className="h-4 w-4" />
-              Orders
-            </TabsTrigger>
-            <TabsTrigger value="invoices" className="flex items-center gap-2" data-testid="tab-invoices">
-              <Receipt className="h-4 w-4" />
-              Invoices
-            </TabsTrigger>
-            <TabsTrigger value="jobs" className="flex items-center gap-2" data-testid="tab-jobs">
-              <Briefcase className="h-4 w-4" />
-              Jobs
-            </TabsTrigger>
-            <TabsTrigger value="candidates" className="flex items-center gap-2" data-testid="tab-candidates">
-              <Users className="h-4 w-4" />
-              Candidates
-            </TabsTrigger>
-            <TabsTrigger value="partnerships" className="flex items-center gap-2" data-testid="tab-partnerships">
-              <Handshake className="h-4 w-4" />
-              Partnerships
-            </TabsTrigger>
-            <TabsTrigger value="general" className="flex items-center gap-2" data-testid="tab-general">
-              <Settings className="h-4 w-4" />
-              General
-            </TabsTrigger>
-            <TabsTrigger value="pricing" className="flex items-center gap-2" data-testid="tab-pricing">
-              <DollarSign className="h-4 w-4" />
-              Pricing
-            </TabsTrigger>
-            <TabsTrigger value="contact" className="flex items-center gap-2" data-testid="tab-contact">
-              <Mail className="h-4 w-4" />
-              Contact
-            </TabsTrigger>
-            <TabsTrigger value="social" className="flex items-center gap-2" data-testid="tab-social">
-              <Share2 className="h-4 w-4" />
-              Social
-            </TabsTrigger>
-            <TabsTrigger value="event-planners" className="flex items-center gap-2" data-testid="tab-event-planners">
-              <Handshake className="h-4 w-4" />
-              Event Planners Page
-            </TabsTrigger>
-          </TabsList>
+            {/* Recent Orders */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Recent Orders</CardTitle>
+                    <CardDescription>Latest customer orders</CardDescription>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => setActiveSection("orders")}>
+                    View All
+                    <ChevronRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {ordersLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : orders && orders.length > 0 ? (
+                  <div className="space-y-3">
+                    {orders.slice(0, 5).map((order) => (
+                      <div key={order.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                            <User className="h-5 w-5 text-primary" />
+                          </div>
+                          <div>
+                            <p className="font-medium">{order.names}</p>
+                            <p className="text-sm text-muted-foreground">{order.eventType} - {order.packageType}</p>
+                          </div>
+                        </div>
+                        <Badge variant={order.paymentStatus === "completed" ? "default" : "secondary"}>
+                          {order.paymentStatus}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-muted-foreground py-8">No orders yet</p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        );
 
-          <TabsContent value="general" className="space-y-6">
+      case "orders":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight">Customer Orders</h2>
+              <p className="text-muted-foreground">View and manage all customer orders with complete details</p>
+            </div>
+            
+            {ordersLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : orders && orders.length > 0 ? (
+              <div className="space-y-4">
+                {orders.map((order) => (
+                  <Card key={order.id} className="overflow-hidden" data-testid={`order-${order.id}`}>
+                    <CardHeader 
+                      className="cursor-pointer hover-elevate"
+                      onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
+                    >
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                          <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <User className="h-6 w-6 text-primary" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <CardTitle className="text-lg">{order.names}</CardTitle>
+                              <Badge variant="outline" className="capitalize">{order.packageType}</Badge>
+                              <Badge variant="secondary" className="capitalize">{order.eventType}</Badge>
+                            </div>
+                            <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <Calendar className="h-3.5 w-3.5" />
+                                {order.eventDate}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Clock className="h-3.5 w-3.5" />
+                                {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : "N/A"}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Badge 
+                            variant={order.paymentStatus === "completed" ? "default" : "secondary"}
+                            className="px-3 py-1"
+                          >
+                            {order.paymentStatus}
+                          </Badge>
+                          {order.paymentMethod === "whatsapp" && (
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(`https://wa.me/${settings.whatsappNumber?.replace(/[^0-9]/g, "")}`, "_blank");
+                              }}
+                              data-testid={`button-whatsapp-${order.id}`}
+                            >
+                              <ExternalLink className="h-4 w-4 mr-1" />
+                              WhatsApp
+                            </Button>
+                          )}
+                          <ChevronRight className={`h-5 w-5 text-muted-foreground transition-transform ${expandedOrder === order.id ? "rotate-90" : ""}`} />
+                        </div>
+                      </div>
+                    </CardHeader>
+                    
+                    {expandedOrder === order.id && (
+                      <CardContent className="border-t bg-muted/20">
+                        <div className="grid gap-6 pt-4">
+                          {/* Contact Information */}
+                          <div>
+                            <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
+                              <User className="h-4 w-4" />
+                              Contact Information
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-background rounded-lg border">
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1">Name</p>
+                                <p className="font-medium">{order.contactName}</p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1">Email</p>
+                                <p className="font-medium">{order.contactEmail}</p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1">Phone</p>
+                                <p className="font-medium">{order.contactPhone}</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Event Locations */}
+                          {order.locations && Array.isArray(order.locations) && order.locations.length > 0 && (
+                            <div>
+                              <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
+                                <MapPin className="h-4 w-4" />
+                                Event Locations ({order.locations.length})
+                              </h4>
+                              <div className="grid gap-3">
+                                {order.locations.map((location: { name: string; address: string; mapLink?: string }, idx: number) => (
+                                  <div key={idx} className="p-4 bg-background rounded-lg border">
+                                    <div className="flex items-start justify-between gap-4">
+                                      <div>
+                                        <p className="font-semibold">{location.name}</p>
+                                        <p className="text-sm text-muted-foreground mt-1">{location.address}</p>
+                                      </div>
+                                      {location.mapLink && (
+                                        <Button 
+                                          variant="outline" 
+                                          size="sm"
+                                          onClick={() => window.open(location.mapLink, "_blank")}
+                                        >
+                                          <MapPin className="h-4 w-4 mr-1" />
+                                          Map
+                                        </Button>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Customizations */}
+                          <div>
+                            <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
+                              <Settings className="h-4 w-4" />
+                              Customizations
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-background rounded-lg border">
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                                  <Music className="h-3 w-3" />
+                                  Song Choice
+                                </p>
+                                <p className="font-medium">{order.songChoice || "Not specified"}</p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                                  <MessageSquare className="h-3 w-3" />
+                                  RSVP Preference
+                                </p>
+                                <p className="font-medium capitalize">{order.rsvpPreference || "Not specified"}</p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                                  <DollarSign className="h-3 w-3" />
+                                  Payment Method
+                                </p>
+                                <p className="font-medium capitalize">{order.paymentMethod}</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Additional Notes */}
+                          {order.additionalNotes && (
+                            <div>
+                              <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
+                                <MessageSquare className="h-4 w-4" />
+                                Additional Notes
+                              </h4>
+                              <div className="p-4 bg-background rounded-lg border">
+                                <p className="text-sm whitespace-pre-wrap">{order.additionalNotes}</p>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Media */}
+                          {order.mediaUrls && Array.isArray(order.mediaUrls) && order.mediaUrls.length > 0 && (
+                            <div>
+                              <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
+                                <Image className="h-4 w-4" />
+                                Uploaded Media ({order.mediaUrls.length} files)
+                              </h4>
+                              <div className="p-4 bg-background rounded-lg border">
+                                <div className="flex flex-wrap gap-2">
+                                  {order.mediaUrls.map((url, idx) => (
+                                    <Button key={idx} variant="outline" size="sm" onClick={() => window.open(url, "_blank")}>
+                                      File {idx + 1}
+                                      <ExternalLink className="h-3 w-3 ml-1" />
+                                    </Button>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    )}
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <FileText className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                  <p className="text-lg font-medium">No orders yet</p>
+                  <p className="text-muted-foreground">Orders will appear here when customers submit them</p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        );
+
+      case "invoices":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight">Invoices</h2>
+              <p className="text-muted-foreground">Create and manage invoices for your customers</p>
+            </div>
+            <InvoiceManager />
+          </div>
+        );
+
+      case "jobs":
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold tracking-tight">Job Openings</h2>
+                <p className="text-muted-foreground">Manage your job postings and career opportunities</p>
+              </div>
+              <Button onClick={openCreateJobDialog} data-testid="button-add-job">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Job
+              </Button>
+            </div>
+            
+            {jobsLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : jobs && jobs.length > 0 ? (
+              <div className="grid gap-4">
+                {jobs.map((job) => (
+                  <Card key={job.id} data-testid={`job-${job.id}`}>
+                    <CardHeader>
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                          <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <Briefcase className="h-6 w-6 text-primary" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <CardTitle className="text-lg">{job.title}</CardTitle>
+                              <Badge variant={job.isActive === "true" ? "default" : "secondary"}>
+                                {job.isActive === "true" ? "Active" : "Inactive"}
+                              </Badge>
+                            </div>
+                            <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+                              <span>{job.department}</span>
+                              <span>{job.location}</span>
+                              <span className="capitalize">{job.type}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => openEditJobDialog(job)}
+                            data-testid={`button-edit-job-${job.id}`}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => deleteJobMutation.mutate(job.id)}
+                            data-testid={`button-delete-job-${job.id}`}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardHeader>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Briefcase className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                  <p className="text-lg font-medium">No job openings</p>
+                  <p className="text-muted-foreground mb-4">Create your first job posting to start hiring</p>
+                  <Button onClick={openCreateJobDialog}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Job
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        );
+
+      case "candidates":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight">Job Applications</h2>
+              <p className="text-muted-foreground">Review and manage candidate applications</p>
+            </div>
+            
+            {applicationsLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : applications && applications.length > 0 ? (
+              <div className="grid gap-4">
+                {applications.map((app) => (
+                  <Card key={app.id} data-testid={`application-${app.id}`}>
+                    <CardHeader>
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                          <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <User className="h-6 w-6 text-primary" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <CardTitle className="text-lg">{app.fullName}</CardTitle>
+                              <Badge variant={
+                                app.status === "hired" ? "default" :
+                                app.status === "rejected" ? "destructive" :
+                                app.status === "interviewing" || app.status === "offered" ? "default" :
+                                "secondary"
+                              }>
+                                {app.status}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-primary font-medium mt-1">
+                              Applied for: {getJobTitle(app.jobId)}
+                            </p>
+                            <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+                              <span>{app.email}</span>
+                              <span>{app.phone}</span>
+                              <span>{app.yearsOfExperience ? `${app.yearsOfExperience} years exp` : ""}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Select
+                            value={app.status || "new"}
+                            onValueChange={(value) => updateApplicationStatusMutation.mutate({ id: app.id, status: value })}
+                          >
+                            <SelectTrigger className="w-[140px]" data-testid={`select-status-${app.id}`}>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="new">New</SelectItem>
+                              <SelectItem value="reviewed">Reviewed</SelectItem>
+                              <SelectItem value="interviewing">Interviewing</SelectItem>
+                              <SelectItem value="offered">Offered</SelectItem>
+                              <SelectItem value="hired">Hired</SelectItem>
+                              <SelectItem value="rejected">Rejected</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => setViewingApplication(app)}
+                            data-testid={`button-view-${app.id}`}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            View
+                          </Button>
+                          {app.resumeUrl && (
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => window.open(app.resumeUrl!, "_blank")}
+                              data-testid={`button-resume-${app.id}`}
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </CardHeader>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Users className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                  <p className="text-lg font-medium">No applications yet</p>
+                  <p className="text-muted-foreground">Applications will appear here when candidates apply</p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        );
+
+      case "partnerships":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight">Partnership Requests</h2>
+              <p className="text-muted-foreground">Manage partnership applications from event planners</p>
+            </div>
+            
+            {partnershipsLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : partnershipRequests && partnershipRequests.length > 0 ? (
+              <div className="grid gap-4">
+                {partnershipRequests.map((req) => (
+                  <Card key={req.id} data-testid={`partnership-${req.id}`}>
+                    <CardHeader>
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                          <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <Handshake className="h-6 w-6 text-primary" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <CardTitle className="text-lg">{req.companyName}</CardTitle>
+                              <Badge variant={
+                                req.status === "approved" ? "default" :
+                                req.status === "rejected" ? "destructive" :
+                                req.status === "contacted" ? "secondary" :
+                                "outline"
+                              }>
+                                {req.status}
+                              </Badge>
+                              <Badge variant="secondary">{req.eventsPerYear} events/year</Badge>
+                            </div>
+                            <p className="text-sm font-medium mt-1">{req.contactName}</p>
+                            <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+                              <span>{req.email}</span>
+                              <span>{req.phone}</span>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Events: {(req.eventTypes as string[]).join(", ")}
+                            </p>
+                            {req.message && (
+                              <p className="text-sm text-muted-foreground mt-2 italic">"{req.message}"</p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Select
+                            value={req.status || "pending"}
+                            onValueChange={(value) => updatePartnershipStatusMutation.mutate({ id: req.id, status: value })}
+                          >
+                            <SelectTrigger className="w-[140px]" data-testid={`select-partnership-status-${req.id}`}>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pending">Pending</SelectItem>
+                              <SelectItem value="contacted">Contacted</SelectItem>
+                              <SelectItem value="approved">Approved</SelectItem>
+                              <SelectItem value="rejected">Rejected</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          {req.website && (
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => window.open(req.website!, "_blank")}
+                              data-testid={`button-website-${req.id}`}
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </CardHeader>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Handshake className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                  <p className="text-lg font-medium">No partnership requests</p>
+                  <p className="text-muted-foreground">Partnership requests will appear here</p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        );
+
+      case "general":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight">General Settings</h2>
+              <p className="text-muted-foreground">Customize your landing page hero and statistics</p>
+            </div>
+            
             <Card>
               <CardHeader>
                 <CardTitle>Hero Section</CardTitle>
@@ -594,9 +1185,17 @@ export default function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+          </div>
+        );
 
-          <TabsContent value="pricing" className="space-y-6">
+      case "pricing":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight">Pricing Settings</h2>
+              <p className="text-muted-foreground">Configure your pricing packages and features</p>
+            </div>
+            
             {(["essential", "premium", "royal"] as const).map((tier) => (
               <Card key={tier}>
                 <CardHeader>
@@ -624,25 +1223,26 @@ export default function AdminDashboard() {
                           <Input
                             value={feature}
                             onChange={(e) => updateFeatures(tier, index, e.target.value)}
-                            placeholder="Feature description"
+                            placeholder={`Feature ${index + 1}`}
                             data-testid={`input-${tier}-feature-${index}`}
                           />
-                          <Button 
-                            variant="ghost" 
+                          <Button
+                            type="button"
+                            variant="ghost"
                             size="icon"
                             onClick={() => removeFeature(tier, index)}
-                            data-testid={`button-remove-${tier}-feature-${index}`}
                           >
-                            <X className="h-4 w-4" />
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       ))}
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
                         onClick={() => addFeature(tier)}
-                        data-testid={`button-add-${tier}-feature`}
                       >
+                        <Plus className="h-4 w-4 mr-2" />
                         Add Feature
                       </Button>
                     </div>
@@ -650,16 +1250,23 @@ export default function AdminDashboard() {
                 </CardContent>
               </Card>
             ))}
-          </TabsContent>
+          </div>
+        );
 
-          <TabsContent value="contact" className="space-y-6">
+      case "contact":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight">Contact Information</h2>
+              <p className="text-muted-foreground">Manage your contact details displayed on the site</p>
+            </div>
+            
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Phone className="h-5 w-5" />
-                  Contact Information
+                  Contact Details
                 </CardTitle>
-                <CardDescription>Your business contact details</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -669,7 +1276,7 @@ export default function AdminDashboard() {
                     value={settings.phoneNumber || ""}
                     onChange={(e) => updateField("phoneNumber", e.target.value)}
                     placeholder="+961 81 82 47 82"
-                    data-testid="input-phone-number"
+                    data-testid="input-phone"
                   />
                 </div>
                 <div className="space-y-2">
@@ -695,25 +1302,31 @@ export default function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+          </div>
+        );
 
-          <TabsContent value="social" className="space-y-6">
+      case "social":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight">Social Media</h2>
+              <p className="text-muted-foreground">Configure your social media links</p>
+            </div>
+            
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Share2 className="h-5 w-5" />
-                  Social Media Links
+                  Social Links
                 </CardTitle>
-                <CardDescription>Your social media profiles</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="facebook" className="flex items-center gap-2">
+                  <Label className="flex items-center gap-2">
                     <Facebook className="h-4 w-4" />
                     Facebook
                   </Label>
                   <Input
-                    id="facebook"
                     value={settings.facebookUrl || ""}
                     onChange={(e) => updateField("facebookUrl", e.target.value)}
                     placeholder="https://facebook.com/einviteme"
@@ -721,12 +1334,11 @@ export default function AdminDashboard() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="instagram" className="flex items-center gap-2">
+                  <Label className="flex items-center gap-2">
                     <Instagram className="h-4 w-4" />
                     Instagram
                   </Label>
                   <Input
-                    id="instagram"
                     value={settings.instagramUrl || ""}
                     onChange={(e) => updateField("instagramUrl", e.target.value)}
                     placeholder="https://instagram.com/einviteme"
@@ -734,12 +1346,11 @@ export default function AdminDashboard() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="twitter" className="flex items-center gap-2">
+                  <Label className="flex items-center gap-2">
                     <X className="h-4 w-4" />
                     X (Twitter)
                   </Label>
                   <Input
-                    id="twitter"
                     value={settings.twitterUrl || ""}
                     onChange={(e) => updateField("twitterUrl", e.target.value)}
                     placeholder="https://twitter.com/einviteme"
@@ -747,25 +1358,23 @@ export default function AdminDashboard() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="linkedin" className="flex items-center gap-2">
+                  <Label className="flex items-center gap-2">
                     <Linkedin className="h-4 w-4" />
                     LinkedIn
                   </Label>
                   <Input
-                    id="linkedin"
                     value={settings.linkedinUrl || ""}
                     onChange={(e) => updateField("linkedinUrl", e.target.value)}
-                    placeholder="https://linkedin.com/company/einviteme"
+                    placeholder="https://linkedin.com/company/einvite"
                     data-testid="input-linkedin"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="tiktok" className="flex items-center gap-2">
+                  <Label className="flex items-center gap-2">
                     <SiTiktok className="h-4 w-4" />
                     TikTok
                   </Label>
                   <Input
-                    id="tiktok"
                     value={settings.tiktokUrl || ""}
                     onChange={(e) => updateField("tiktokUrl", e.target.value)}
                     placeholder="https://tiktok.com/@einviteme"
@@ -774,431 +1383,17 @@ export default function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+          </div>
+        );
 
-          <TabsContent value="orders" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  Customer Orders
-                </CardTitle>
-                <CardDescription>
-                  View all customer orders and client information
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {ordersLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                  </div>
-                ) : orders && orders.length > 0 ? (
-                  <div className="space-y-6">
-                    {orders.map((order) => (
-                      <Card 
-                        key={order.id} 
-                        className="overflow-hidden"
-                        data-testid={`order-${order.id}`}
-                      >
-                        <CardHeader className="pb-3">
-                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div className="space-y-1">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <CardTitle className="text-lg">{order.names}</CardTitle>
-                                <Badge variant="outline" className="capitalize">{order.packageType}</Badge>
-                                <Badge variant="secondary" className="capitalize">{order.eventType}</Badge>
-                              </div>
-                              <CardDescription>
-                                Order ID: {order.id} | Submitted: {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : "N/A"}
-                              </CardDescription>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Badge 
-                                variant={order.paymentStatus === "completed" ? "default" : "secondary"}
-                              >
-                                {order.paymentStatus}
-                              </Badge>
-                              {order.paymentMethod === "whatsapp" && (
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  onClick={() => window.open(`https://wa.me/${settings.whatsappNumber?.replace(/[^0-9]/g, "")}`, "_blank")}
-                                  data-testid={`button-whatsapp-${order.id}`}
-                                >
-                                  <ExternalLink className="h-4 w-4 mr-1" />
-                                  WhatsApp
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          {/* Contact Information */}
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-muted/50 rounded-md">
-                            <div>
-                              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Contact Name</p>
-                              <p className="font-medium">{order.contactName}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Email</p>
-                              <p className="font-medium">{order.contactEmail}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Phone</p>
-                              <p className="font-medium">{order.contactPhone}</p>
-                            </div>
-                          </div>
-
-                          {/* Event Details */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Event Date</p>
-                              <p className="font-medium">{order.eventDate}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Payment Method</p>
-                              <p className="font-medium capitalize">{order.paymentMethod}</p>
-                            </div>
-                          </div>
-
-                          {/* Locations */}
-                          {order.locations && Array.isArray(order.locations) && order.locations.length > 0 && (
-                            <div>
-                              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">Locations</p>
-                              <div className="space-y-2">
-                                {order.locations.map((location: { name: string; address: string; mapLink?: string }, idx: number) => (
-                                  <div key={idx} className="p-3 border rounded-md">
-                                    <p className="font-medium">{location.name}</p>
-                                    <p className="text-sm text-muted-foreground">{location.address}</p>
-                                    {location.mapLink && (
-                                      <a 
-                                        href={location.mapLink} 
-                                        target="_blank" 
-                                        rel="noopener noreferrer"
-                                        className="text-sm text-primary hover:underline"
-                                      >
-                                        View on Map
-                                      </a>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Customizations */}
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {order.songChoice && (
-                              <div>
-                                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Song Choice</p>
-                                <p className="font-medium">{order.songChoice}</p>
-                              </div>
-                            )}
-                            {order.rsvpPreference && (
-                              <div>
-                                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">RSVP Preference</p>
-                                <p className="font-medium capitalize">{order.rsvpPreference}</p>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Additional Notes */}
-                          {order.additionalNotes && (
-                            <div>
-                              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Additional Notes</p>
-                              <p className="text-sm p-3 bg-muted/50 rounded-md">{order.additionalNotes}</p>
-                            </div>
-                          )}
-
-                          {/* Media URLs */}
-                          {order.mediaUrls && Array.isArray(order.mediaUrls) && order.mediaUrls.length > 0 && (
-                            <div>
-                              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Uploaded Media</p>
-                              <p className="text-sm">{order.mediaUrls.length} file(s) attached</p>
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-center text-muted-foreground py-8" data-testid="no-orders-message">
-                    No orders yet
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Invoices Tab */}
-          <TabsContent value="invoices" className="space-y-6">
-            <InvoiceManager />
-          </TabsContent>
-
-          {/* Jobs Tab */}
-          <TabsContent value="jobs" className="space-y-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between gap-4 flex-wrap">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <Briefcase className="h-5 w-5" />
-                    Job Openings
-                  </CardTitle>
-                  <CardDescription>
-                    Manage job postings for your careers page
-                  </CardDescription>
-                </div>
-                <Button onClick={openCreateJobDialog} data-testid="button-create-job">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Job
-                </Button>
-              </CardHeader>
-              <CardContent>
-                {jobsLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                  </div>
-                ) : jobs && jobs.length > 0 ? (
-                  <div className="space-y-4">
-                    {jobs.map((job) => (
-                      <div 
-                        key={job.id} 
-                        className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-md gap-4"
-                        data-testid={`job-${job.id}`}
-                      >
-                        <div className="space-y-1 flex-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-medium">{job.title}</span>
-                            <Badge variant={job.isActive === "true" ? "default" : "secondary"}>
-                              {job.isActive === "true" ? "Active" : "Inactive"}
-                            </Badge>
-                            <Badge variant="outline">{job.type}</Badge>
-                          </div>
-                          <p className="text-sm text-muted-foreground">
-                            {job.department} | {job.location}
-                            {job.salaryRange && ` | ${job.salaryRange}`}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Created: {job.createdAt ? new Date(job.createdAt).toLocaleDateString() : "N/A"}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => openEditJobDialog(job)}
-                            data-testid={`button-edit-job-${job.id}`}
-                          >
-                            <Pencil className="h-4 w-4 mr-1" />
-                            Edit
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => deleteJobMutation.mutate(job.id)}
-                            disabled={deleteJobMutation.isPending}
-                            data-testid={`button-delete-job-${job.id}`}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-center text-muted-foreground py-8" data-testid="no-jobs-message">
-                    No job openings yet. Click "Add Job" to create one.
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Candidates Tab */}
-          <TabsContent value="candidates" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  Job Applications
-                </CardTitle>
-                <CardDescription>
-                  Review and manage candidate applications
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {applicationsLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                  </div>
-                ) : applications && applications.length > 0 ? (
-                  <div className="space-y-4">
-                    {applications.map((app) => (
-                      <div 
-                        key={app.id} 
-                        className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-md gap-4"
-                        data-testid={`application-${app.id}`}
-                      >
-                        <div className="space-y-1 flex-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-medium">{app.fullName}</span>
-                            <Badge variant={
-                              app.status === "hired" ? "default" :
-                              app.status === "rejected" ? "destructive" :
-                              app.status === "interviewing" || app.status === "offered" ? "default" :
-                              "secondary"
-                            }>
-                              {app.status}
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-primary font-medium">
-                            Applied for: {getJobTitle(app.jobId)}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {app.email} | {app.phone}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Experience: {app.yearsOfExperience || "Not specified"} | Applied: {app.createdAt ? new Date(app.createdAt).toLocaleDateString() : "N/A"}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <Select
-                            value={app.status || "new"}
-                            onValueChange={(value) => updateApplicationStatusMutation.mutate({ id: app.id, status: value })}
-                          >
-                            <SelectTrigger className="w-[130px]" data-testid={`select-status-${app.id}`}>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="new">New</SelectItem>
-                              <SelectItem value="reviewed">Reviewed</SelectItem>
-                              <SelectItem value="interviewing">Interviewing</SelectItem>
-                              <SelectItem value="offered">Offered</SelectItem>
-                              <SelectItem value="hired">Hired</SelectItem>
-                              <SelectItem value="rejected">Rejected</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => setViewingApplication(app)}
-                            data-testid={`button-view-${app.id}`}
-                          >
-                            <Eye className="h-4 w-4 mr-1" />
-                            View
-                          </Button>
-                          {app.resumeUrl && (
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => window.open(app.resumeUrl!, "_blank")}
-                              data-testid={`button-resume-${app.id}`}
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-center text-muted-foreground py-8" data-testid="no-applications-message">
-                    No applications yet
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Partnerships Tab */}
-          <TabsContent value="partnerships" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Handshake className="h-5 w-5" />
-                  Partnership Requests
-                </CardTitle>
-                <CardDescription>
-                  Manage partnership applications from event planners
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {partnershipsLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                  </div>
-                ) : partnershipRequests && partnershipRequests.length > 0 ? (
-                  <div className="space-y-4">
-                    {partnershipRequests.map((req) => (
-                      <div 
-                        key={req.id} 
-                        className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-md gap-4"
-                        data-testid={`partnership-${req.id}`}
-                      >
-                        <div className="space-y-1 flex-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-medium">{req.companyName}</span>
-                            <Badge variant={
-                              req.status === "approved" ? "default" :
-                              req.status === "rejected" ? "destructive" :
-                              req.status === "contacted" ? "secondary" :
-                              "outline"
-                            }>
-                              {req.status}
-                            </Badge>
-                            <Badge variant="secondary">{req.eventsPerYear} events/year</Badge>
-                          </div>
-                          <p className="text-sm font-medium">{req.contactName}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {req.email} | {req.phone}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Events: {(req.eventTypes as string[]).join(", ")} | Applied: {req.createdAt ? new Date(req.createdAt).toLocaleDateString() : "N/A"}
-                          </p>
-                          {req.message && (
-                            <p className="text-sm text-muted-foreground mt-2 italic">"{req.message}"</p>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Select
-                            value={req.status || "pending"}
-                            onValueChange={(value) => updatePartnershipStatusMutation.mutate({ id: req.id, status: value })}
-                          >
-                            <SelectTrigger className="w-[130px]" data-testid={`select-partnership-status-${req.id}`}>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="pending">Pending</SelectItem>
-                              <SelectItem value="contacted">Contacted</SelectItem>
-                              <SelectItem value="approved">Approved</SelectItem>
-                              <SelectItem value="rejected">Rejected</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          {req.website && (
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => window.open(req.website!, "_blank")}
-                              data-testid={`button-website-${req.id}`}
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-center text-muted-foreground py-8" data-testid="no-partnerships-message">
-                    No partnership requests yet
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Event Planners Page Content */}
-          <TabsContent value="event-planners" className="space-y-6">
+      case "event-planners":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight">Event Planners Page</h2>
+              <p className="text-muted-foreground">Customize the Event Planners partnership page content</p>
+            </div>
+            
             <Card>
               <CardHeader>
                 <CardTitle>Hero Section</CardTitle>
@@ -1307,249 +1502,246 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Silver Partner Tier</CardTitle>
-                <CardDescription>Configure the Silver partner tier details</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label>Tier Name</Label>
-                    <Input
-                      value={settings.eventPlannersSilverName || ""}
-                      onChange={(e) => setSettings({ ...settings, eventPlannersSilverName: e.target.value })}
-                      placeholder="Silver Partner"
-                      data-testid="input-silver-name"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Events Range</Label>
-                    <Input
-                      value={settings.eventPlannersSilverEvents || ""}
-                      onChange={(e) => setSettings({ ...settings, eventPlannersSilverEvents: e.target.value })}
-                      placeholder="1-10 events/year"
-                      data-testid="input-silver-events"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Discount</Label>
-                    <Input
-                      value={settings.eventPlannersSilverDiscount || ""}
-                      onChange={(e) => setSettings({ ...settings, eventPlannersSilverDiscount: e.target.value })}
-                      placeholder="15%"
-                      data-testid="input-silver-discount"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Features (one per line)</Label>
-                  <Textarea
-                    value={(settings.eventPlannersSilverFeatures || []).join("\n")}
-                    onChange={(e) => setSettings({ ...settings, eventPlannersSilverFeatures: e.target.value.split("\n").filter(f => f.trim()) })}
-                    placeholder="10% discount on all packages&#10;Standard support&#10;Partner badge"
-                    className="min-h-[100px]"
-                    data-testid="input-silver-features"
-                  />
-                </div>
-              </CardContent>
-            </Card>
+            {/* Partner Tiers */}
+            {(["Silver", "Gold", "Platinum"] as const).map((tierName) => {
+              const tierKey = tierName.toLowerCase() as "silver" | "gold" | "platinum";
+              return (
+                <Card key={tierName}>
+                  <CardHeader>
+                    <CardTitle>{tierName} Partner Tier</CardTitle>
+                    <CardDescription>
+                      Configure the {tierName} partner tier details
+                      {tierName === "Gold" && " (Most Popular)"}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label>Tier Name</Label>
+                        <Input
+                          value={(settings as any)[`eventPlanners${tierName}Name`] || ""}
+                          onChange={(e) => setSettings({ ...settings, [`eventPlanners${tierName}Name`]: e.target.value })}
+                          placeholder={`${tierName} Partner`}
+                          data-testid={`input-${tierKey}-name`}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Events Range</Label>
+                        <Input
+                          value={(settings as any)[`eventPlanners${tierName}Events`] || ""}
+                          onChange={(e) => setSettings({ ...settings, [`eventPlanners${tierName}Events`]: e.target.value })}
+                          placeholder={tierName === "Silver" ? "1-10 events/year" : tierName === "Gold" ? "11-50 events/year" : "51+ events/year"}
+                          data-testid={`input-${tierKey}-events`}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Discount</Label>
+                        <Input
+                          value={(settings as any)[`eventPlanners${tierName}Discount`] || ""}
+                          onChange={(e) => setSettings({ ...settings, [`eventPlanners${tierName}Discount`]: e.target.value })}
+                          placeholder={tierName === "Silver" ? "15%" : tierName === "Gold" ? "25%" : "40%"}
+                          data-testid={`input-${tierKey}-discount`}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Features (one per line)</Label>
+                      <Textarea
+                        value={((settings as any)[`eventPlanners${tierName}Features`] || []).join("\n")}
+                        onChange={(e) => setSettings({ ...settings, [`eventPlanners${tierName}Features`]: e.target.value.split("\n").filter((f: string) => f.trim()) })}
+                        placeholder="Feature 1&#10;Feature 2&#10;Feature 3"
+                        className="min-h-[100px]"
+                        data-testid={`input-${tierKey}-features`}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        );
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Gold Partner Tier</CardTitle>
-                <CardDescription>Configure the Gold partner tier details (Most Popular)</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label>Tier Name</Label>
-                    <Input
-                      value={settings.eventPlannersGoldName || ""}
-                      onChange={(e) => setSettings({ ...settings, eventPlannersGoldName: e.target.value })}
-                      placeholder="Gold Partner"
-                      data-testid="input-gold-name"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Events Range</Label>
-                    <Input
-                      value={settings.eventPlannersGoldEvents || ""}
-                      onChange={(e) => setSettings({ ...settings, eventPlannersGoldEvents: e.target.value })}
-                      placeholder="11-50 events/year"
-                      data-testid="input-gold-events"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Discount</Label>
-                    <Input
-                      value={settings.eventPlannersGoldDiscount || ""}
-                      onChange={(e) => setSettings({ ...settings, eventPlannersGoldDiscount: e.target.value })}
-                      placeholder="25%"
-                      data-testid="input-gold-discount"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Features (one per line)</Label>
-                  <Textarea
-                    value={(settings.eventPlannersGoldFeatures || []).join("\n")}
-                    onChange={(e) => setSettings({ ...settings, eventPlannersGoldFeatures: e.target.value.split("\n").filter(f => f.trim()) })}
-                    placeholder="25% discount on all packages&#10;Priority support&#10;White label option"
-                    className="min-h-[100px]"
-                    data-testid="input-gold-features"
-                  />
-                </div>
-              </CardContent>
-            </Card>
+      default:
+        return null;
+    }
+  };
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Platinum Partner Tier</CardTitle>
-                <CardDescription>Configure the Platinum partner tier details</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label>Tier Name</Label>
-                    <Input
-                      value={settings.eventPlannersPlatinumName || ""}
-                      onChange={(e) => setSettings({ ...settings, eventPlannersPlatinumName: e.target.value })}
-                      placeholder="Platinum Partner"
-                      data-testid="input-platinum-name"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Events Range</Label>
-                    <Input
-                      value={settings.eventPlannersPlatinumEvents || ""}
-                      onChange={(e) => setSettings({ ...settings, eventPlannersPlatinumEvents: e.target.value })}
-                      placeholder="50+ events/year"
-                      data-testid="input-platinum-events"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Discount</Label>
-                    <Input
-                      value={settings.eventPlannersPlatinumDiscount || ""}
-                      onChange={(e) => setSettings({ ...settings, eventPlannersPlatinumDiscount: e.target.value })}
-                      placeholder="40%"
-                      data-testid="input-platinum-discount"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Features (one per line)</Label>
-                  <Textarea
-                    value={(settings.eventPlannersPlatinumFeatures || []).join("\n")}
-                    onChange={(e) => setSettings({ ...settings, eventPlannersPlatinumFeatures: e.target.value.split("\n").filter(f => f.trim()) })}
-                    placeholder="40% discount on all packages&#10;Dedicated account manager&#10;Free rush delivery"
-                    className="min-h-[100px]"
-                    data-testid="input-platinum-features"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Button
-              onClick={() => updateSettingsMutation.mutate(settings)}
+  return (
+    <SidebarProvider style={sidebarStyle as React.CSSProperties}>
+      <div className="flex h-screen w-full" data-testid="admin-dashboard">
+        <Sidebar>
+          <SidebarHeader className="p-4 border-b">
+            <div className="flex items-center gap-3">
+              <img src={logoPath} alt="Einvite" className="h-8" />
+              <div>
+                <p className="font-semibold text-sm">Admin Portal</p>
+                <p className="text-xs text-muted-foreground truncate">{sessionData.email}</p>
+              </div>
+            </div>
+          </SidebarHeader>
+          
+          <SidebarContent>
+            <SidebarGroup>
+              <SidebarGroupLabel>Management</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {menuItems.map((item) => (
+                    <SidebarMenuItem key={item.id}>
+                      <SidebarMenuButton 
+                        isActive={activeSection === item.id}
+                        onClick={() => setActiveSection(item.id)}
+                        data-testid={`nav-${item.id}`}
+                      >
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.label}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+            
+            <SidebarGroup>
+              <SidebarGroupLabel>Settings</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {settingsItems.map((item) => (
+                    <SidebarMenuItem key={item.id}>
+                      <SidebarMenuButton 
+                        isActive={activeSection === item.id}
+                        onClick={() => setActiveSection(item.id)}
+                        data-testid={`nav-${item.id}`}
+                      >
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.label}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </SidebarContent>
+          
+          <SidebarFooter className="p-4 border-t">
+            <div className="flex flex-col gap-2">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => window.location.href = "/"}
+              >
+                <Home className="h-4 w-4 mr-2" />
+                View Site
+              </Button>
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start"
+                onClick={handleLogout}
+                disabled={logoutMutation.isPending}
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            </div>
+          </SidebarFooter>
+        </Sidebar>
+        
+        <div className="flex flex-col flex-1 overflow-hidden">
+          <header className="flex items-center justify-between h-14 px-4 border-b bg-background shrink-0">
+            <div className="flex items-center gap-2">
+              <SidebarTrigger data-testid="button-sidebar-toggle" />
+              <h1 className="text-lg font-semibold capitalize">
+                {activeSection === "event-planners" ? "Event Planners Page" : activeSection}
+              </h1>
+            </div>
+            <Button 
+              onClick={handleSave} 
               disabled={updateSettingsMutation.isPending}
-              className="w-full"
-              data-testid="button-save-event-planners"
+              data-testid="button-save-settings"
             >
               {updateSettingsMutation.isPending ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (
                 <Save className="h-4 w-4 mr-2" />
               )}
-              Save Event Planners Settings
+              Save Changes
             </Button>
-          </TabsContent>
-        </Tabs>
-      </main>
-
-      {/* Job Create/Edit Dialog */}
-      <Dialog open={showJobDialog} onOpenChange={(open) => { if (!open) { setShowJobDialog(false); setEditingJob(null); setJobForm(defaultJobForm); } }}>
+          </header>
+          
+          <main className="flex-1 overflow-auto p-6 bg-muted/30">
+            {renderContent()}
+          </main>
+        </div>
+      </div>
+      
+      {/* Job Dialog */}
+      <Dialog open={showJobDialog} onOpenChange={setShowJobDialog}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingJob ? "Edit Job" : "Create New Job"}</DialogTitle>
             <DialogDescription>
-              {editingJob ? "Update the job posting details" : "Fill in the details for the new job opening"}
+              {editingJob ? "Update job details below" : "Fill in the job details below"}
             </DialogDescription>
           </DialogHeader>
-          
           <div className="space-y-4 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Job Title *</Label>
+                <Label>Job Title</Label>
                 <Input
                   value={jobForm.title}
                   onChange={(e) => updateJobFormField("title", e.target.value)}
-                  placeholder="e.g., Senior Designer"
+                  placeholder="e.g. Senior Designer"
                   data-testid="input-job-title"
                 />
               </div>
               <div className="space-y-2">
-                <Label>Department *</Label>
-                <Select value={jobForm.department} onValueChange={(v) => updateJobFormField("department", v)}>
-                  <SelectTrigger data-testid="select-department">
-                    <SelectValue placeholder="Select department" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Design">Design</SelectItem>
-                    <SelectItem value="Development">Development</SelectItem>
-                    <SelectItem value="Marketing">Marketing</SelectItem>
-                    <SelectItem value="Operations">Operations</SelectItem>
-                    <SelectItem value="Sales">Sales</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label>Department</Label>
+                <Input
+                  value={jobForm.department}
+                  onChange={(e) => updateJobFormField("department", e.target.value)}
+                  placeholder="e.g. Design"
+                  data-testid="input-job-department"
+                />
               </div>
             </div>
-
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Location *</Label>
-                <Select value={jobForm.location} onValueChange={(v) => updateJobFormField("location", v)}>
-                  <SelectTrigger data-testid="select-location">
-                    <SelectValue placeholder="Select location" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Beirut">Beirut</SelectItem>
-                    <SelectItem value="Remote">Remote</SelectItem>
-                    <SelectItem value="Hybrid">Hybrid</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label>Location</Label>
+                <Input
+                  value={jobForm.location}
+                  onChange={(e) => updateJobFormField("location", e.target.value)}
+                  placeholder="e.g. Beirut, Lebanon"
+                  data-testid="input-job-location"
+                />
               </div>
               <div className="space-y-2">
-                <Label>Job Type *</Label>
+                <Label>Employment Type</Label>
                 <Select value={jobForm.type} onValueChange={(v) => updateJobFormField("type", v)}>
-                  <SelectTrigger data-testid="select-type">
-                    <SelectValue placeholder="Select type" />
+                  <SelectTrigger data-testid="select-job-type">
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="full-time">Full-time</SelectItem>
                     <SelectItem value="part-time">Part-time</SelectItem>
                     <SelectItem value="contract">Contract</SelectItem>
-                    <SelectItem value="internship">Internship</SelectItem>
+                    <SelectItem value="remote">Remote</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
-
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Salary Range</Label>
+                <Label>Salary Range (optional)</Label>
                 <Input
                   value={jobForm.salaryRange}
                   onChange={(e) => updateJobFormField("salaryRange", e.target.value)}
-                  placeholder="e.g., $40k-$60k"
-                  data-testid="input-salary"
+                  placeholder="e.g. $50,000 - $70,000"
+                  data-testid="input-job-salary"
                 />
               </div>
               <div className="space-y-2">
                 <Label>Status</Label>
                 <Select value={jobForm.isActive} onValueChange={(v) => updateJobFormField("isActive", v)}>
-                  <SelectTrigger data-testid="select-active">
+                  <SelectTrigger data-testid="select-job-status">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -1559,161 +1751,218 @@ export default function AdminDashboard() {
                 </Select>
               </div>
             </div>
-
             <div className="space-y-2">
-              <Label>Description *</Label>
+              <Label>Job Description</Label>
               <Textarea
                 value={jobForm.description}
                 onChange={(e) => updateJobFormField("description", e.target.value)}
-                placeholder="Job description..."
-                className="min-h-[80px]"
-                data-testid="input-description"
+                placeholder="Describe the role and responsibilities..."
+                className="min-h-[100px]"
+                data-testid="input-job-description"
               />
             </div>
-
+            
+            {/* Requirements */}
             <div className="space-y-2">
               <Label>Requirements</Label>
-              {jobForm.requirements.map((req, i) => (
-                <div key={i} className="flex gap-2">
+              {jobForm.requirements.map((req, index) => (
+                <div key={index} className="flex items-center gap-2">
                   <Input
                     value={req}
-                    onChange={(e) => updateJobFormArray("requirements", i, e.target.value)}
-                    placeholder="Add requirement"
-                    data-testid={`input-requirement-${i}`}
+                    onChange={(e) => updateJobFormArray("requirements", index, e.target.value)}
+                    placeholder={`Requirement ${index + 1}`}
                   />
-                  <Button variant="ghost" size="icon" onClick={() => removeJobFormArrayItem("requirements", i)}>
-                    <X className="h-4 w-4" />
-                  </Button>
+                  {jobForm.requirements.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeJobFormArrayItem("requirements", index)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
               ))}
-              <Button variant="outline" size="sm" onClick={() => addJobFormArrayItem("requirements")}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => addJobFormArrayItem("requirements")}
+              >
+                <Plus className="h-4 w-4 mr-2" />
                 Add Requirement
               </Button>
             </div>
-
+            
+            {/* Responsibilities */}
             <div className="space-y-2">
               <Label>Responsibilities</Label>
-              {jobForm.responsibilities.map((resp, i) => (
-                <div key={i} className="flex gap-2">
+              {jobForm.responsibilities.map((resp, index) => (
+                <div key={index} className="flex items-center gap-2">
                   <Input
                     value={resp}
-                    onChange={(e) => updateJobFormArray("responsibilities", i, e.target.value)}
-                    placeholder="Add responsibility"
-                    data-testid={`input-responsibility-${i}`}
+                    onChange={(e) => updateJobFormArray("responsibilities", index, e.target.value)}
+                    placeholder={`Responsibility ${index + 1}`}
                   />
-                  <Button variant="ghost" size="icon" onClick={() => removeJobFormArrayItem("responsibilities", i)}>
-                    <X className="h-4 w-4" />
-                  </Button>
+                  {jobForm.responsibilities.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeJobFormArrayItem("responsibilities", index)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
               ))}
-              <Button variant="outline" size="sm" onClick={() => addJobFormArrayItem("responsibilities")}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => addJobFormArrayItem("responsibilities")}
+              >
+                <Plus className="h-4 w-4 mr-2" />
                 Add Responsibility
               </Button>
             </div>
-
+            
+            {/* Benefits */}
             <div className="space-y-2">
               <Label>Benefits</Label>
-              {jobForm.benefits.map((benefit, i) => (
-                <div key={i} className="flex gap-2">
+              {jobForm.benefits.map((benefit, index) => (
+                <div key={index} className="flex items-center gap-2">
                   <Input
                     value={benefit}
-                    onChange={(e) => updateJobFormArray("benefits", i, e.target.value)}
-                    placeholder="Add benefit"
-                    data-testid={`input-benefit-${i}`}
+                    onChange={(e) => updateJobFormArray("benefits", index, e.target.value)}
+                    placeholder={`Benefit ${index + 1}`}
                   />
-                  <Button variant="ghost" size="icon" onClick={() => removeJobFormArrayItem("benefits", i)}>
-                    <X className="h-4 w-4" />
-                  </Button>
+                  {jobForm.benefits.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeJobFormArrayItem("benefits", index)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
               ))}
-              <Button variant="outline" size="sm" onClick={() => addJobFormArrayItem("benefits")}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => addJobFormArrayItem("benefits")}
+              >
+                <Plus className="h-4 w-4 mr-2" />
                 Add Benefit
               </Button>
             </div>
           </div>
-
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setShowJobDialog(false); setEditingJob(null); setJobForm(defaultJobForm); }}>
+            <Button variant="outline" onClick={() => setShowJobDialog(false)}>
               Cancel
             </Button>
             <Button 
               onClick={handleSaveJob}
-              disabled={createJobMutation.isPending || updateJobMutation.isPending || !jobForm.title || !jobForm.department || !jobForm.location || !jobForm.description}
+              disabled={createJobMutation.isPending || updateJobMutation.isPending}
               data-testid="button-save-job"
             >
-              {(createJobMutation.isPending || updateJobMutation.isPending) && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {(createJobMutation.isPending || updateJobMutation.isPending) && (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              )}
               {editingJob ? "Update Job" : "Create Job"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* View Application Dialog */}
-      <Dialog open={!!viewingApplication} onOpenChange={(open) => { if (!open) setViewingApplication(null); }}>
-        <DialogContent className="max-w-lg">
+      
+      {/* Application View Dialog */}
+      <Dialog open={!!viewingApplication} onOpenChange={() => setViewingApplication(null)}>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Application Details</DialogTitle>
             <DialogDescription>
-              {viewingApplication?.fullName}'s application
+              Viewing application from {viewingApplication?.fullName}
             </DialogDescription>
           </DialogHeader>
-          
           {viewingApplication && (
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-muted-foreground">Name</p>
+                  <Label className="text-muted-foreground">Full Name</Label>
                   <p className="font-medium">{viewingApplication.fullName}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground">Position</p>
+                  <Label className="text-muted-foreground">Position Applied</Label>
                   <p className="font-medium">{getJobTitle(viewingApplication.jobId)}</p>
                 </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-muted-foreground">Email</p>
+                  <Label className="text-muted-foreground">Email</Label>
                   <p className="font-medium">{viewingApplication.email}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground">Phone</p>
+                  <Label className="text-muted-foreground">Phone</Label>
                   <p className="font-medium">{viewingApplication.phone}</p>
                 </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-muted-foreground">Experience</p>
+                  <Label className="text-muted-foreground">Years of Experience</Label>
                   <p className="font-medium">{viewingApplication.yearsOfExperience || "Not specified"}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground">Status</p>
-                  <Badge variant="outline">{viewingApplication.status}</Badge>
+                  <Label className="text-muted-foreground">Applied Date</Label>
+                  <p className="font-medium">
+                    {viewingApplication.createdAt 
+                      ? new Date(viewingApplication.createdAt).toLocaleDateString() 
+                      : "N/A"}
+                  </p>
                 </div>
               </div>
-
               {viewingApplication.coverLetter && (
                 <div>
-                  <p className="text-muted-foreground text-sm mb-1">Cover Letter</p>
-                  <p className="text-sm bg-muted p-3 rounded-md">{viewingApplication.coverLetter}</p>
+                  <Label className="text-muted-foreground">Cover Letter</Label>
+                  <p className="font-medium whitespace-pre-wrap mt-1 p-3 bg-muted rounded-md">
+                    {viewingApplication.coverLetter}
+                  </p>
                 </div>
               )}
-
-              <div className="flex gap-2 flex-wrap">
+              <div className="flex gap-2">
                 {viewingApplication.resumeUrl && (
-                  <Button variant="outline" size="sm" onClick={() => window.open(viewingApplication.resumeUrl!, "_blank")}>
-                    <ExternalLink className="h-4 w-4 mr-1" /> Resume
+                  <Button 
+                    variant="outline"
+                    onClick={() => window.open(viewingApplication.resumeUrl!, "_blank")}
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    View Resume
                   </Button>
                 )}
                 {viewingApplication.portfolioUrl && (
-                  <Button variant="outline" size="sm" onClick={() => window.open(viewingApplication.portfolioUrl!, "_blank")}>
-                    <ExternalLink className="h-4 w-4 mr-1" /> Portfolio
+                  <Button 
+                    variant="outline"
+                    onClick={() => window.open(viewingApplication.portfolioUrl!, "_blank")}
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    View Portfolio
                   </Button>
                 )}
                 {viewingApplication.linkedinUrl && (
-                  <Button variant="outline" size="sm" onClick={() => window.open(viewingApplication.linkedinUrl!, "_blank")}>
-                    <Linkedin className="h-4 w-4 mr-1" /> LinkedIn
+                  <Button 
+                    variant="outline"
+                    onClick={() => window.open(viewingApplication.linkedinUrl!, "_blank")}
+                  >
+                    <Linkedin className="h-4 w-4 mr-2" />
+                    LinkedIn
                   </Button>
                 )}
               </div>
             </div>
           )}
-
           <DialogFooter>
             <Button variant="outline" onClick={() => setViewingApplication(null)}>
               Close
@@ -1721,6 +1970,6 @@ export default function AdminDashboard() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </SidebarProvider>
   );
 }
