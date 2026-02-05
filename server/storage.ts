@@ -1,4 +1,4 @@
-import { type Order, type InsertOrder, type SiteSettings, type InsertSiteSettings, type PartnershipRequest, type InsertPartnershipRequest, type JobOpening, type InsertJobOpening, type JobApplication, type InsertJobApplication, orders, siteSettings, partnershipRequests, jobOpenings, jobApplications } from "@shared/schema";
+import { type Order, type InsertOrder, type SiteSettings, type InsertSiteSettings, type PartnershipRequest, type InsertPartnershipRequest, type JobOpening, type InsertJobOpening, type JobApplication, type InsertJobApplication, type Invoice, type InsertInvoice, orders, siteSettings, partnershipRequests, jobOpenings, jobApplications, invoices } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
 
@@ -30,6 +30,14 @@ export interface IStorage {
   getJobApplication(id: string): Promise<JobApplication | undefined>;
   createJobApplication(application: InsertJobApplication): Promise<JobApplication>;
   updateJobApplicationStatus(id: string, status: string, notes?: string): Promise<JobApplication | undefined>;
+  
+  // Invoice operations
+  getInvoices(): Promise<Invoice[]>;
+  getInvoice(id: string): Promise<Invoice | undefined>;
+  createInvoice(invoice: InsertInvoice): Promise<Invoice>;
+  updateInvoice(id: string, invoice: Partial<InsertInvoice>): Promise<Invoice | undefined>;
+  deleteInvoice(id: string): Promise<boolean>;
+  getNextInvoiceNumber(): Promise<string>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -159,6 +167,42 @@ export class DatabaseStorage implements IStorage {
       .where(eq(jobApplications.id, id))
       .returning();
     return updated;
+  }
+
+  // Invoice operations
+  async getInvoices(): Promise<Invoice[]> {
+    return db.select().from(invoices).orderBy(desc(invoices.createdAt));
+  }
+
+  async getInvoice(id: string): Promise<Invoice | undefined> {
+    const [invoice] = await db.select().from(invoices).where(eq(invoices.id, id));
+    return invoice;
+  }
+
+  async createInvoice(invoice: InsertInvoice): Promise<Invoice> {
+    const [created] = await db.insert(invoices).values(invoice as any).returning();
+    return created;
+  }
+
+  async updateInvoice(id: string, invoice: Partial<InsertInvoice>): Promise<Invoice | undefined> {
+    const [updated] = await db
+      .update(invoices)
+      .set({ ...invoice, updatedAt: new Date() } as any)
+      .where(eq(invoices.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteInvoice(id: string): Promise<boolean> {
+    await db.delete(invoices).where(eq(invoices.id, id));
+    return true;
+  }
+
+  async getNextInvoiceNumber(): Promise<string> {
+    const allInvoices = await db.select().from(invoices);
+    const year = new Date().getFullYear();
+    const count = allInvoices.length + 1;
+    return `INV-${year}-${count.toString().padStart(4, "0")}`;
   }
 }
 

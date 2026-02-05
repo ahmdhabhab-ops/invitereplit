@@ -275,6 +275,59 @@ export const insertJobApplicationSchema = createInsertSchema(jobApplications).om
 export type InsertJobApplication = z.infer<typeof insertJobApplicationSchema>;
 export type JobApplication = typeof jobApplications.$inferSelect;
 
+// Invoice line items type
+export type InvoiceItem = {
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+};
+
+// Invoices for billing
+export const invoices = pgTable("invoices", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  invoiceNumber: text("invoice_number").notNull(), // e.g., INV-2024-001
+  orderId: varchar("order_id"), // Optional link to order
+  
+  // Client info
+  clientName: text("client_name").notNull(),
+  clientEmail: text("client_email").notNull(),
+  clientPhone: text("client_phone"),
+  clientAddress: text("client_address"),
+  
+  // Invoice details
+  issueDate: text("issue_date").notNull(), // YYYY-MM-DD format
+  dueDate: text("due_date"), // YYYY-MM-DD format
+  
+  // Line items (array of items with description, quantity, price)
+  items: jsonb("items").$type<InvoiceItem[]>().notNull(),
+  
+  // Pricing
+  subtotal: integer("subtotal").notNull(), // In cents
+  discountType: text("discount_type").default("percentage"), // percentage or fixed
+  discountValue: integer("discount_value").default(0), // Percentage (0-100) or fixed amount in cents
+  discountAmount: integer("discount_amount").default(0), // Calculated discount in cents
+  taxRate: integer("tax_rate").default(0), // Tax percentage (0-100)
+  taxAmount: integer("tax_amount").default(0), // Calculated tax in cents
+  total: integer("total").notNull(), // Final total in cents
+  
+  // Status
+  status: text("status").default("draft"), // draft, sent, paid, cancelled
+  notes: text("notes"), // Additional notes on invoice
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertInvoiceSchema = createInsertSchema(invoices).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
+export type Invoice = typeof invoices.$inferSelect;
+
 // Pricing tiers (static defaults, can be overridden by site settings)
 export const pricingTiers = [
   {
