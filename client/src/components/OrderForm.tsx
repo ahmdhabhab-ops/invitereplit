@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -30,10 +30,10 @@ import {
   eventDetailsSchema,
   customizationsSchema,
   contactPaymentSchema,
-  pricingTiers,
   type EventDetails,
   type Customizations,
   type ContactPayment,
+  type SiteSettings,
 } from "@shared/schema";
 import {
   Calendar,
@@ -66,7 +66,59 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const { toast } = useToast();
 
-  const selectedTier = pricingTiers.find((t) => t.id === selectedPackage);
+  // Fetch settings for dynamic pricing
+  const { data: settings } = useQuery<SiteSettings>({
+    queryKey: ["/api/settings"],
+  });
+
+  // Build dynamic pricing tiers from settings
+  const dynamicPricingTiers = [
+    {
+      id: "essential",
+      name: "Essential",
+      price: settings?.essentialPrice ?? 49,
+      description: "Perfect for simple, elegant invitations",
+      features: settings?.essentialFeatures ?? [
+        "Single-page invitation design",
+        "Mobile responsive",
+        "Custom date & location",
+        "Shareable link",
+        "3 design revisions",
+      ],
+    },
+    {
+      id: "premium",
+      name: "Premium",
+      price: settings?.premiumPrice ?? 99,
+      description: "Most popular for memorable events",
+      features: settings?.premiumFeatures ?? [
+        "Multi-page interactive design",
+        "Photo gallery integration",
+        "Background music",
+        "RSVP tracking",
+        "5 design revisions",
+        "Custom animations",
+      ],
+      popular: true,
+    },
+    {
+      id: "royal",
+      name: "Royal",
+      price: settings?.royalPrice ?? 199,
+      description: "Ultimate luxury experience",
+      features: settings?.royalFeatures ?? [
+        "Everything in Premium",
+        "Video backgrounds",
+        "Guest messaging",
+        "Live countdown timer",
+        "Unlimited revisions",
+        "Priority support",
+        "Custom domain option",
+      ],
+    },
+  ];
+
+  const selectedTier = dynamicPricingTiers.find((t) => t.id === selectedPackage);
 
   // Form for step 1
   const eventForm = useForm<EventDetails>({

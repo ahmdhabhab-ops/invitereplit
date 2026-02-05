@@ -787,48 +787,132 @@ export default function AdminDashboard() {
                     <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                   </div>
                 ) : orders && orders.length > 0 ? (
-                  <div className="space-y-4">
+                  <div className="space-y-6">
                     {orders.map((order) => (
-                      <div 
+                      <Card 
                         key={order.id} 
-                        className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-md gap-4"
+                        className="overflow-hidden"
                         data-testid={`order-${order.id}`}
                       >
-                        <div className="space-y-1 flex-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-medium">{order.names}</span>
-                            <Badge variant="outline">{order.packageType}</Badge>
-                            <Badge variant="secondary">{order.eventType}</Badge>
+                        <CardHeader className="pb-3">
+                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <CardTitle className="text-lg">{order.names}</CardTitle>
+                                <Badge variant="outline" className="capitalize">{order.packageType}</Badge>
+                                <Badge variant="secondary" className="capitalize">{order.eventType}</Badge>
+                              </div>
+                              <CardDescription>
+                                Order ID: {order.id} | Submitted: {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : "N/A"}
+                              </CardDescription>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge 
+                                variant={order.paymentStatus === "completed" ? "default" : "secondary"}
+                              >
+                                {order.paymentStatus}
+                              </Badge>
+                              {order.paymentMethod === "whatsapp" && (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => window.open(`https://wa.me/${settings.whatsappNumber?.replace(/[^0-9]/g, "")}`, "_blank")}
+                                  data-testid={`button-whatsapp-${order.id}`}
+                                >
+                                  <ExternalLink className="h-4 w-4 mr-1" />
+                                  WhatsApp
+                                </Button>
+                              )}
+                            </div>
                           </div>
-                          <p className="text-sm font-medium text-foreground">
-                            {order.contactName}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {order.contactEmail} | {order.contactPhone}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Event: {order.eventDate} | Ordered: {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : "N/A"}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge 
-                            variant={order.paymentStatus === "completed" ? "default" : "secondary"}
-                          >
-                            {order.paymentStatus}
-                          </Badge>
-                          {order.paymentMethod === "whatsapp" && (
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => window.open(`https://wa.me/${settings.whatsappNumber?.replace(/[^0-9]/g, "")}`, "_blank")}
-                              data-testid={`button-whatsapp-${order.id}`}
-                            >
-                              <ExternalLink className="h-4 w-4 mr-1" />
-                              WhatsApp
-                            </Button>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          {/* Contact Information */}
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-muted/50 rounded-md">
+                            <div>
+                              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Contact Name</p>
+                              <p className="font-medium">{order.contactName}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Email</p>
+                              <p className="font-medium">{order.contactEmail}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Phone</p>
+                              <p className="font-medium">{order.contactPhone}</p>
+                            </div>
+                          </div>
+
+                          {/* Event Details */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Event Date</p>
+                              <p className="font-medium">{order.eventDate}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Payment Method</p>
+                              <p className="font-medium capitalize">{order.paymentMethod}</p>
+                            </div>
+                          </div>
+
+                          {/* Locations */}
+                          {order.locations && Array.isArray(order.locations) && order.locations.length > 0 && (
+                            <div>
+                              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">Locations</p>
+                              <div className="space-y-2">
+                                {order.locations.map((location: { name: string; address: string; mapLink?: string }, idx: number) => (
+                                  <div key={idx} className="p-3 border rounded-md">
+                                    <p className="font-medium">{location.name}</p>
+                                    <p className="text-sm text-muted-foreground">{location.address}</p>
+                                    {location.mapLink && (
+                                      <a 
+                                        href={location.mapLink} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="text-sm text-primary hover:underline"
+                                      >
+                                        View on Map
+                                      </a>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
                           )}
-                        </div>
-                      </div>
+
+                          {/* Customizations */}
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {order.songChoice && (
+                              <div>
+                                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Song Choice</p>
+                                <p className="font-medium">{order.songChoice}</p>
+                              </div>
+                            )}
+                            {order.rsvpPreference && (
+                              <div>
+                                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">RSVP Preference</p>
+                                <p className="font-medium capitalize">{order.rsvpPreference}</p>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Additional Notes */}
+                          {order.additionalNotes && (
+                            <div>
+                              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Additional Notes</p>
+                              <p className="text-sm p-3 bg-muted/50 rounded-md">{order.additionalNotes}</p>
+                            </div>
+                          )}
+
+                          {/* Media URLs */}
+                          {order.mediaUrls && Array.isArray(order.mediaUrls) && order.mediaUrls.length > 0 && (
+                            <div>
+                              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Uploaded Media</p>
+                              <p className="text-sm">{order.mediaUrls.length} file(s) attached</p>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
                     ))}
                   </div>
                 ) : (
