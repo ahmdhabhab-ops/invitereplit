@@ -51,6 +51,8 @@ import {
 } from "lucide-react";
 import { SiTiktok } from "react-icons/si";
 import type { SiteSettings, Order, JobOpening, JobApplication, PartnershipRequest } from "@shared/schema";
+import { InvoiceManager } from "@/components/InvoiceManager";
+import { Receipt } from "lucide-react";
 
 type JobFormData = {
   title: string;
@@ -475,6 +477,10 @@ export default function AdminDashboard() {
             <TabsTrigger value="orders" className="flex items-center gap-2" data-testid="tab-orders">
               <FileText className="h-4 w-4" />
               Orders
+            </TabsTrigger>
+            <TabsTrigger value="invoices" className="flex items-center gap-2" data-testid="tab-invoices">
+              <Receipt className="h-4 w-4" />
+              Invoices
             </TabsTrigger>
             <TabsTrigger value="jobs" className="flex items-center gap-2" data-testid="tab-jobs">
               <Briefcase className="h-4 w-4" />
@@ -922,6 +928,11 @@ export default function AdminDashboard() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Invoices Tab */}
+          <TabsContent value="invoices" className="space-y-6">
+            <InvoiceManager />
           </TabsContent>
 
           {/* Jobs Tab */}

@@ -517,12 +517,19 @@ export async function registerRoutes(
   // Update invoice (admin only)
   app.patch("/api/invoices/:id", isAdmin, async (req, res) => {
     try {
-      const invoice = await storage.updateInvoice(req.params.id, req.body);
+      // Validate the update data with partial schema
+      const updateSchema = insertInvoiceSchema.partial();
+      const validatedData = updateSchema.parse(req.body);
+      
+      const invoice = await storage.updateInvoice(req.params.id, validatedData);
       if (!invoice) {
         return res.status(404).json({ error: "Invoice not found" });
       }
       res.json(invoice);
     } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation failed", details: error.errors });
+      }
       console.error("Error updating invoice:", error);
       res.status(500).json({ error: "Failed to update invoice" });
     }
