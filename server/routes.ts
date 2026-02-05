@@ -1,7 +1,7 @@
 import type { Express, RequestHandler } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertOrderSchema, insertSiteSettingsSchema, insertPartnershipRequestSchema, insertJobOpeningSchema, insertJobApplicationSchema } from "@shared/schema";
+import { insertOrderSchema, insertSiteSettingsSchema, insertPartnershipRequestSchema, insertJobOpeningSchema, insertJobApplicationSchema, insertInvoiceSchema } from "@shared/schema";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import session from "express-session";
@@ -458,6 +458,84 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error updating application:", error);
       res.status(500).json({ error: "Failed to update application" });
+    }
+  });
+
+  // ==================== INVOICE ROUTES ====================
+
+  // Get all invoices (admin only)
+  app.get("/api/invoices", isAdmin, async (req, res) => {
+    try {
+      const invoices = await storage.getInvoices();
+      res.json(invoices);
+    } catch (error) {
+      console.error("Error fetching invoices:", error);
+      res.status(500).json({ error: "Failed to fetch invoices" });
+    }
+  });
+
+  // Get next invoice number (admin only)
+  app.get("/api/invoices/next-number", isAdmin, async (req, res) => {
+    try {
+      const nextNumber = await storage.getNextInvoiceNumber();
+      res.json({ invoiceNumber: nextNumber });
+    } catch (error) {
+      console.error("Error getting next invoice number:", error);
+      res.status(500).json({ error: "Failed to get next invoice number" });
+    }
+  });
+
+  // Get single invoice (admin only)
+  app.get("/api/invoices/:id", isAdmin, async (req, res) => {
+    try {
+      const invoice = await storage.getInvoice(req.params.id);
+      if (!invoice) {
+        return res.status(404).json({ error: "Invoice not found" });
+      }
+      res.json(invoice);
+    } catch (error) {
+      console.error("Error fetching invoice:", error);
+      res.status(500).json({ error: "Failed to fetch invoice" });
+    }
+  });
+
+  // Create invoice (admin only)
+  app.post("/api/invoices", isAdmin, async (req, res) => {
+    try {
+      const validatedData = insertInvoiceSchema.parse(req.body);
+      const invoice = await storage.createInvoice(validatedData);
+      res.status(201).json(invoice);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation failed", details: error.errors });
+      }
+      console.error("Error creating invoice:", error);
+      res.status(500).json({ error: "Failed to create invoice" });
+    }
+  });
+
+  // Update invoice (admin only)
+  app.patch("/api/invoices/:id", isAdmin, async (req, res) => {
+    try {
+      const invoice = await storage.updateInvoice(req.params.id, req.body);
+      if (!invoice) {
+        return res.status(404).json({ error: "Invoice not found" });
+      }
+      res.json(invoice);
+    } catch (error) {
+      console.error("Error updating invoice:", error);
+      res.status(500).json({ error: "Failed to update invoice" });
+    }
+  });
+
+  // Delete invoice (admin only)
+  app.delete("/api/invoices/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteInvoice(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting invoice:", error);
+      res.status(500).json({ error: "Failed to delete invoice" });
     }
   });
 
