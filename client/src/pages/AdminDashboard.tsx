@@ -275,6 +275,21 @@ export default function AdminDashboard() {
     },
   });
 
+  // Update order payment status mutation
+  const updateOrderStatusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const res = await apiRequest("PATCH", `/api/orders/${id}/payment`, { status });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+      toast({ title: "Payment status updated" });
+    },
+    onError: () => {
+      toast({ title: "Failed to update payment status", variant: "destructive" });
+    },
+  });
+
   // Update application status mutation
   const updateApplicationStatusMutation = useMutation({
     mutationFn: async ({ id, status, notes }: { id: string; status: string; notes?: string }) => {
@@ -656,12 +671,26 @@ export default function AdminDashboard() {
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
-                          <Badge 
-                            variant={order.paymentStatus === "completed" ? "default" : "secondary"}
-                            className="px-3 py-1"
+                          <Select
+                            value={order.paymentStatus || "pending"}
+                            onValueChange={(value) => {
+                              updateOrderStatusMutation.mutate({ id: order.id, status: value });
+                            }}
+                            disabled={updateOrderStatusMutation.isPending}
                           >
-                            {order.paymentStatus}
-                          </Badge>
+                            <SelectTrigger 
+                              className="w-[130px]" 
+                              onClick={(e) => e.stopPropagation()}
+                              data-testid={`select-payment-status-${order.id}`}
+                            >
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
+                              <SelectItem value="pending" data-testid={`selectitem-status-pending-${order.id}`}>Pending</SelectItem>
+                              <SelectItem value="completed" data-testid={`selectitem-status-completed-${order.id}`}>Completed</SelectItem>
+                              <SelectItem value="failed" data-testid={`selectitem-status-failed-${order.id}`}>Failed</SelectItem>
+                            </SelectContent>
+                          </Select>
                           {order.paymentMethod === "whatsapp" && (
                             <Button 
                               variant="outline" 
@@ -684,6 +713,50 @@ export default function AdminDashboard() {
                     {expandedOrder === order.id && (
                       <CardContent className="border-t bg-muted/20">
                         <div className="grid gap-6 pt-4">
+                          {/* Order Summary */}
+                          <div>
+                            <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
+                              <Package className="h-4 w-4" />
+                              Order Summary
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-background rounded-lg border">
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1">Order ID</p>
+                                <p className="font-medium font-mono text-sm">{order.id}</p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1">Package</p>
+                                <Badge variant="outline" className="capitalize">{order.packageType}</Badge>
+                              </div>
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1">Event Type</p>
+                                <Badge variant="secondary" className="capitalize">{order.eventType}</Badge>
+                              </div>
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1">Order Date</p>
+                                <p className="font-medium">{order.createdAt ? new Date(order.createdAt).toLocaleString() : "N/A"}</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Event Details */}
+                          <div>
+                            <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
+                              <Calendar className="h-4 w-4" />
+                              Event Details
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-background rounded-lg border">
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1">Names (Couple/Host)</p>
+                                <p className="font-medium text-lg">{order.names}</p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1">Event Date</p>
+                                <p className="font-medium text-lg">{order.eventDate}</p>
+                              </div>
+                            </div>
+                          </div>
+
                           {/* Contact Information */}
                           <div>
                             <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
@@ -692,57 +765,79 @@ export default function AdminDashboard() {
                             </h4>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-background rounded-lg border">
                               <div>
-                                <p className="text-xs text-muted-foreground mb-1">Name</p>
+                                <p className="text-xs text-muted-foreground mb-1">Contact Name</p>
                                 <p className="font-medium">{order.contactName}</p>
                               </div>
                               <div>
                                 <p className="text-xs text-muted-foreground mb-1">Email</p>
-                                <p className="font-medium">{order.contactEmail}</p>
+                                <a 
+                                  href={`mailto:${order.contactEmail}`} 
+                                  className="font-medium text-primary hover:underline"
+                                  data-testid={`link-email-${order.id}`}
+                                >
+                                  {order.contactEmail}
+                                </a>
                               </div>
                               <div>
                                 <p className="text-xs text-muted-foreground mb-1">Phone</p>
-                                <p className="font-medium">{order.contactPhone}</p>
+                                <a 
+                                  href={`tel:${order.contactPhone}`} 
+                                  className="font-medium text-primary hover:underline"
+                                  data-testid={`link-phone-${order.id}`}
+                                >
+                                  {order.contactPhone}
+                                </a>
                               </div>
                             </div>
                           </div>
 
                           {/* Event Locations */}
-                          {order.locations && Array.isArray(order.locations) && order.locations.length > 0 && (
-                            <div>
-                              <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
-                                <MapPin className="h-4 w-4" />
-                                Event Locations ({order.locations.length})
-                              </h4>
+                          <div>
+                            <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
+                              <MapPin className="h-4 w-4" />
+                              Event Locations {order.locations && Array.isArray(order.locations) ? `(${order.locations.length})` : ""}
+                            </h4>
+                            {order.locations && Array.isArray(order.locations) && order.locations.length > 0 ? (
                               <div className="grid gap-3">
                                 {order.locations.map((location: { name: string; address: string; mapLink?: string }, idx: number) => (
                                   <div key={idx} className="p-4 bg-background rounded-lg border">
                                     <div className="flex items-start justify-between gap-4">
-                                      <div>
-                                        <p className="font-semibold">{location.name}</p>
-                                        <p className="text-sm text-muted-foreground mt-1">{location.address}</p>
+                                      <div className="flex-1">
+                                        <p className="font-semibold">{location.name || `Location ${idx + 1}`}</p>
+                                        <p className="text-sm text-muted-foreground mt-1">{location.address || "No address provided"}</p>
+                                        {location.mapLink && (
+                                          <p className="text-xs text-muted-foreground mt-1 truncate">
+                                            Map: {location.mapLink}
+                                          </p>
+                                        )}
                                       </div>
                                       {location.mapLink && (
                                         <Button 
                                           variant="outline" 
                                           size="sm"
                                           onClick={() => window.open(location.mapLink, "_blank")}
+                                          data-testid={`button-map-${order.id}-${idx}`}
                                         >
                                           <MapPin className="h-4 w-4 mr-1" />
-                                          Map
+                                          Open Map
                                         </Button>
                                       )}
                                     </div>
                                   </div>
                                 ))}
                               </div>
-                            </div>
-                          )}
+                            ) : (
+                              <div className="p-4 bg-background rounded-lg border">
+                                <p className="text-sm text-muted-foreground">No locations specified</p>
+                              </div>
+                            )}
+                          </div>
 
                           {/* Customizations */}
                           <div>
                             <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
                               <Settings className="h-4 w-4" />
-                              Customizations
+                              Customizations & Preferences
                             </h4>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-background rounded-lg border">
                               <div>
@@ -770,37 +865,80 @@ export default function AdminDashboard() {
                           </div>
 
                           {/* Additional Notes */}
-                          {order.additionalNotes && (
-                            <div>
-                              <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
-                                <MessageSquare className="h-4 w-4" />
-                                Additional Notes
-                              </h4>
-                              <div className="p-4 bg-background rounded-lg border">
+                          <div>
+                            <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
+                              <MessageSquare className="h-4 w-4" />
+                              Additional Notes
+                            </h4>
+                            <div className="p-4 bg-background rounded-lg border">
+                              {order.additionalNotes ? (
                                 <p className="text-sm whitespace-pre-wrap">{order.additionalNotes}</p>
-                              </div>
+                              ) : (
+                                <p className="text-sm text-muted-foreground italic">No additional notes provided</p>
+                              )}
                             </div>
-                          )}
+                          </div>
 
-                          {/* Media */}
-                          {order.mediaUrls && Array.isArray(order.mediaUrls) && order.mediaUrls.length > 0 && (
-                            <div>
-                              <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
-                                <Image className="h-4 w-4" />
-                                Uploaded Media ({order.mediaUrls.length} files)
-                              </h4>
-                              <div className="p-4 bg-background rounded-lg border">
+                          {/* Uploaded Media */}
+                          <div>
+                            <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
+                              <Image className="h-4 w-4" />
+                              Uploaded Media
+                            </h4>
+                            <div className="p-4 bg-background rounded-lg border">
+                              {order.mediaUrls && Array.isArray(order.mediaUrls) && order.mediaUrls.length > 0 ? (
                                 <div className="flex flex-wrap gap-2">
                                   {order.mediaUrls.map((url, idx) => (
-                                    <Button key={idx} variant="outline" size="sm" onClick={() => window.open(url, "_blank")}>
+                                    <Button 
+                                      key={idx} 
+                                      variant="outline" 
+                                      size="sm" 
+                                      onClick={() => window.open(url, "_blank")}
+                                      data-testid={`button-media-${order.id}-${idx}`}
+                                    >
                                       File {idx + 1}
                                       <ExternalLink className="h-3 w-3 ml-1" />
                                     </Button>
                                   ))}
                                 </div>
+                              ) : (
+                                <p className="text-sm text-muted-foreground italic">No media files uploaded</p>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Payment Status */}
+                          <div>
+                            <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
+                              <DollarSign className="h-4 w-4" />
+                              Payment Information
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-background rounded-lg border">
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1">Payment Method</p>
+                                <p className="font-medium capitalize">{order.paymentMethod}</p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-2">Payment Status</p>
+                                <Select
+                                  value={order.paymentStatus || "pending"}
+                                  onValueChange={(value) => {
+                                    updateOrderStatusMutation.mutate({ id: order.id, status: value });
+                                  }}
+                                  disabled={updateOrderStatusMutation.isPending}
+                                >
+                                  <SelectTrigger className="w-[160px]" data-testid={`select-payment-status-detail-${order.id}`}>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="pending" data-testid={`selectitem-status-detail-pending-${order.id}`}>Pending</SelectItem>
+                                    <SelectItem value="completed" data-testid={`selectitem-status-detail-completed-${order.id}`}>Completed</SelectItem>
+                                    <SelectItem value="failed" data-testid={`selectitem-status-detail-failed-${order.id}`}>Failed</SelectItem>
+                                  </SelectContent>
+                                </Select>
                               </div>
                             </div>
-                          )}
+                          </div>
                         </div>
                       </CardContent>
                     )}
