@@ -215,7 +215,8 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
         const message = encodeURIComponent(
           `Hi! I'd like to order the ${selectedTier?.name} package for my ${eventType}.\n\nOrder ID: ${data.id}\nNames: ${eventForm.getValues("names")}\nEvent Date: ${eventForm.getValues("eventDate")}`
         );
-        window.open(`https://wa.me/96170000000?text=${message}`, "_blank");
+        const whatsappNum = settings?.whatsappNumber?.replace(/[^0-9]/g, "") || "96181824782";
+        window.open(`https://wa.me/${whatsappNum}?text=${message}`, "_blank");
       }
       
       toast({
@@ -775,7 +776,7 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                         <FormControl>
                           <Input
                             type="tel"
-                            placeholder="+961 70 000 000"
+                            placeholder="+961 81 824 782"
                             {...field}
                             data-testid="input-contact-phone"
                           />
