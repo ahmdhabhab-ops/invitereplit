@@ -177,13 +177,30 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
       customizations: Customizations;
       contact: ContactPayment;
     }) => {
+      let mediaUrls: string[] = [];
+      if (uploadedFiles.length > 0) {
+        const formData = new FormData();
+        uploadedFiles.forEach((file) => {
+          formData.append("media", file);
+        });
+        const uploadRes = await fetch("/api/upload/media", {
+          method: "POST",
+          body: formData,
+        });
+        if (!uploadRes.ok) {
+          throw new Error("Failed to upload media files");
+        }
+        const uploadData = await uploadRes.json();
+        mediaUrls = uploadData.urls;
+      }
+
       const orderData = {
         packageType: selectedPackage,
         eventType,
         ...data.eventDetails,
         ...data.customizations,
         ...data.contact,
-        mediaUrls: [],
+        mediaUrls,
         paymentStatus: "pending",
       };
       

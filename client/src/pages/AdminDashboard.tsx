@@ -887,18 +887,25 @@ export default function AdminDashboard() {
                             </h4>
                             <div className="p-4 bg-background rounded-lg border">
                               {order.mediaUrls && Array.isArray(order.mediaUrls) && order.mediaUrls.length > 0 ? (
-                                <div className="flex flex-wrap gap-2">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                                   {order.mediaUrls.map((url, idx) => (
-                                    <Button 
-                                      key={idx} 
-                                      variant="outline" 
-                                      size="sm" 
-                                      onClick={() => window.open(url, "_blank")}
+                                    <a
+                                      key={idx}
+                                      href={url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="group relative aspect-square rounded-lg overflow-hidden border hover:ring-2 hover:ring-primary transition-all"
                                       data-testid={`button-media-${order.id}-${idx}`}
                                     >
-                                      File {idx + 1}
-                                      <ExternalLink className="h-3 w-3 ml-1" />
-                                    </Button>
+                                      <img
+                                        src={url}
+                                        alt={`Upload ${idx + 1}`}
+                                        className="w-full h-full object-cover"
+                                      />
+                                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                                        <ExternalLink className="h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                                      </div>
+                                    </a>
                                   ))}
                                 </div>
                               ) : (

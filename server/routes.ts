@@ -43,6 +43,22 @@ const upload = multer({
   }
 });
 
+const mediaUpload = multer({
+  storage: storage_multer,
+  limits: {
+    fileSize: 10 * 1024 * 1024,
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.heic', '.heif'];
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (allowedTypes.includes(ext)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files (PNG, JPG, GIF, WEBP, HEIC) are allowed'));
+    }
+  }
+});
+
 // Admin credentials from environment variables
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "info@einvite.me";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "";
@@ -382,6 +398,20 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error uploading file:", error);
       res.status(500).json({ error: "Failed to upload file" });
+    }
+  });
+
+  app.post("/api/upload/media", mediaUpload.array("media", 10), (req, res) => {
+    try {
+      const files = req.files as Express.Multer.File[];
+      if (!files || files.length === 0) {
+        return res.status(400).json({ error: "No files uploaded" });
+      }
+      const urls = files.map(file => `/uploads/${file.filename}`);
+      res.json({ urls });
+    } catch (error) {
+      console.error("Error uploading media:", error);
+      res.status(500).json({ error: "Failed to upload media files" });
     }
   });
 
