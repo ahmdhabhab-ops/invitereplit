@@ -1,7 +1,7 @@
 import type { Express, RequestHandler } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertOrderSchema, insertSiteSettingsSchema, insertPartnershipRequestSchema, insertJobOpeningSchema, insertJobApplicationSchema, insertInvoiceSchema } from "@shared/schema";
+import { insertOrderSchema, insertSiteSettingsSchema, insertPartnershipRequestSchema, insertJobOpeningSchema, insertJobApplicationSchema, insertInvoiceSchema, insertAdminUserSchema } from "@shared/schema";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import session from "express-session";
@@ -59,30 +59,54 @@ const mediaUpload = multer({
   }
 });
 
-// Admin credentials from environment variables
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "info@einvite.me";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "";
-
-// Validate admin credentials on startup
-if (!ADMIN_PASSWORD) {
-  console.warn("Warning: ADMIN_PASSWORD environment variable not set. Admin login will be disabled.");
-}
-
 // Extend session type
 declare module "express-session" {
   interface SessionData {
     isAdmin?: boolean;
     adminEmail?: string;
+    adminRole?: string;
+    adminUserId?: string;
   }
 }
 
-// Middleware to check if user is admin
-const isAdmin: RequestHandler = (req, res, next) => {
+// Middleware: any authenticated admin/sales user
+const isAuthenticated: RequestHandler = (req, res, next) => {
   if (req.session?.isAdmin) {
     return next();
   }
-  return res.status(401).json({ error: "Unauthorized. Please log in as admin." });
+  return res.status(401).json({ error: "Unauthorized. Please log in." });
 };
+
+// Middleware: only admin role
+const isAdminRole: RequestHandler = (req, res, next) => {
+  if (req.session?.isAdmin && req.session?.adminRole === "admin") {
+    return next();
+  }
+  return res.status(403).json({ error: "Forbidden. Admin access required." });
+};
+
+// Keep backward compat - isAdmin means any authenticated user for existing routes
+const isAdmin: RequestHandler = isAuthenticated;
+
+async function seedInitialAdmin() {
+  const existingUsers = await storage.getAdminUsers();
+  if (existingUsers.length === 0) {
+    const password = process.env.ADMIN_PASSWORD;
+    if (password) {
+      const hash = await bcrypt.hash(password, 10);
+      await storage.createAdminUser({
+        name: "Admin",
+        email: process.env.ADMIN_EMAIL || "info@einvite.me",
+        passwordHash: hash,
+        role: "admin",
+        isActive: "true",
+      });
+      console.log("Initial admin user created from environment variables.");
+    } else {
+      console.warn("Warning: No admin users exist and ADMIN_PASSWORD not set. Admin login will not work.");
+    }
+  }
+}
 
 export async function registerRoutes(
   httpServer: Server,
@@ -111,6 +135,9 @@ export async function registerRoutes(
     },
   }));
 
+  // Seed initial admin user on startup
+  await seedInitialAdmin();
+
   // Admin login endpoint
   app.post("/api/admin/login", async (req, res) => {
     try {
@@ -120,21 +147,26 @@ export async function registerRoutes(
         return res.status(400).json({ error: "Email and password are required" });
       }
       
-      // Check if admin login is configured
-      if (!ADMIN_PASSWORD) {
-        return res.status(503).json({ error: "Admin login not configured" });
+      const user = await storage.getAdminUserByEmail(email);
+      if (!user) {
+        return res.status(401).json({ error: "Invalid email or password" });
       }
-      
-      // Verify credentials
-      if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
+
+      if (user.isActive !== "true") {
+        return res.status(401).json({ error: "Account is disabled" });
+      }
+
+      const valid = await bcrypt.compare(password, user.passwordHash);
+      if (!valid) {
         return res.status(401).json({ error: "Invalid email or password" });
       }
       
-      // Set session
       req.session.isAdmin = true;
-      req.session.adminEmail = email;
+      req.session.adminEmail = user.email;
+      req.session.adminRole = user.role;
+      req.session.adminUserId = user.id;
       
-      res.json({ success: true, email });
+      res.json({ success: true, email: user.email, role: user.role, name: user.name });
     } catch (error) {
       console.error("Error during admin login:", error);
       res.status(500).json({ error: "Login failed" });
@@ -154,7 +186,7 @@ export async function registerRoutes(
   // Check admin session
   app.get("/api/admin/session", (req, res) => {
     if (req.session?.isAdmin) {
-      res.json({ isAdmin: true, email: req.session.adminEmail });
+      res.json({ isAdmin: true, email: req.session.adminEmail, role: req.session.adminRole, userId: req.session.adminUserId });
     } else {
       res.json({ isAdmin: false });
     }
@@ -238,8 +270,8 @@ export async function registerRoutes(
     }
   });
 
-  // Update site settings (protected - admin only)
-  app.patch("/api/settings", isAdmin, async (req, res) => {
+  // Update site settings (protected - admin role only)
+  app.patch("/api/settings", isAdminRole, async (req, res) => {
     try {
       // Create a partial schema for validation
       const updateSettingsSchema = insertSiteSettingsSchema.partial();
@@ -340,8 +372,8 @@ export async function registerRoutes(
     }
   });
 
-  // Create job opening (admin only)
-  app.post("/api/jobs", isAdmin, async (req, res) => {
+  // Create job opening (admin role only)
+  app.post("/api/jobs", isAdminRole, async (req, res) => {
     try {
       const validatedData = insertJobOpeningSchema.parse(req.body);
       const job = await storage.createJobOpening(validatedData);
@@ -355,8 +387,8 @@ export async function registerRoutes(
     }
   });
 
-  // Update job opening (admin only)
-  app.patch("/api/jobs/:id", isAdmin, async (req, res) => {
+  // Update job opening (admin role only)
+  app.patch("/api/jobs/:id", isAdminRole, async (req, res) => {
     try {
       const updateSchema = insertJobOpeningSchema.partial();
       const validatedData = updateSchema.parse(req.body);
@@ -374,8 +406,8 @@ export async function registerRoutes(
     }
   });
 
-  // Delete job opening (admin only)
-  app.delete("/api/jobs/:id", isAdmin, async (req, res) => {
+  // Delete job opening (admin role only)
+  app.delete("/api/jobs/:id", isAdminRole, async (req, res) => {
     try {
       await storage.deleteJobOpening(req.params.id);
       res.json({ success: true });
@@ -573,6 +605,86 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error deleting invoice:", error);
       res.status(500).json({ error: "Failed to delete invoice" });
+    }
+  });
+
+  // ==================== ADMIN USER MANAGEMENT ====================
+
+  // Get all admin users (admin role only)
+  app.get("/api/admin/users", isAdminRole, async (req, res) => {
+    try {
+      const users = await storage.getAdminUsers();
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching admin users:", error);
+      res.status(500).json({ error: "Failed to fetch users" });
+    }
+  });
+
+  // Create admin user (admin role only)
+  app.post("/api/admin/users", isAdminRole, async (req, res) => {
+    try {
+      const { name, email, password, role, isActive } = insertAdminUserSchema.parse(req.body);
+
+      const existing = await storage.getAdminUserByEmail(email);
+      if (existing) {
+        return res.status(400).json({ error: "A user with this email already exists" });
+      }
+
+      const passwordHash = await bcrypt.hash(password, 10);
+      const user = await storage.createAdminUser({ name, email, passwordHash, role, isActive });
+      res.status(201).json(user);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation failed", details: error.errors });
+      }
+      console.error("Error creating admin user:", error);
+      res.status(500).json({ error: "Failed to create user" });
+    }
+  });
+
+  // Update admin user (admin role only)
+  app.patch("/api/admin/users/:id", isAdminRole, async (req, res) => {
+    try {
+      const { name, email, role, isActive } = req.body;
+      const updateData: any = {};
+      if (name) updateData.name = name;
+      if (email) {
+        const existing = await storage.getAdminUserByEmail(email);
+        if (existing && existing.id !== req.params.id) {
+          return res.status(400).json({ error: "A user with this email already exists" });
+        }
+        updateData.email = email;
+      }
+      if (role && ["admin", "sales"].includes(role)) updateData.role = role;
+      if (isActive !== undefined) updateData.isActive = isActive;
+
+      if (req.body.password) {
+        updateData.passwordHash = await bcrypt.hash(req.body.password, 10);
+      }
+
+      const user = await storage.updateAdminUser(req.params.id, updateData);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      res.json(user);
+    } catch (error) {
+      console.error("Error updating admin user:", error);
+      res.status(500).json({ error: "Failed to update user" });
+    }
+  });
+
+  // Delete admin user (admin role only)
+  app.delete("/api/admin/users/:id", isAdminRole, async (req, res) => {
+    try {
+      if (req.params.id === req.session.adminUserId) {
+        return res.status(400).json({ error: "You cannot delete your own account" });
+      }
+      await storage.deleteAdminUser(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting admin user:", error);
+      res.status(500).json({ error: "Failed to delete user" });
     }
   });
 

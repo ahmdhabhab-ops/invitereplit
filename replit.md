@@ -19,7 +19,7 @@ A high-conversion landing page for "einvite.me" - a professional digital invitat
 - **Styling**: Tailwind CSS with custom design tokens, Framer Motion for animations
 - **Animations**: Lottie-react for interactive vector animations
 - **Backend**: Express.js API with PostgreSQL database using Drizzle ORM
-- **Authentication**: Replit Auth (OpenID Connect) for admin access
+- **Authentication**: Multi-user admin system with role-based access (Admin/Sales)
 - **UI Components**: Shadcn/ui component library
 
 ## Project Structure
@@ -90,19 +90,25 @@ shared/
 - **partnership_requests**: id, companyName, contactName, email, phone, website, eventsPerYear, eventTypes (JSONB), message, status, createdAt
 - **job_openings**: id, title, department, location, type, description, requirements (JSONB), responsibilities (JSONB), benefits (JSONB), salaryRange, isActive, createdAt, updatedAt
 - **job_applications**: id, jobId, fullName, email, phone, resumeUrl, portfolioUrl, linkedinUrl, coverLetter, yearsOfExperience, status, notes, createdAt
+- **admin_users**: id, name, email, passwordHash, role (admin/sales), isActive, createdAt, updatedAt
 
 ## Admin Dashboard Features
 The admin panel at `/admin` allows managing:
-- **General Settings**: Hero section content, statistics, admin user emails
-- **Pricing**: Package prices and features for Essential, Premium, Royal tiers
-- **Contact Info**: Phone, email, WhatsApp number
-- **Social Media**: Facebook, Instagram, X, LinkedIn, TikTok links
-- **Orders**: View and manage customer orders with WhatsApp integration
+- **General Settings**: Hero section content, statistics (Admin only)
+- **Pricing**: Package prices and features for Essential, Premium, Royal tiers (Admin only)
+- **Contact Info**: Phone, email, WhatsApp number (Admin only)
+- **Social Media**: Facebook, Instagram, X, LinkedIn, TikTok links (Admin only)
+- **Orders**: View and manage customer orders with WhatsApp integration (Admin + Sales)
+- **Invoices**: Create and manage invoices for clients (Admin + Sales)
+- **Team Members**: User management with role assignment (Admin only)
 
-## Authentication
-- Uses username/password login for admin access
-- Admin credentials: info@einvite.me (configured in server/routes.ts)
+## Authentication & Roles
+- Multi-user admin system stored in `admin_users` database table
+- Two roles: **Admin** (full access) and **Sales** (orders + invoices only)
+- Initial admin user auto-seeded from ADMIN_EMAIL/ADMIN_PASSWORD env vars on first startup
+- Passwords hashed with bcrypt
 - Session-based authentication with PostgreSQL session storage
+- Sales users cannot access settings, jobs, candidates, partnerships, or user management
 - Access admin at `/admin` route (visible link in footer)
 
 ## Design Tokens

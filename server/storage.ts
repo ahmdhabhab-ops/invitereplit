@@ -1,4 +1,4 @@
-import { type Order, type InsertOrder, type SiteSettings, type InsertSiteSettings, type PartnershipRequest, type InsertPartnershipRequest, type JobOpening, type InsertJobOpening, type JobApplication, type InsertJobApplication, type Invoice, type InsertInvoice, orders, siteSettings, partnershipRequests, jobOpenings, jobApplications, invoices } from "@shared/schema";
+import { type Order, type InsertOrder, type SiteSettings, type InsertSiteSettings, type PartnershipRequest, type InsertPartnershipRequest, type JobOpening, type InsertJobOpening, type JobApplication, type InsertJobApplication, type Invoice, type InsertInvoice, type AdminUser, type AdminUserSafe, orders, siteSettings, partnershipRequests, jobOpenings, jobApplications, invoices, adminUsers } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
 
@@ -38,6 +38,14 @@ export interface IStorage {
   updateInvoice(id: string, invoice: Partial<InsertInvoice>): Promise<Invoice | undefined>;
   deleteInvoice(id: string): Promise<boolean>;
   getNextInvoiceNumber(): Promise<string>;
+
+  // Admin user operations
+  getAdminUsers(): Promise<AdminUserSafe[]>;
+  getAdminUser(id: string): Promise<AdminUser | undefined>;
+  getAdminUserByEmail(email: string): Promise<AdminUser | undefined>;
+  createAdminUser(user: { name: string; email: string; passwordHash: string; role: string; isActive?: string }): Promise<AdminUserSafe>;
+  updateAdminUser(id: string, data: Partial<{ name: string; email: string; passwordHash: string; role: string; isActive: string }>): Promise<AdminUserSafe | undefined>;
+  deleteAdminUser(id: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -203,6 +211,49 @@ export class DatabaseStorage implements IStorage {
     const year = new Date().getFullYear();
     const count = allInvoices.length + 1;
     return `INV-${year}-${count.toString().padStart(4, "0")}`;
+  }
+
+  private stripPasswordHash(user: AdminUser): AdminUserSafe {
+    const { passwordHash, ...safe } = user;
+    return safe;
+  }
+
+  async getAdminUsers(): Promise<AdminUserSafe[]> {
+    const users = await db.select().from(adminUsers).orderBy(desc(adminUsers.createdAt));
+    return users.map(u => this.stripPasswordHash(u));
+  }
+
+  async getAdminUser(id: string): Promise<AdminUser | undefined> {
+    const [user] = await db.select().from(adminUsers).where(eq(adminUsers.id, id));
+    return user;
+  }
+
+  async getAdminUserByEmail(email: string): Promise<AdminUser | undefined> {
+    const [user] = await db.select().from(adminUsers).where(eq(adminUsers.email, email.toLowerCase()));
+    return user;
+  }
+
+  async createAdminUser(user: { name: string; email: string; passwordHash: string; role: string; isActive?: string }): Promise<AdminUserSafe> {
+    const [created] = await db.insert(adminUsers).values({
+      name: user.name,
+      email: user.email.toLowerCase(),
+      passwordHash: user.passwordHash,
+      role: user.role,
+      isActive: user.isActive || "true",
+    } as any).returning();
+    return this.stripPasswordHash(created);
+  }
+
+  async updateAdminUser(id: string, data: Partial<{ name: string; email: string; passwordHash: string; role: string; isActive: string }>): Promise<AdminUserSafe | undefined> {
+    const updateData: any = { ...data, updatedAt: new Date() };
+    if (data.email) updateData.email = data.email.toLowerCase();
+    const [updated] = await db.update(adminUsers).set(updateData).where(eq(adminUsers.id, id)).returning();
+    return updated ? this.stripPasswordHash(updated) : undefined;
+  }
+
+  async deleteAdminUser(id: string): Promise<boolean> {
+    await db.delete(adminUsers).where(eq(adminUsers.id, id));
+    return true;
   }
 }
 

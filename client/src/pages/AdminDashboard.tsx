@@ -75,7 +75,7 @@ import {
   Image
 } from "lucide-react";
 import { SiTiktok } from "react-icons/si";
-import type { SiteSettings, Order, JobOpening, JobApplication, PartnershipRequest } from "@shared/schema";
+import type { SiteSettings, Order, JobOpening, JobApplication, PartnershipRequest, AdminUserSafe } from "@shared/schema";
 import { InvoiceManager } from "@/components/InvoiceManager";
 import logoPath from "@assets/Logo_1769975575984.png";
 
@@ -112,19 +112,23 @@ type ActiveSection =
   | "jobs" 
   | "candidates" 
   | "partnerships" 
+  | "users"
   | "general" 
   | "pricing" 
   | "contact" 
   | "social" 
   | "event-planners";
 
-const menuItems = [
-  { id: "dashboard" as ActiveSection, label: "Dashboard", icon: LayoutDashboard },
-  { id: "orders" as ActiveSection, label: "Orders", icon: FileText },
-  { id: "invoices" as ActiveSection, label: "Invoices", icon: Receipt },
-  { id: "jobs" as ActiveSection, label: "Job Openings", icon: Briefcase },
-  { id: "candidates" as ActiveSection, label: "Candidates", icon: Users },
-  { id: "partnerships" as ActiveSection, label: "Partnerships", icon: Handshake },
+type UserRole = "admin" | "sales";
+
+const allMenuItems = [
+  { id: "dashboard" as ActiveSection, label: "Dashboard", icon: LayoutDashboard, roles: ["admin"] as UserRole[] },
+  { id: "orders" as ActiveSection, label: "Orders", icon: FileText, roles: ["admin", "sales"] as UserRole[] },
+  { id: "invoices" as ActiveSection, label: "Invoices", icon: Receipt, roles: ["admin", "sales"] as UserRole[] },
+  { id: "jobs" as ActiveSection, label: "Job Openings", icon: Briefcase, roles: ["admin"] as UserRole[] },
+  { id: "candidates" as ActiveSection, label: "Candidates", icon: Users, roles: ["admin"] as UserRole[] },
+  { id: "partnerships" as ActiveSection, label: "Partnerships", icon: Handshake, roles: ["admin"] as UserRole[] },
+  { id: "users" as ActiveSection, label: "Team Members", icon: Users, roles: ["admin"] as UserRole[] },
 ];
 
 const settingsItems = [
@@ -140,7 +144,7 @@ export default function AdminDashboard() {
   const [settings, setSettings] = useState<Partial<SiteSettings>>({});
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
-  const [activeSection, setActiveSection] = useState<ActiveSection>("dashboard");
+  const [activeSection, setActiveSection] = useState<ActiveSection>("orders");
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   
   // Job management state
@@ -149,8 +153,13 @@ export default function AdminDashboard() {
   const [jobForm, setJobForm] = useState<JobFormData>(defaultJobForm);
   const [viewingApplication, setViewingApplication] = useState<JobApplication | null>(null);
 
+  // User management state
+  const [showUserDialog, setShowUserDialog] = useState(false);
+  const [editingUser, setEditingUser] = useState<AdminUserSafe | null>(null);
+  const [userForm, setUserForm] = useState({ name: "", email: "", password: "", role: "sales" as UserRole, isActive: "true" });
+
   // Check admin session
-  const { data: sessionData, isLoading: sessionLoading, refetch: refetchSession } = useQuery<{ isAdmin: boolean; email?: string }>({
+  const { data: sessionData, isLoading: sessionLoading, refetch: refetchSession } = useQuery<{ isAdmin: boolean; email?: string; role?: string; userId?: string }>({
     queryKey: ["/api/admin/session"],
   });
 
@@ -180,8 +189,18 @@ export default function AdminDashboard() {
   // Get partnership requests (only when admin is logged in)
   const { data: partnershipRequests, isLoading: partnershipsLoading } = useQuery<PartnershipRequest[]>({
     queryKey: ["/api/partnership-requests"],
-    enabled: sessionData?.isAdmin === true,
+    enabled: sessionData?.isAdmin === true && sessionData?.role === "admin",
   });
+
+  // Get admin users (only for admin role)
+  const { data: adminUsersList } = useQuery<AdminUserSafe[]>({
+    queryKey: ["/api/admin/users"],
+    enabled: sessionData?.isAdmin === true && sessionData?.role === "admin",
+  });
+
+  const userRole = (sessionData?.role as UserRole) || "sales";
+  const isAdminUser = userRole === "admin";
+  const menuItems = allMenuItems.filter(item => item.roles.includes(userRole));
 
   // Login mutation
   const loginMutation = useMutation({
@@ -317,6 +336,56 @@ export default function AdminDashboard() {
     },
     onError: () => {
       toast({ title: "Failed to update status", variant: "destructive" });
+    },
+  });
+
+  // Create admin user mutation
+  const createUserMutation = useMutation({
+    mutationFn: async (data: { name: string; email: string; password: string; role: string; isActive: string }) => {
+      const res = await apiRequest("POST", "/api/admin/users", data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      toast({ title: "User created successfully" });
+      setShowUserDialog(false);
+      setUserForm({ name: "", email: "", password: "", role: "sales", isActive: "true" });
+    },
+    onError: (error: any) => {
+      toast({ title: error?.message || "Failed to create user", variant: "destructive" });
+    },
+  });
+
+  // Update admin user mutation
+  const updateUserMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      const res = await apiRequest("PATCH", `/api/admin/users/${id}`, data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      toast({ title: "User updated successfully" });
+      setShowUserDialog(false);
+      setEditingUser(null);
+      setUserForm({ name: "", email: "", password: "", role: "sales", isActive: "true" });
+    },
+    onError: () => {
+      toast({ title: "Failed to update user", variant: "destructive" });
+    },
+  });
+
+  // Delete admin user mutation
+  const deleteUserMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await apiRequest("DELETE", `/api/admin/users/${id}`, {});
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      toast({ title: "User deleted successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to delete user", variant: "destructive" });
     },
   });
 
@@ -1706,6 +1775,91 @@ export default function AdminDashboard() {
           </div>
         );
 
+      case "users":
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold tracking-tight" data-testid="text-users-title">Team Members</h2>
+                <p className="text-muted-foreground">Manage admin and sales users</p>
+              </div>
+              <Button onClick={() => {
+                setEditingUser(null);
+                setUserForm({ name: "", email: "", password: "", role: "sales", isActive: "true" });
+                setShowUserDialog(true);
+              }} data-testid="button-add-user">
+                <Plus className="h-4 w-4 mr-2" />
+                Add User
+              </Button>
+            </div>
+            
+            <div className="grid gap-4">
+              {adminUsersList?.map((user) => (
+                <Card key={user.id} data-testid={`card-user-${user.id}`}>
+                  <CardContent className="flex items-center justify-between py-4">
+                    <div className="flex items-center gap-4">
+                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <User className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="font-medium" data-testid={`text-user-name-${user.id}`}>{user.name}</p>
+                        <p className="text-sm text-muted-foreground" data-testid={`text-user-email-${user.id}`}>{user.email}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Badge variant={user.role === "admin" ? "default" : "secondary"} data-testid={`badge-user-role-${user.id}`}>
+                        {user.role === "admin" ? "Admin" : "Sales"}
+                      </Badge>
+                      <Badge variant={user.isActive === "true" ? "outline" : "destructive"} data-testid={`badge-user-status-${user.id}`}>
+                        {user.isActive === "true" ? "Active" : "Disabled"}
+                      </Badge>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setEditingUser(user);
+                          setUserForm({
+                            name: user.name,
+                            email: user.email,
+                            password: "",
+                            role: user.role as UserRole,
+                            isActive: user.isActive || "true",
+                          });
+                          setShowUserDialog(true);
+                        }}
+                        data-testid={`button-edit-user-${user.id}`}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      {user.id !== sessionData?.userId && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            if (confirm("Are you sure you want to delete this user?")) {
+                              deleteUserMutation.mutate(user.id);
+                            }
+                          }}
+                          data-testid={`button-delete-user-${user.id}`}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+              {(!adminUsersList || adminUsersList.length === 0) && (
+                <Card>
+                  <CardContent className="py-8 text-center text-muted-foreground">
+                    No users found. Add your first team member above.
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </div>
+        );
+
       default:
         return null;
     }
@@ -1719,7 +1873,12 @@ export default function AdminDashboard() {
             <div className="flex items-center gap-3">
               <img src={logoPath} alt="Einvite" className="h-8" />
               <div>
-                <p className="font-semibold text-sm">Admin Portal</p>
+                <div className="flex items-center gap-2">
+                  <p className="font-semibold text-sm">Admin Portal</p>
+                  <Badge variant={isAdminUser ? "default" : "secondary"} className="text-[10px] px-1.5 py-0" data-testid="badge-current-role">
+                    {isAdminUser ? "Admin" : "Sales"}
+                  </Badge>
+                </div>
                 <p className="text-xs text-muted-foreground truncate">{sessionData.email}</p>
               </div>
             </div>
@@ -1746,25 +1905,27 @@ export default function AdminDashboard() {
               </SidebarGroupContent>
             </SidebarGroup>
             
-            <SidebarGroup>
-              <SidebarGroupLabel>Settings</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {settingsItems.map((item) => (
-                    <SidebarMenuItem key={item.id}>
-                      <SidebarMenuButton 
-                        isActive={activeSection === item.id}
-                        onClick={() => setActiveSection(item.id)}
-                        data-testid={`nav-${item.id}`}
-                      >
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.label}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
+            {isAdminUser && (
+              <SidebarGroup>
+                <SidebarGroupLabel>Settings</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {settingsItems.map((item) => (
+                      <SidebarMenuItem key={item.id}>
+                        <SidebarMenuButton 
+                          isActive={activeSection === item.id}
+                          onClick={() => setActiveSection(item.id)}
+                          data-testid={`nav-${item.id}`}
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.label}</span>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            )}
           </SidebarContent>
           
           <SidebarFooter className="p-4 border-t">
@@ -1798,18 +1959,20 @@ export default function AdminDashboard() {
                 {activeSection === "event-planners" ? "Event Planners Page" : activeSection}
               </h1>
             </div>
-            <Button 
-              onClick={handleSave} 
-              disabled={updateSettingsMutation.isPending}
-              data-testid="button-save-settings"
-            >
-              {updateSettingsMutation.isPending ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Save className="h-4 w-4 mr-2" />
-              )}
-              Save Changes
-            </Button>
+            {isAdminUser && ["general", "pricing", "contact", "social", "event-planners"].includes(activeSection) && (
+              <Button 
+                onClick={handleSave} 
+                disabled={updateSettingsMutation.isPending}
+                data-testid="button-save-settings"
+              >
+                {updateSettingsMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4 mr-2" />
+                )}
+                Save Changes
+              </Button>
+            )}
           </header>
           
           <main className="flex-1 overflow-auto p-6 bg-muted/30">
@@ -2111,6 +2274,96 @@ export default function AdminDashboard() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setViewingApplication(null)}>
               Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* User Management Dialog */}
+      <Dialog open={showUserDialog} onOpenChange={setShowUserDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{editingUser ? "Edit User" : "Add New User"}</DialogTitle>
+            <DialogDescription>
+              {editingUser ? "Update user details below" : "Create a new team member account"}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Full Name</Label>
+              <Input
+                value={userForm.name}
+                onChange={(e) => setUserForm(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="John Doe"
+                data-testid="input-user-name"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Email</Label>
+              <Input
+                type="email"
+                value={userForm.email}
+                onChange={(e) => setUserForm(prev => ({ ...prev, email: e.target.value }))}
+                placeholder="user@einvite.me"
+                data-testid="input-user-email"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>{editingUser ? "New Password (leave blank to keep current)" : "Password"}</Label>
+              <Input
+                type="password"
+                value={userForm.password}
+                onChange={(e) => setUserForm(prev => ({ ...prev, password: e.target.value }))}
+                placeholder={editingUser ? "Leave blank to keep current" : "Min 6 characters"}
+                data-testid="input-user-password"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Role</Label>
+              <Select value={userForm.role} onValueChange={(v) => setUserForm(prev => ({ ...prev, role: v as UserRole }))}>
+                <SelectTrigger data-testid="select-user-role">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="admin">Admin (Full Access)</SelectItem>
+                  <SelectItem value="sales">Sales (Orders & Invoices Only)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Status</Label>
+              <Select value={userForm.isActive} onValueChange={(v) => setUserForm(prev => ({ ...prev, isActive: v }))}>
+                <SelectTrigger data-testid="select-user-status">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="true">Active</SelectItem>
+                  <SelectItem value="false">Disabled</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowUserDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                if (editingUser) {
+                  const data: any = { name: userForm.name, email: userForm.email, role: userForm.role, isActive: userForm.isActive };
+                  if (userForm.password) data.password = userForm.password;
+                  updateUserMutation.mutate({ id: editingUser.id, data });
+                } else {
+                  createUserMutation.mutate(userForm);
+                }
+              }}
+              disabled={createUserMutation.isPending || updateUserMutation.isPending}
+              data-testid="button-save-user"
+            >
+              {(createUserMutation.isPending || updateUserMutation.isPending) && (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              )}
+              {editingUser ? "Update User" : "Create User"}
             </Button>
           </DialogFooter>
         </DialogContent>

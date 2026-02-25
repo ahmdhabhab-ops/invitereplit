@@ -328,6 +328,31 @@ export const insertInvoiceSchema = createInsertSchema(invoices).omit({
 export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
 export type Invoice = typeof invoices.$inferSelect;
 
+// Admin users with role-based access
+export const adminUsers = pgTable("admin_users", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  role: text("role").notNull().default("sales"), // admin, sales
+  isActive: text("is_active").default("true"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertAdminUserSchema = createInsertSchema(adminUsers).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  passwordHash: true,
+}).extend({
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+export type InsertAdminUser = z.infer<typeof insertAdminUserSchema>;
+export type AdminUser = typeof adminUsers.$inferSelect;
+export type AdminUserSafe = Omit<AdminUser, "passwordHash">;
+
 // Pricing tiers (static defaults, can be overridden by site settings)
 export const pricingTiers = [
   {
