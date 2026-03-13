@@ -167,6 +167,73 @@ export function ProposalManager() {
     setFormData({ ...formData, items: newItems });
   };
 
+  const handlePackageChange = (pkg: string) => {
+    if (!settings || pkg === "Custom" || pkg === "") {
+      setFormData((prev) => ({ ...prev, packageRecommendation: pkg }));
+      return;
+    }
+
+    let packagePrice = 0;
+    let features: string[] = [];
+    let packageLabel = "";
+
+    if (pkg === "Essential") {
+      packagePrice = settings.essentialPrice ?? 49;
+      features = (settings.essentialFeatures as string[]) ?? [
+        "Single-page invitation design",
+        "Mobile responsive",
+        "Custom date & location",
+        "Shareable link",
+        "3 design revisions",
+      ];
+      packageLabel = "Essential";
+    } else if (pkg === "Premium") {
+      packagePrice = settings.premiumPrice ?? 99;
+      features = (settings.premiumFeatures as string[]) ?? [
+        "Multi-page interactive design",
+        "Photo gallery integration",
+        "Background music",
+        "RSVP tracking",
+        "5 design revisions",
+        "Custom animations",
+      ];
+      packageLabel = "Premium";
+    } else if (pkg === "Royal") {
+      packagePrice = settings.royalPrice ?? 199;
+      features = (settings.royalFeatures as string[]) ?? [
+        "Everything in Premium",
+        "Video backgrounds",
+        "Guest messaging",
+        "Live countdown timer",
+        "Unlimited revisions",
+        "Priority support",
+        "Custom domain option",
+      ];
+      packageLabel = "Royal";
+    }
+
+    const newItems: InvoiceItem[] = [
+      {
+        description: `${packageLabel} Digital Invitation Package`,
+        quantity: 1,
+        unitPrice: packagePrice, // stored in dollars in form state
+        total: packagePrice * 100, // cents for calculation consistency
+      },
+      ...features.map((feature) => ({
+        description: `✓ ${feature}`,
+        quantity: 1,
+        unitPrice: 0,
+        total: 0,
+      })),
+    ];
+
+    setFormData((prev) => ({
+      ...prev,
+      packageRecommendation: pkg,
+      items: newItems,
+    }));
+  };
+
   const fetchNextProposalNumber = async () => {
     try {
       const response = await fetch("/api/proposals/next-number", { credentials: "include" });
@@ -446,17 +513,20 @@ export function ProposalManager() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Recommended Package</Label>
-                <Select value={formData.packageRecommendation} onValueChange={(v) => setFormData({ ...formData, packageRecommendation: v })}>
+                <Select value={formData.packageRecommendation} onValueChange={handlePackageChange}>
                   <SelectTrigger data-testid="select-package">
                     <SelectValue placeholder="Select package" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Essential">Essential ($49)</SelectItem>
-                    <SelectItem value="Premium">Premium ($99)</SelectItem>
-                    <SelectItem value="Royal">Royal ($199)</SelectItem>
+                    <SelectItem value="Essential">Essential (${settings?.essentialPrice ?? 49})</SelectItem>
+                    <SelectItem value="Premium">Premium (${settings?.premiumPrice ?? 99})</SelectItem>
+                    <SelectItem value="Royal">Royal (${settings?.royalPrice ?? 199})</SelectItem>
                     <SelectItem value="Custom">Custom</SelectItem>
                   </SelectContent>
                 </Select>
+                {formData.packageRecommendation && formData.packageRecommendation !== "Custom" && (
+                  <p className="text-xs text-muted-foreground">Line items auto-filled from this plan's features</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label>Status</Label>
@@ -501,56 +571,68 @@ export function ProposalManager() {
                 </Button>
               </div>
               <div className="space-y-3">
-                {formData.items.map((item, index) => (
-                  <div key={index} className="grid grid-cols-12 gap-2 items-end">
-                    <div className="col-span-5 space-y-1">
-                      {index === 0 && <Label className="text-xs">Description</Label>}
-                      <Input
-                        value={item.description}
-                        onChange={(e) => handleItemChange(index, "description", e.target.value)}
-                        placeholder="e.g. Premium Digital Invitation Design"
-                        data-testid={`input-proposal-item-desc-${index}`}
-                      />
+                {formData.items.map((item, index) => {
+                  const isIncluded = item.unitPrice === 0 && index > 0;
+                  return (
+                    <div key={index} className={`grid grid-cols-12 gap-2 items-end ${isIncluded ? "opacity-80" : ""}`}>
+                      <div className="col-span-5 space-y-1">
+                        {index === 0 && <Label className="text-xs">Description</Label>}
+                        <Input
+                          value={item.description}
+                          onChange={(e) => handleItemChange(index, "description", e.target.value)}
+                          placeholder={index === 0 ? "e.g. Premium Digital Invitation Package" : "Included feature"}
+                          className={isIncluded ? "text-violet-600 text-sm" : ""}
+                          data-testid={`input-proposal-item-desc-${index}`}
+                        />
+                      </div>
+                      <div className="col-span-2 space-y-1">
+                        {index === 0 && <Label className="text-xs">Qty</Label>}
+                        <Input
+                          type="number"
+                          min="1"
+                          value={item.quantity}
+                          onChange={(e) => handleItemChange(index, "quantity", e.target.value)}
+                          disabled={isIncluded}
+                          className={isIncluded ? "bg-muted" : ""}
+                          data-testid={`input-proposal-item-qty-${index}`}
+                        />
+                      </div>
+                      <div className="col-span-2 space-y-1">
+                        {index === 0 && <Label className="text-xs">Price ($)</Label>}
+                        <Input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={item.unitPrice}
+                          onChange={(e) => handleItemChange(index, "unitPrice", e.target.value)}
+                          disabled={isIncluded}
+                          className={isIncluded ? "bg-muted" : ""}
+                          data-testid={`input-proposal-item-price-${index}`}
+                        />
+                      </div>
+                      <div className="col-span-2 space-y-1">
+                        {index === 0 && <Label className="text-xs">Total</Label>}
+                        <Input
+                          value={isIncluded ? "Included" : `$${(item.quantity * item.unitPrice).toFixed(2)}`}
+                          disabled
+                          className={`bg-muted ${isIncluded ? "text-violet-600 text-xs font-medium" : ""}`}
+                        />
+                      </div>
+                      <div className="col-span-1">
+                        {formData.items.length > 1 && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setFormData({ ...formData, items: formData.items.filter((_, i) => i !== index) })}
+                            data-testid={`button-remove-proposal-item-${index}`}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
                     </div>
-                    <div className="col-span-2 space-y-1">
-                      {index === 0 && <Label className="text-xs">Qty</Label>}
-                      <Input
-                        type="number"
-                        min="1"
-                        value={item.quantity}
-                        onChange={(e) => handleItemChange(index, "quantity", e.target.value)}
-                        data-testid={`input-proposal-item-qty-${index}`}
-                      />
-                    </div>
-                    <div className="col-span-2 space-y-1">
-                      {index === 0 && <Label className="text-xs">Price ($)</Label>}
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={item.unitPrice}
-                        onChange={(e) => handleItemChange(index, "unitPrice", e.target.value)}
-                        data-testid={`input-proposal-item-price-${index}`}
-                      />
-                    </div>
-                    <div className="col-span-2 space-y-1">
-                      {index === 0 && <Label className="text-xs">Total</Label>}
-                      <Input value={`$${(item.quantity * item.unitPrice).toFixed(2)}`} disabled className="bg-muted" />
-                    </div>
-                    <div className="col-span-1">
-                      {formData.items.length > 1 && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setFormData({ ...formData, items: formData.items.filter((_, i) => i !== index) })}
-                          data-testid={`button-remove-proposal-item-${index}`}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
@@ -741,14 +823,25 @@ export function ProposalManager() {
                     </tr>
                   </thead>
                   <tbody>
-                    {(previewProposal.items as InvoiceItem[]).map((item, idx) => (
-                      <tr key={idx} style={{ background: idx % 2 === 0 ? "#f9fafb" : "white" }}>
-                        <td style={{ padding: "12px 16px", fontSize: "13px", color: "#374151", borderBottom: "1px solid #e5e7eb" }}>{item.description}</td>
-                        <td style={{ padding: "12px 16px", fontSize: "13px", color: "#374151", textAlign: "center", borderBottom: "1px solid #e5e7eb" }}>{item.quantity}</td>
-                        <td style={{ padding: "12px 16px", fontSize: "13px", color: "#374151", textAlign: "right", borderBottom: "1px solid #e5e7eb" }}>{formatCurrency(item.unitPrice)}</td>
-                        <td style={{ padding: "12px 16px", fontSize: "13px", color: "#374151", textAlign: "right", borderBottom: "1px solid #e5e7eb" }}>{formatCurrency(item.total)}</td>
-                      </tr>
-                    ))}
+                    {(previewProposal.items as InvoiceItem[]).map((item, idx) => {
+                      const isIncluded = item.unitPrice === 0;
+                      return (
+                        <tr key={idx} style={{ background: isIncluded ? "#faf5ff" : (idx % 2 === 0 ? "#f9fafb" : "white") }}>
+                          <td style={{ padding: "10px 16px", fontSize: isIncluded ? "12px" : "13px", color: isIncluded ? "#7c3aed" : "#374151", borderBottom: "1px solid #e5e7eb", paddingLeft: isIncluded ? "28px" : "16px" }}>
+                            {item.description}
+                          </td>
+                          <td style={{ padding: "10px 16px", fontSize: "13px", color: "#9ca3af", textAlign: "center", borderBottom: "1px solid #e5e7eb" }}>
+                            {isIncluded ? "—" : item.quantity}
+                          </td>
+                          <td style={{ padding: "10px 16px", fontSize: "13px", color: "#9ca3af", textAlign: "right", borderBottom: "1px solid #e5e7eb" }}>
+                            {isIncluded ? "—" : formatCurrency(item.unitPrice)}
+                          </td>
+                          <td style={{ padding: "10px 16px", fontSize: "12px", fontWeight: isIncluded ? "500" : "normal", color: isIncluded ? "#7c3aed" : "#374151", textAlign: "right", borderBottom: "1px solid #e5e7eb" }}>
+                            {isIncluded ? "Included" : formatCurrency(item.total)}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
