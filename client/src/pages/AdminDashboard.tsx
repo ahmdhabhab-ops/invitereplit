@@ -72,11 +72,13 @@ import {
   ChevronRight,
   LogOut,
   Home,
-  Image
+  Image,
+  Send
 } from "lucide-react";
 import { SiTiktok } from "react-icons/si";
 import type { SiteSettings, Order, JobOpening, JobApplication, PartnershipRequest, AdminUserSafe } from "@shared/schema";
 import { InvoiceManager } from "@/components/InvoiceManager";
+import { ProposalManager } from "@/components/ProposalManager";
 import logoPath from "@assets/Logo_1769975575984.png";
 
 type JobFormData = {
@@ -108,7 +110,8 @@ const defaultJobForm: JobFormData = {
 type ActiveSection = 
   | "dashboard" 
   | "orders" 
-  | "invoices" 
+  | "invoices"
+  | "proposals"
   | "jobs" 
   | "candidates" 
   | "partnerships" 
@@ -125,6 +128,7 @@ const allMenuItems = [
   { id: "dashboard" as ActiveSection, label: "Dashboard", icon: LayoutDashboard, roles: ["admin"] as UserRole[] },
   { id: "orders" as ActiveSection, label: "Orders", icon: FileText, roles: ["admin", "sales"] as UserRole[] },
   { id: "invoices" as ActiveSection, label: "Invoices", icon: Receipt, roles: ["admin", "sales"] as UserRole[] },
+  { id: "proposals" as ActiveSection, label: "Proposals", icon: Send, roles: ["admin", "sales"] as UserRole[] },
   { id: "jobs" as ActiveSection, label: "Job Openings", icon: Briefcase, roles: ["admin"] as UserRole[] },
   { id: "candidates" as ActiveSection, label: "Candidates", icon: Users, roles: ["admin"] as UserRole[] },
   { id: "partnerships" as ActiveSection, label: "Partnerships", icon: Handshake, roles: ["admin"] as UserRole[] },
@@ -1041,6 +1045,17 @@ export default function AdminDashboard() {
               <p className="text-muted-foreground">Create and manage invoices for your customers</p>
             </div>
             <InvoiceManager />
+          </div>
+        );
+
+      case "proposals":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight">Proposals</h2>
+              <p className="text-muted-foreground">Create and send professional proposals to potential clients</p>
+            </div>
+            <ProposalManager />
           </div>
         );
 

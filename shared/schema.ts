@@ -328,6 +328,59 @@ export const insertInvoiceSchema = createInsertSchema(invoices).omit({
 export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
 export type Invoice = typeof invoices.$inferSelect;
 
+// Proposals for clients
+export const proposals = pgTable("proposals", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  proposalNumber: text("proposal_number").notNull(), // e.g., PRO-2024-001
+
+  // Client info
+  clientName: text("client_name").notNull(),
+  clientEmail: text("client_email").notNull(),
+  clientPhone: text("client_phone"),
+
+  // Proposal metadata
+  proposalDate: text("proposal_date").notNull(), // YYYY-MM-DD
+  validUntil: text("valid_until"), // YYYY-MM-DD
+
+  // Event context
+  eventType: text("event_type"), // Wedding, Birthday, Corporate, etc.
+  packageRecommendation: text("package_recommendation"), // Essential, Premium, Royal, Custom
+
+  // Custom intro message
+  introMessage: text("intro_message"),
+
+  // Line items (services/packages)
+  items: jsonb("items").$type<InvoiceItem[]>().notNull(),
+
+  // Pricing (in cents)
+  subtotal: integer("subtotal").notNull(),
+  discountType: text("discount_type").default("percentage"),
+  discountValue: integer("discount_value").default(0),
+  discountAmount: integer("discount_amount").default(0),
+  taxRate: integer("tax_rate").default(0),
+  taxAmount: integer("tax_amount").default(0),
+  total: integer("total").notNull(),
+
+  // Terms and notes
+  terms: text("terms"),
+  notes: text("notes"),
+
+  // Status: draft, sent, accepted, rejected
+  status: text("status").default("draft"),
+
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertProposalSchema = createInsertSchema(proposals).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertProposal = z.infer<typeof insertProposalSchema>;
+export type Proposal = typeof proposals.$inferSelect;
+
 // Admin users with role-based access
 export const adminUsers = pgTable("admin_users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

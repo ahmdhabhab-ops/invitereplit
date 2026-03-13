@@ -1,7 +1,7 @@
 import type { Express, RequestHandler } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertOrderSchema, insertSiteSettingsSchema, insertPartnershipRequestSchema, insertJobOpeningSchema, insertJobApplicationSchema, insertInvoiceSchema, insertAdminUserSchema } from "@shared/schema";
+import { insertOrderSchema, insertSiteSettingsSchema, insertPartnershipRequestSchema, insertJobOpeningSchema, insertJobApplicationSchema, insertInvoiceSchema, insertProposalSchema, insertAdminUserSchema } from "@shared/schema";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import session from "express-session";
@@ -605,6 +605,81 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error deleting invoice:", error);
       res.status(500).json({ error: "Failed to delete invoice" });
+    }
+  });
+
+  // ==================== PROPOSAL ROUTES ====================
+
+  // Get all proposals (admin + sales)
+  app.get("/api/proposals", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.getProposals();
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching proposals:", error);
+      res.status(500).json({ error: "Failed to fetch proposals" });
+    }
+  });
+
+  // Get next proposal number (admin + sales)
+  app.get("/api/proposals/next-number", isAuthenticated, async (req, res) => {
+    try {
+      const nextNumber = await storage.getNextProposalNumber();
+      res.json({ proposalNumber: nextNumber });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get next proposal number" });
+    }
+  });
+
+  // Get single proposal (admin + sales)
+  app.get("/api/proposals/:id", isAuthenticated, async (req, res) => {
+    try {
+      const proposal = await storage.getProposal(req.params.id);
+      if (!proposal) return res.status(404).json({ error: "Proposal not found" });
+      res.json(proposal);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch proposal" });
+    }
+  });
+
+  // Create proposal (admin + sales)
+  app.post("/api/proposals", isAuthenticated, async (req, res) => {
+    try {
+      const validatedData = insertProposalSchema.parse(req.body);
+      const proposal = await storage.createProposal(validatedData);
+      res.status(201).json(proposal);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation failed", details: error.errors });
+      }
+      console.error("Error creating proposal:", error);
+      res.status(500).json({ error: "Failed to create proposal" });
+    }
+  });
+
+  // Update proposal (admin + sales)
+  app.patch("/api/proposals/:id", isAuthenticated, async (req, res) => {
+    try {
+      const updateSchema = insertProposalSchema.partial();
+      const validatedData = updateSchema.parse(req.body);
+      const proposal = await storage.updateProposal(req.params.id, validatedData);
+      if (!proposal) return res.status(404).json({ error: "Proposal not found" });
+      res.json(proposal);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation failed", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update proposal" });
+    }
+  });
+
+  // Delete proposal (admin + sales)
+  app.delete("/api/proposals/:id", isAuthenticated, async (req, res) => {
+    try {
+      await storage.deleteProposal(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete proposal" });
     }
   });
 

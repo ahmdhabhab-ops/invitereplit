@@ -1,4 +1,4 @@
-import { type Order, type InsertOrder, type SiteSettings, type InsertSiteSettings, type PartnershipRequest, type InsertPartnershipRequest, type JobOpening, type InsertJobOpening, type JobApplication, type InsertJobApplication, type Invoice, type InsertInvoice, type AdminUser, type AdminUserSafe, orders, siteSettings, partnershipRequests, jobOpenings, jobApplications, invoices, adminUsers } from "@shared/schema";
+import { type Order, type InsertOrder, type SiteSettings, type InsertSiteSettings, type PartnershipRequest, type InsertPartnershipRequest, type JobOpening, type InsertJobOpening, type JobApplication, type InsertJobApplication, type Invoice, type InsertInvoice, type Proposal, type InsertProposal, type AdminUser, type AdminUserSafe, orders, siteSettings, partnershipRequests, jobOpenings, jobApplications, invoices, proposals, adminUsers } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
 
@@ -38,6 +38,14 @@ export interface IStorage {
   updateInvoice(id: string, invoice: Partial<InsertInvoice>): Promise<Invoice | undefined>;
   deleteInvoice(id: string): Promise<boolean>;
   getNextInvoiceNumber(): Promise<string>;
+
+  // Proposal operations
+  getProposals(): Promise<Proposal[]>;
+  getProposal(id: string): Promise<Proposal | undefined>;
+  createProposal(proposal: InsertProposal): Promise<Proposal>;
+  updateProposal(id: string, proposal: Partial<InsertProposal>): Promise<Proposal | undefined>;
+  deleteProposal(id: string): Promise<boolean>;
+  getNextProposalNumber(): Promise<string>;
 
   // Admin user operations
   getAdminUsers(): Promise<AdminUserSafe[]>;
@@ -211,6 +219,41 @@ export class DatabaseStorage implements IStorage {
     const year = new Date().getFullYear();
     const count = allInvoices.length + 1;
     return `INV-${year}-${count.toString().padStart(4, "0")}`;
+  }
+
+  async getProposals(): Promise<Proposal[]> {
+    return db.select().from(proposals).orderBy(desc(proposals.createdAt));
+  }
+
+  async getProposal(id: string): Promise<Proposal | undefined> {
+    const [proposal] = await db.select().from(proposals).where(eq(proposals.id, id));
+    return proposal;
+  }
+
+  async createProposal(proposal: InsertProposal): Promise<Proposal> {
+    const [created] = await db.insert(proposals).values(proposal as any).returning();
+    return created;
+  }
+
+  async updateProposal(id: string, proposal: Partial<InsertProposal>): Promise<Proposal | undefined> {
+    const [updated] = await db
+      .update(proposals)
+      .set({ ...proposal, updatedAt: new Date() } as any)
+      .where(eq(proposals.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteProposal(id: string): Promise<boolean> {
+    await db.delete(proposals).where(eq(proposals.id, id));
+    return true;
+  }
+
+  async getNextProposalNumber(): Promise<string> {
+    const all = await db.select().from(proposals);
+    const year = new Date().getFullYear();
+    const count = all.length + 1;
+    return `PRO-${year}-${count.toString().padStart(4, "0")}`;
   }
 
   private stripPasswordHash(user: AdminUser): AdminUserSafe {

@@ -90,6 +90,7 @@ shared/
 - **partnership_requests**: id, companyName, contactName, email, phone, website, eventsPerYear, eventTypes (JSONB), message, status, createdAt
 - **job_openings**: id, title, department, location, type, description, requirements (JSONB), responsibilities (JSONB), benefits (JSONB), salaryRange, isActive, createdAt, updatedAt
 - **job_applications**: id, jobId, fullName, email, phone, resumeUrl, portfolioUrl, linkedinUrl, coverLetter, yearsOfExperience, status, notes, createdAt
+- **proposals**: id, proposalNumber, clientName, clientEmail, clientPhone, proposalDate, validUntil, eventType, packageRecommendation, introMessage, items (JSONB), subtotal, discountType, discountValue, discountAmount, taxRate, taxAmount, total, terms, notes, status (draft/sent/accepted/rejected), createdAt, updatedAt
 - **admin_users**: id, name, email, passwordHash, role (admin/sales), isActive, createdAt, updatedAt
 
 ## Admin Dashboard Features
@@ -100,6 +101,7 @@ The admin panel at `/admin` allows managing:
 - **Social Media**: Facebook, Instagram, X, LinkedIn, TikTok links (Admin only)
 - **Orders**: View and manage customer orders with WhatsApp integration (Admin + Sales)
 - **Invoices**: Create and manage invoices for clients (Admin + Sales)
+- **Proposals**: Create and send professional proposals with PDF export to potential clients (Admin + Sales)
 - **Team Members**: User management with role assignment (Admin only)
 
 ## Authentication & Roles
