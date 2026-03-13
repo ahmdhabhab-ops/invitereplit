@@ -80,9 +80,42 @@ export const translations = {
         satisfaction: "Satisfaction Guaranteed",
       },
       plans: {
-        essential: { description: "Perfect for simple, elegant invitations" },
-        premium: { description: "Most popular for memorable events" },
-        royal: { description: "Ultimate luxury experience" },
+        essential: {
+          name: "Essential",
+          description: "Perfect for simple, elegant invitations",
+          features: [
+            "Single-page invitation design",
+            "Mobile responsive",
+            "Custom date & location",
+            "Shareable link",
+            "3 design revisions",
+          ],
+        },
+        premium: {
+          name: "Premium",
+          description: "Most popular for memorable events",
+          features: [
+            "Multi-page interactive design",
+            "Photo gallery integration",
+            "Background music",
+            "RSVP tracking",
+            "5 design revisions",
+            "Custom animations",
+          ],
+        },
+        royal: {
+          name: "Royal",
+          description: "Ultimate luxury experience",
+          features: [
+            "Everything in Premium",
+            "Video backgrounds",
+            "Guest messaging",
+            "Live countdown timer",
+            "Unlimited revisions",
+            "Priority support",
+            "Custom domain option",
+          ],
+        },
       },
     },
 
@@ -488,9 +521,42 @@ export const translations = {
         satisfaction: "Satisfaction Garantie",
       },
       plans: {
-        essential: { description: "Parfait pour des invitations simples et élégantes" },
-        premium: { description: "Le plus populaire pour des événements mémorables" },
-        royal: { description: "L'expérience de luxe ultime" },
+        essential: {
+          name: "Essentiel",
+          description: "Parfait pour des invitations simples et élégantes",
+          features: [
+            "Design d'invitation une page",
+            "Adapté aux mobiles",
+            "Date et lieu personnalisés",
+            "Lien partageable",
+            "3 révisions de design",
+          ],
+        },
+        premium: {
+          name: "Premium",
+          description: "Le plus populaire pour des événements mémorables",
+          features: [
+            "Design interactif multi-pages",
+            "Intégration de galerie photos",
+            "Musique de fond",
+            "Suivi RSVP",
+            "5 révisions de design",
+            "Animations personnalisées",
+          ],
+        },
+        royal: {
+          name: "Royal",
+          description: "L'expérience de luxe ultime",
+          features: [
+            "Tout le forfait Premium",
+            "Arrière-plans vidéo",
+            "Messagerie des invités",
+            "Compte à rebours en direct",
+            "Révisions illimitées",
+            "Support prioritaire",
+            "Option domaine personnalisé",
+          ],
+        },
       },
     },
 
