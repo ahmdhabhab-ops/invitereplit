@@ -174,6 +174,7 @@ export const translations = {
       bankTransfer: "Bank Transfer",
       bankTransferDesc: "Transfer to our bank account",
       package: "Package",
+      orderSummary: "Order Summary",
       includes: "Includes",
       back: "Back",
       next: "Next",
@@ -615,6 +616,7 @@ export const translations = {
       bankTransfer: "Virement Bancaire",
       bankTransferDesc: "Transférez sur notre compte bancaire",
       package: "Forfait",
+      orderSummary: "Récapitulatif de la Commande",
       includes: "Inclus",
       back: "Retour",
       next: "Suivant",
@@ -790,7 +792,7 @@ export const translations = {
         },
         {
           question: "Qu'est-ce qui est inclus dans chaque forfait ?",
-          answer: "Notre forfait Essentiel (49$) comprend une belle invitation numérique avec suivi RSVP. Premium (99$) ajoute des animations personnalisées, de la musique et une galerie de photos. Royal (199$) offre une personnalisation illimitée, l'intégration vidéo et un support prioritaire.",
+          answer: "Notre forfait Essentiel (€45) comprend une belle invitation numérique avec suivi RSVP. Premium (€91) ajoute des animations personnalisées, de la musique et une galerie de photos. Royal (€183) offre une personnalisation illimitée, l'intégration vidéo et un support prioritaire.",
         },
         {
           question: "Comment partager mon invitation numérique avec mes invités ?",

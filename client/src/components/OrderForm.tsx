@@ -66,56 +66,40 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
   const [eventType, setEventType] = useState<string>("wedding");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const { toast } = useToast();
-  const { t } = useLanguage();
+  const { t, language, formatPrice } = useLanguage();
   const tf = t.orderForm;
 
   const { data: settings } = useQuery<SiteSettings>({
     queryKey: ["/api/settings"],
   });
 
+  const getFeatures = (dbFeatures: string[] | null | undefined, translatedFeatures: readonly string[]) => {
+    if (language === "fr") return translatedFeatures;
+    return dbFeatures ?? translatedFeatures;
+  };
+
   const dynamicPricingTiers = [
     {
       id: "essential",
-      name: "Essential",
+      name: t.pricing.plans.essential.name,
       price: settings?.essentialPrice ?? 49,
       description: t.pricing.plans.essential.description,
-      features: settings?.essentialFeatures ?? [
-        "Single-page invitation design",
-        "Mobile responsive",
-        "Custom date & location",
-        "Shareable link",
-        "3 design revisions",
-      ],
+      features: getFeatures(settings?.essentialFeatures, t.pricing.plans.essential.features),
     },
     {
       id: "premium",
-      name: "Premium",
+      name: t.pricing.plans.premium.name,
       price: settings?.premiumPrice ?? 99,
       description: t.pricing.plans.premium.description,
-      features: settings?.premiumFeatures ?? [
-        "Multi-page interactive design",
-        "Photo gallery integration",
-        "Background music",
-        "RSVP tracking",
-        "5 design revisions",
-        "Custom animations",
-      ],
+      features: getFeatures(settings?.premiumFeatures, t.pricing.plans.premium.features),
       popular: true,
     },
     {
       id: "royal",
-      name: "Royal",
+      name: t.pricing.plans.royal.name,
       price: settings?.royalPrice ?? 199,
       description: t.pricing.plans.royal.description,
-      features: settings?.royalFeatures ?? [
-        "Everything in Premium",
-        "Video backgrounds",
-        "Guest messaging",
-        "Live countdown timer",
-        "Unlimited revisions",
-        "Priority support",
-        "Custom domain option",
-      ],
+      features: getFeatures(settings?.royalFeatures, t.pricing.plans.royal.features),
     },
   ];
 
@@ -297,8 +281,8 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-serif text-2xl flex items-center gap-3">
-            {selectedTier?.name} Package
-            <span className="text-primary">${selectedTier?.price}</span>
+            {selectedTier?.name} {tf.package}
+            <span className="text-primary">{formatPrice(selectedTier?.price ?? 0)}</span>
           </DialogTitle>
           <DialogDescription>
             {tf.description}
@@ -839,10 +823,10 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
 
                   {/* Order Summary */}
                   <div className="mt-6 p-4 bg-muted/50 rounded-lg">
-                    <h4 className="font-semibold mb-2">Order Summary</h4>
+                    <h4 className="font-semibold mb-2">{tf.orderSummary}</h4>
                     <div className="flex justify-between text-sm">
-                      <span>{selectedTier?.name} Package</span>
-                      <span className="font-semibold">${selectedTier?.price}</span>
+                      <span>{selectedTier?.name} {tf.package}</span>
+                      <span className="font-semibold">{formatPrice(selectedTier?.price ?? 0)}</span>
                     </div>
                   </div>
 

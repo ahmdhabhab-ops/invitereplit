@@ -15,7 +15,7 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
   const { data: settings, isLoading } = useQuery<SiteSettings>({
     queryKey: ["/api/settings"],
   });
-  const { t, language } = useLanguage();
+  const { t, language, formatPrice } = useLanguage();
 
   const getFeatures = (dbFeatures: string[] | null | undefined, translatedFeatures: readonly string[]) => {
     if (language === "fr") return translatedFeatures;
@@ -106,7 +106,7 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
                       <h3 className="font-serif text-2xl font-semibold">{tier.name}</h3>
                       <p className="text-muted-foreground text-sm mt-1">{tier.description}</p>
                       <div className="mt-4">
-                        <span className="font-serif text-4xl font-semibold" data-testid={`price-${tier.id}`}>${tier.price}</span>
+                        <span className="font-serif text-4xl font-semibold" data-testid={`price-${tier.id}`}>{formatPrice(tier.price)}</span>
                         <span className="text-muted-foreground text-sm ml-1">{t.pricing.oneTime}</span>
                       </div>
                     </CardHeader>
