@@ -225,6 +225,114 @@ export const translations = {
       },
     },
 
+    // Promo Video
+    promoVideo: {
+      badge: "Watch Our Video",
+      title: "See Our Wedding Invitations in Action",
+      subtitle: "Discover how einvite.me transforms your special day with elegant digital invitations that capture the magic of Lebanese weddings.",
+      caption: "Join hundreds of Lebanese couples who chose einvite.me for their wedding day",
+    },
+
+    // Featured Events
+    featuredEvents: {
+      title: "Where We've Been",
+      subtitle: "Connecting with communities and showcasing sustainable event solutions at leading conferences and forums",
+      featuredLabel: "Featured Event",
+      events: [
+        {
+          title: "National Youth Leadership Forum",
+          location: "LAU Byblos, Lebanon",
+          date: "September 9th, 2024",
+          description: "Einvite participated in the National Youth Leadership Forum organized by UNDP and LAU, celebrating 10 years of the Youth Leadership Programme. We showcased our eco-friendly digital invitation solutions, helping make events greener and more efficient!",
+          highlight: "Fostering innovation and sustainable growth",
+          tags: ["EcoFriendly", "SustainableEvents", "YouthLeadership"],
+        },
+        {
+          title: "Web Summit Qatar 2025",
+          location: "Doha, Qatar",
+          date: "2025",
+          description: "Einvite proudly exhibited at Web Summit Qatar 2025, one of the world's largest technology conferences. We showcased our innovative event management platform featuring e-commerce for gifting, crowdfunding, ticketing, and secure contacts via Blockchain.",
+          highlight: "Booth A225 - ALPHA Stage",
+          tags: ["WebSummitQatar", "TechStartup", "Innovation"],
+        },
+      ],
+    },
+
+    // Why Choose Us
+    whyChooseUs: {
+      title: "The Premier Digital Invitation Service Across All of Lebanon",
+      subtitle: "Whether you are planning a grand gala in Beirut, a seaside wedding in Jounieh or Byblos, or a mountain celebration in the Chouf and North Lebanon, einvite.me offers the most elegant and professional way to invite your guests.",
+      subtitle2: "We proudly serve every village and city across Lebanon—from Tripoli to Tyre, and from the Metn to the Bekaa Valley.",
+      subtitle3: "Unlike traditional paper cards, our digital invites provide a luxury experience that fits the modern Lebanese lifestyle:",
+      caption: "Join hundreds of couples and event planners nationwide who have chosen the most sophisticated and sustainable invitation solution in the Middle East.",
+      features: [
+        {
+          title: "Real-Time RSVP Tracking",
+          description: "Know exactly who is coming with one click.",
+        },
+        {
+          title: "Instant Location Sharing",
+          description: "Integrated Google Maps for any venue in Lebanon.",
+        },
+        {
+          title: "Eco-Friendly & Cost-Effective",
+          description: "Save on printing and delivery while maintaining a high-end feel.",
+        },
+        {
+          title: "Cultural Customization",
+          description: "Fully supports Arabic, English, and French designs to suit your family's needs.",
+        },
+      ],
+    },
+
+    // FAQ
+    faq: {
+      title: "Frequently Asked Questions",
+      subtitle: "Everything you need to know about our digital invitation service in Lebanon",
+      items: [
+        {
+          question: "How long does it take to get my digital invite in Lebanon?",
+          answer: "Most digital invitations are ready within 24-48 hours after you submit your order and provide all the necessary details. For rush orders, we offer express delivery within 12 hours for an additional fee.",
+        },
+        {
+          question: "Can I include a location map for my venue in Beirut?",
+          answer: "Absolutely! All our digital invitations come with integrated Google Maps functionality. Whether your venue is in Beirut, Jounieh, Byblos, or anywhere else in Lebanon, guests can get directions with a single tap.",
+        },
+        {
+          question: "What languages do you support for invitations?",
+          answer: "We fully support Arabic, English, and French—the three main languages used in Lebanon. You can have your invitation in one language or combine multiple languages to accommodate all your guests.",
+        },
+        {
+          question: "How do guests RSVP to my digital invitation?",
+          answer: "Guests simply tap the RSVP button on their invitation and select their attendance status. You'll receive real-time notifications and can track all responses from your personal dashboard.",
+        },
+        {
+          question: "Can I update my invitation after it's been sent?",
+          answer: "Yes! One of the biggest advantages of digital invitations is the ability to make updates. Whether you need to change the venue, time, or any other details, changes are reflected instantly for all guests.",
+        },
+        {
+          question: "Do you serve areas outside Beirut?",
+          answer: "We proudly serve all of Lebanon—from Tripoli in the north to Tyre in the south, and from the coastal cities to the Bekaa Valley and mountain regions. No matter where your event is, we've got you covered.",
+        },
+        {
+          question: "What's included in each pricing package?",
+          answer: "Our Essential package ($49) includes a beautiful digital invitation with RSVP tracking. Premium ($99) adds custom animations, music, and a photo gallery. Royal ($199) offers unlimited customization, video integration, and priority support.",
+        },
+        {
+          question: "How do I share my digital invitation with guests?",
+          answer: "You'll receive a unique link that can be shared via WhatsApp, SMS, email, or any social media platform. Guests don't need to download any app—they simply tap the link to view your invitation.",
+        },
+        {
+          question: "Are digital invitations environmentally friendly?",
+          answer: "Yes! Digital invitations eliminate the need for paper, printing, and physical delivery, making them an eco-friendly choice. You'll save trees while still creating a luxurious experience for your guests.",
+        },
+        {
+          question: "Can I see samples before ordering?",
+          answer: "Of course! Browse our sample gallery on the homepage to see examples of wedding, birthday, and event invitations. Each sample showcases the interactive features and elegant designs available.",
+        },
+      ],
+    },
+
     // Careers
     careers: {
       backHome: "Back to Home",
@@ -523,6 +631,114 @@ export const translations = {
         messagePlaceholder: "Parlez-nous de votre activité et de vos objectifs de partenariat...",
         submit: "Soumettre la Demande de Partenariat",
       },
+    },
+
+    // Promo Video
+    promoVideo: {
+      badge: "Regarder Notre Vidéo",
+      title: "Découvrez Nos Invitations de Mariage en Action",
+      subtitle: "Découvrez comment einvite.me transforme votre jour spécial avec des invitations numériques élégantes qui capturent la magie des mariages libanais.",
+      caption: "Rejoignez des centaines de couples libanais qui ont choisi einvite.me pour leur jour de mariage",
+    },
+
+    // Featured Events
+    featuredEvents: {
+      title: "Nos Présences",
+      subtitle: "Connexion avec les communautés et présentation de solutions d'événements durables lors de grandes conférences et forums",
+      featuredLabel: "Événement Vedette",
+      events: [
+        {
+          title: "Forum National de Leadership des Jeunes",
+          location: "LAU Byblos, Liban",
+          date: "9 septembre 2024",
+          description: "Einvite a participé au Forum National de Leadership des Jeunes organisé par le PNUD et la LAU, célébrant les 10 ans du Programme de Leadership des Jeunes. Nous avons présenté nos solutions d'invitations numériques écologiques, contribuant à rendre les événements plus verts et plus efficaces !",
+          highlight: "Favoriser l'innovation et la croissance durable",
+          tags: ["ÉcoResponsable", "ÉvénementsÉcolos", "LeadershipJeunes"],
+        },
+        {
+          title: "Web Summit Qatar 2025",
+          location: "Doha, Qatar",
+          date: "2025",
+          description: "Einvite a fièrement exposé au Web Summit Qatar 2025, l'une des plus grandes conférences technologiques au monde. Nous avons présenté notre plateforme innovante de gestion d'événements avec e-commerce pour les cadeaux, le financement participatif, la billetterie et les contacts sécurisés via Blockchain.",
+          highlight: "Stand A225 - Scène ALPHA",
+          tags: ["WebSummitQatar", "StartupTech", "Innovation"],
+        },
+      ],
+    },
+
+    // Why Choose Us
+    whyChooseUs: {
+      title: "Le Premier Service d'Invitation Digitale au Liban",
+      subtitle: "Que vous planifiiez un grand gala à Beyrouth, un mariage en bord de mer à Jounieh ou Byblos, ou une célébration en montagne dans le Chouf et le Nord du Liban, einvite.me offre la façon la plus élégante et professionnelle d'inviter vos convives.",
+      subtitle2: "Nous desservons fièrement chaque village et ville du Liban — de Tripoli à Tyr, du Metn à la Vallée de la Bekaa.",
+      subtitle3: "Contrairement aux cartes papier traditionnelles, nos invitations numériques offrent une expérience de luxe adaptée au style de vie libanais moderne :",
+      caption: "Rejoignez des centaines de couples et d'organisateurs d'événements qui ont choisi la solution d'invitation la plus sophistiquée et durable du Moyen-Orient.",
+      features: [
+        {
+          title: "Suivi RSVP en Temps Réel",
+          description: "Sachez exactement qui vient en un seul clic.",
+        },
+        {
+          title: "Partage de Localisation Instantané",
+          description: "Google Maps intégré pour tout lieu au Liban.",
+        },
+        {
+          title: "Écologique & Économique",
+          description: "Économisez sur l'impression et la livraison tout en maintenant une touche haut de gamme.",
+        },
+        {
+          title: "Personnalisation Culturelle",
+          description: "Supporte entièrement les designs en arabe, anglais et français pour répondre aux besoins de votre famille.",
+        },
+      ],
+    },
+
+    // FAQ
+    faq: {
+      title: "Questions Fréquemment Posées",
+      subtitle: "Tout ce que vous devez savoir sur notre service d'invitation numérique au Liban",
+      items: [
+        {
+          question: "Combien de temps faut-il pour recevoir mon invitation numérique au Liban ?",
+          answer: "La plupart des invitations numériques sont prêtes sous 24 à 48 heures après votre commande et la fourniture de tous les détails nécessaires. Pour les commandes urgentes, nous proposons une livraison express en 12 heures moyennant un supplément.",
+        },
+        {
+          question: "Puis-je inclure une carte de localisation pour ma salle à Beyrouth ?",
+          answer: "Absolument ! Toutes nos invitations numériques intègrent la fonctionnalité Google Maps. Que votre salle soit à Beyrouth, Jounieh, Byblos ou ailleurs au Liban, vos invités pourront obtenir l'itinéraire en un seul clic.",
+        },
+        {
+          question: "Quelles langues prenez-vous en charge pour les invitations ?",
+          answer: "Nous supportons pleinement l'arabe, l'anglais et le français — les trois principales langues utilisées au Liban. Votre invitation peut être dans une seule langue ou combiner plusieurs langues pour accueillir tous vos invités.",
+        },
+        {
+          question: "Comment les invités confirment-ils leur présence à mon invitation numérique ?",
+          answer: "Les invités appuient simplement sur le bouton RSVP de leur invitation et sélectionnent leur statut de présence. Vous recevrez des notifications en temps réel et pourrez suivre toutes les réponses depuis votre tableau de bord personnel.",
+        },
+        {
+          question: "Puis-je mettre à jour mon invitation après son envoi ?",
+          answer: "Oui ! L'un des grands avantages des invitations numériques est la possibilité d'effectuer des mises à jour. Que vous deviez changer le lieu, l'heure ou tout autre détail, les modifications sont immédiatement visibles par tous vos invités.",
+        },
+        {
+          question: "Desservez-vous des zones en dehors de Beyrouth ?",
+          answer: "Nous desservons fièrement tout le Liban — de Tripoli au nord à Tyr au sud, et des villes côtières à la Vallée de la Bekaa et aux régions montagneuses. Quel que soit l'endroit de votre événement, nous sommes là pour vous.",
+        },
+        {
+          question: "Qu'est-ce qui est inclus dans chaque forfait ?",
+          answer: "Notre forfait Essentiel (49$) comprend une belle invitation numérique avec suivi RSVP. Premium (99$) ajoute des animations personnalisées, de la musique et une galerie de photos. Royal (199$) offre une personnalisation illimitée, l'intégration vidéo et un support prioritaire.",
+        },
+        {
+          question: "Comment partager mon invitation numérique avec mes invités ?",
+          answer: "Vous recevrez un lien unique que vous pourrez partager via WhatsApp, SMS, e-mail ou tout réseau social. Vos invités n'ont besoin de télécharger aucune application — ils cliquent simplement sur le lien pour voir votre invitation.",
+        },
+        {
+          question: "Les invitations numériques sont-elles écologiques ?",
+          answer: "Oui ! Les invitations numériques éliminent le besoin de papier, d'impression et de livraison physique, en faisant un choix écologique. Vous préservez les arbres tout en offrant une expérience luxueuse à vos invités.",
+        },
+        {
+          question: "Puis-je voir des exemples avant de commander ?",
+          answer: "Bien sûr ! Parcourez notre galerie d'exemples sur la page d'accueil pour découvrir des exemples d'invitations de mariage, d'anniversaire et d'événements. Chaque exemple présente les fonctionnalités interactives et les designs élégants disponibles.",
+        },
+      ],
     },
 
     // Careers
