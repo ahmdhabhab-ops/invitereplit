@@ -63,6 +63,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { JobOpening } from "@shared/schema";
 import logoImage from "@assets/Logo_1769975575984.png";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const applicationFormSchema = z.object({
   fullName: z.string().min(2, "Please enter your full name"),
@@ -77,40 +78,26 @@ const applicationFormSchema = z.object({
 
 type ApplicationFormData = z.infer<typeof applicationFormSchema>;
 
-const benefits = [
-  {
-    icon: Users,
-    title: "Collaborative Team",
-    description: "Work with talented designers and developers who share your passion",
-  },
-  {
-    icon: Sparkles,
-    title: "Creative Freedom",
-    description: "Express your creativity and bring unique ideas to life",
-  },
-  {
-    icon: Heart,
-    title: "Work-Life Balance",
-    description: "Flexible hours and remote work options to suit your lifestyle",
-  },
-];
-
 function JobTypeLabel({ type }: { type: string }) {
+  const { t } = useLanguage();
   const colors: Record<string, string> = {
     "full-time": "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
     "part-time": "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
     "contract": "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300",
     "internship": "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
   };
+  const label = t.careers.jobTypes[type as keyof typeof t.careers.jobTypes] || type.replace("-", " ").replace(/\b\w/g, l => l.toUpperCase());
   return (
     <Badge className={colors[type] || "bg-gray-100 text-gray-800"} variant="secondary">
-      {type.replace("-", " ").replace(/\b\w/g, l => l.toUpperCase())}
+      {label}
     </Badge>
   );
 }
 
 export default function Careers() {
   const { toast } = useToast();
+  const { t } = useLanguage();
+  const tc = t.careers;
   const [selectedJob, setSelectedJob] = useState<JobOpening | null>(null);
   const [showApplicationForm, setShowApplicationForm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -137,6 +124,24 @@ export default function Careers() {
     },
   });
 
+  const benefitsList = [
+    {
+      icon: Users,
+      title: tc.benefits.team.title,
+      description: tc.benefits.team.description,
+    },
+    {
+      icon: Sparkles,
+      title: tc.benefits.creativity.title,
+      description: tc.benefits.creativity.description,
+    },
+    {
+      icon: Heart,
+      title: tc.benefits.balance.title,
+      description: tc.benefits.balance.description,
+    },
+  ];
+
   const toggleJobExpand = (jobId: string) => {
     setExpandedJobs(prev => {
       const newSet = new Set(prev);
@@ -157,7 +162,7 @@ export default function Careers() {
     const url = getJobShareUrl(job.id);
     try {
       await navigator.clipboard.writeText(url);
-      toast({ title: "Link copied to clipboard!" });
+      toast({ title: tc.linkCopied });
     } catch (error) {
       toast({ title: "Failed to copy link", variant: "destructive" });
     }
@@ -268,7 +273,7 @@ export default function Careers() {
               data-testid="button-back-home"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Home
+              {tc.backHome}
             </Button>
           </div>
         </div>
@@ -279,14 +284,13 @@ export default function Careers() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full mb-6">
             <Briefcase className="h-4 w-4" />
-            <span className="text-sm font-medium">Join Our Team</span>
+            <span className="text-sm font-medium">{tc.heroBadge}</span>
           </div>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-            Build the Future of <span className="text-primary">Digital Celebrations</span>
+            {tc.heroTitle} <span className="text-primary">{tc.heroTitleHighlight}</span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
-            Join Einvite and help millions of people create beautiful, memorable digital invitations 
-            for their most special moments.
+            {tc.heroSubtitle}
           </p>
         </div>
       </section>
@@ -301,7 +305,7 @@ export default function Careers() {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {benefits.map((benefit, index) => (
+            {benefitsList.map((benefit, index) => (
               <Card key={index} className="hover-elevate">
                 <CardContent className="p-6">
                   <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
@@ -320,9 +324,9 @@ export default function Careers() {
       <section className="py-16 md:py-24 bg-muted/30" id="positions">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Open Positions</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">{tc.openingsTitle}</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Find your next opportunity and grow with us
+              {tc.openingsSubtitle}
             </p>
           </div>
 
@@ -334,12 +338,12 @@ export default function Careers() {
             <Card className="max-w-2xl mx-auto">
               <CardContent className="p-8 text-center">
                 <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No Open Positions</h3>
+                <h3 className="text-lg font-semibold mb-2">{tc.noOpenings}</h3>
                 <p className="text-muted-foreground mb-4">
-                  We don't have any open positions at the moment, but we're always looking for talented people.
+                  {tc.noOpeningsSubtitle}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Send your resume to <a href="mailto:careers@einvite.me" className="text-primary hover:underline">careers@einvite.me</a>
+                  {tc.cta.sendResumeDesc} <a href="mailto:careers@einvite.me" className="text-primary hover:underline">careers@einvite.me</a>
                 </p>
               </CardContent>
             </Card>
@@ -390,11 +394,11 @@ export default function Careers() {
                               >
                                 {isExpanded ? (
                                   <>
-                                    Show Less <ChevronUp className="h-4 w-4 ml-1" />
+                                    {tc.hideDetails} <ChevronUp className="h-4 w-4 ml-1" />
                                   </>
                                 ) : (
                                   <>
-                                    Read More <ChevronDown className="h-4 w-4 ml-1" />
+                                    {tc.viewDetails} <ChevronDown className="h-4 w-4 ml-1" />
                                   </>
                                 )}
                               </Button>
@@ -404,7 +408,7 @@ export default function Careers() {
                             <div className="mt-4 space-y-4">
                               {(job.requirements as string[])?.length > 0 && (
                                 <div>
-                                  <h4 className="font-medium text-sm mb-2">Requirements:</h4>
+                                  <h4 className="font-medium text-sm mb-2">{tc.requirements}:</h4>
                                   <ul className="text-sm text-muted-foreground space-y-1">
                                     {(job.requirements as string[]).map((req, i) => (
                                       <li key={i} className="flex items-start gap-2">
@@ -417,7 +421,7 @@ export default function Careers() {
                               )}
                               {(job.responsibilities as string[])?.length > 0 && (
                                 <div>
-                                  <h4 className="font-medium text-sm mb-2">Responsibilities:</h4>
+                                  <h4 className="font-medium text-sm mb-2">{tc.responsibilities}:</h4>
                                   <ul className="text-sm text-muted-foreground space-y-1">
                                     {(job.responsibilities as string[]).map((resp, i) => (
                                       <li key={i} className="flex items-start gap-2">
@@ -448,21 +452,21 @@ export default function Careers() {
                                 data-testid={`share-copy-${job.id}`}
                               >
                                 <Link className="h-4 w-4 mr-2" />
-                                Copy Link
+                                {tc.copyLink}
                               </DropdownMenuItem>
                               <DropdownMenuItem 
                                 onClick={() => handleShareWhatsApp(job)}
                                 data-testid={`share-whatsapp-${job.id}`}
                               >
                                 <SiWhatsapp className="h-4 w-4 mr-2" />
-                                Share on WhatsApp
+                                {tc.shareWhatsApp}
                               </DropdownMenuItem>
                               <DropdownMenuItem 
                                 onClick={() => handleShareEmail(job)}
                                 data-testid={`share-email-${job.id}`}
                               >
                                 <Mail className="h-4 w-4 mr-2" />
-                                Share via Email
+                                {tc.shareEmail}
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -470,7 +474,7 @@ export default function Careers() {
                             onClick={() => handleApply(job)}
                             data-testid={`button-apply-${job.id}`}
                           >
-                            Apply Now
+                            {tc.apply}
                             <ArrowRight className="h-4 w-4 ml-2" />
                           </Button>
                         </div>
@@ -491,11 +495,11 @@ export default function Careers() {
             <>
               <DialogHeader>
                 <DialogTitle className="text-xl">
-                  {submitted ? "Application Submitted!" : `Apply for ${selectedJob.title}`}
+                  {submitted ? tc.successTitle : `${tc.applyTitle} ${selectedJob.title}`}
                 </DialogTitle>
                 <DialogDescription>
                   {submitted 
-                    ? "Thank you for your interest in joining Einvite." 
+                    ? tc.successMessage
                     : `${selectedJob.department} • ${selectedJob.location}`
                   }
                 </DialogDescription>
@@ -507,8 +511,7 @@ export default function Careers() {
                     <Check className="h-8 w-8 text-green-600 dark:text-green-400" />
                   </div>
                   <p className="text-muted-foreground mb-6">
-                    We've received your application and will review it shortly. 
-                    If your qualifications match our needs, we'll be in touch!
+                    {tc.successMessage}
                   </p>
                   <Button onClick={handleCloseDialog} data-testid="button-close-success">
                     Close
@@ -519,7 +522,7 @@ export default function Careers() {
                   {/* Job Details */}
                   <div className="space-y-4 mb-6 p-4 bg-muted/50 rounded-lg">
                     <div>
-                      <h4 className="font-medium mb-2">Requirements</h4>
+                      <h4 className="font-medium mb-2">{tc.requirements}</h4>
                       <ul className="text-sm text-muted-foreground space-y-1">
                         {(selectedJob.requirements as string[]).map((req, i) => (
                           <li key={i} className="flex items-start gap-2">
@@ -530,7 +533,7 @@ export default function Careers() {
                       </ul>
                     </div>
                     <div>
-                      <h4 className="font-medium mb-2">Responsibilities</h4>
+                      <h4 className="font-medium mb-2">{tc.responsibilities}</h4>
                       <ul className="text-sm text-muted-foreground space-y-1">
                         {(selectedJob.responsibilities as string[]).map((resp, i) => (
                           <li key={i} className="flex items-start gap-2">
@@ -551,9 +554,9 @@ export default function Careers() {
                           name="fullName"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Full Name *</FormLabel>
+                              <FormLabel>{tc.form.fullName}</FormLabel>
                               <FormControl>
-                                <Input placeholder="Your Name" {...field} data-testid="input-full-name" />
+                                <Input placeholder={tc.form.fullNamePlaceholder} {...field} data-testid="input-full-name" />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -564,9 +567,9 @@ export default function Careers() {
                           name="email"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Email *</FormLabel>
+                              <FormLabel>{tc.form.email}</FormLabel>
                               <FormControl>
-                                <Input type="email" placeholder="you@example.com" {...field} data-testid="input-email" />
+                                <Input type="email" placeholder={tc.form.emailPlaceholder} {...field} data-testid="input-email" />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -580,9 +583,9 @@ export default function Careers() {
                           name="phone"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Phone *</FormLabel>
+                              <FormLabel>{tc.form.phone}</FormLabel>
                               <FormControl>
-                                <Input placeholder="+961 XX XXX XXX" {...field} data-testid="input-phone" />
+                                <Input placeholder={tc.form.phonePlaceholder} {...field} data-testid="input-phone" />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -593,19 +596,17 @@ export default function Careers() {
                           name="yearsOfExperience"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Years of Experience</FormLabel>
+                              <FormLabel>{tc.form.yearsOfExperience}</FormLabel>
                               <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
                                   <SelectTrigger data-testid="select-experience">
-                                    <SelectValue placeholder="Select" />
+                                    <SelectValue placeholder={tc.form.yearsPlaceholder} />
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  <SelectItem value="0-1">0-1 years</SelectItem>
-                                  <SelectItem value="1-3">1-3 years</SelectItem>
-                                  <SelectItem value="3-5">3-5 years</SelectItem>
-                                  <SelectItem value="5-10">5-10 years</SelectItem>
-                                  <SelectItem value="10+">10+ years</SelectItem>
+                                  {Object.entries(tc.form.yearsOptions).map(([value, label]) => (
+                                    <SelectItem key={value} value={value}>{label}</SelectItem>
+                                  ))}
                                 </SelectContent>
                               </Select>
                               <FormMessage />
@@ -614,88 +615,80 @@ export default function Careers() {
                         />
                       </div>
 
+                      {/* Resume Upload */}
                       <FormItem>
-                        <FormLabel>Resume / CV *</FormLabel>
-                        <FormControl>
-                          <div className="space-y-2">
-                            <input
-                              type="file"
-                              ref={fileInputRef}
-                              onChange={handleFileChange}
-                              accept=".pdf,.doc,.docx,.txt,.rtf"
-                              className="hidden"
-                              data-testid="input-resume-file"
-                            />
-                            <div
-                              onClick={() => fileInputRef.current?.click()}
-                              className="border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors"
-                            >
-                              {uploadingResume ? (
-                                <div className="flex items-center justify-center gap-2 text-muted-foreground">
-                                  <Loader2 className="h-5 w-5 animate-spin" />
-                                  <span>Uploading...</span>
-                                </div>
-                              ) : resumeFile ? (
-                                <div className="flex items-center justify-center gap-2 text-primary">
-                                  <FileText className="h-5 w-5" />
-                                  <span className="font-medium">{resumeFile.name}</span>
-                                  <Check className="h-4 w-4 text-green-500" />
-                                </div>
-                              ) : (
-                                <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                                  <Upload className="h-8 w-8" />
-                                  <span>Click to upload your resume</span>
-                                  <span className="text-xs">PDF, DOC, DOCX, TXT, RTF (Max 10MB)</span>
-                                </div>
-                              )}
+                        <FormLabel>{tc.uploadResume}</FormLabel>
+                        <FormDescription>{tc.uploadResumeDesc}</FormDescription>
+                        <div
+                          className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-input rounded-lg cursor-pointer hover:border-primary/50 transition-colors relative"
+                          onClick={() => fileInputRef.current?.click()}
+                          data-testid="resume-upload-area"
+                        >
+                          {uploadingResume ? (
+                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                          ) : resumeFile ? (
+                            <div className="text-center">
+                              <FileText className="h-8 w-8 text-primary mx-auto mb-1" />
+                              <p className="text-sm font-medium">{resumeFile.name}</p>
+                              <p className="text-xs text-muted-foreground">Click to change</p>
                             </div>
-                          </div>
-                        </FormControl>
-                        <FormDescription>
-                          Upload your resume to apply for this position
-                        </FormDescription>
+                          ) : (
+                            <div className="text-center">
+                              <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-1" />
+                              <p className="text-sm text-muted-foreground">{tc.uploadResumeCta}</p>
+                              <p className="text-xs text-muted-foreground">{tc.uploadResumeTypes}</p>
+                            </div>
+                          )}
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            className="hidden"
+                            accept=".pdf,.doc,.docx,.txt,.rtf"
+                            onChange={handleFileChange}
+                            data-testid="input-resume"
+                          />
+                        </div>
                       </FormItem>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField
-                          control={form.control}
-                          name="portfolioUrl"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Portfolio URL</FormLabel>
-                              <FormControl>
-                                <Input placeholder="https://yourportfolio.com" {...field} data-testid="input-portfolio" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="linkedinUrl"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>LinkedIn URL</FormLabel>
-                              <FormControl>
-                                <Input placeholder="https://linkedin.com/in/..." {...field} data-testid="input-linkedin" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
+                      <FormField
+                        control={form.control}
+                        name="portfolioUrl"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{tc.form.portfolioUrl}</FormLabel>
+                            <FormControl>
+                              <Input placeholder={tc.form.portfolioPlaceholder} {...field} data-testid="input-portfolio" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="linkedinUrl"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{tc.form.linkedinUrl}</FormLabel>
+                            <FormControl>
+                              <Input placeholder={tc.form.linkedinPlaceholder} {...field} data-testid="input-linkedin" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
                       <FormField
                         control={form.control}
                         name="coverLetter"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Cover Letter</FormLabel>
+                            <FormLabel>{tc.form.coverLetter}</FormLabel>
                             <FormControl>
-                              <Textarea 
-                                placeholder="Tell us why you'd be a great fit for this role..."
+                              <Textarea
+                                placeholder={tc.form.coverLetterPlaceholder}
                                 className="min-h-[100px]"
-                                {...field} 
+                                {...field}
                                 data-testid="input-cover-letter"
                               />
                             </FormControl>
@@ -704,19 +697,23 @@ export default function Careers() {
                         )}
                       />
 
-                      <Button 
-                        type="submit" 
-                        className="w-full" 
-                        size="lg"
+                      <Button
+                        type="submit"
+                        className="w-full"
                         disabled={submitMutation.isPending}
                         data-testid="button-submit-application"
                       >
                         {submitMutation.isPending ? (
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            {tc.form.submitting}
+                          </>
                         ) : (
-                          <Send className="h-4 w-4 mr-2" />
+                          <>
+                            <Send className="h-4 w-4 mr-2" />
+                            {tc.form.submit}
+                          </>
                         )}
-                        Submit Application
                       </Button>
                     </form>
                   </Form>
@@ -727,6 +724,17 @@ export default function Careers() {
         </DialogContent>
       </Dialog>
 
+      {/* CTA Section */}
+      <section className="py-16 md:py-24">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl font-bold mb-4">{tc.cta.title}</h2>
+          <p className="text-muted-foreground mb-6">{tc.cta.subtitle}</p>
+          <p className="text-sm text-muted-foreground">
+            {tc.cta.sendResumeDesc} <a href="mailto:careers@einvite.me" className="text-primary hover:underline">careers@einvite.me</a>
+          </p>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="py-8 border-t border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -734,7 +742,7 @@ export default function Careers() {
             <img src={logoImage} alt="Einvite.me" className="h-6 w-auto" />
           </a>
           <p className="text-sm text-muted-foreground">
-            {new Date().getFullYear()} einvite.me. All rights reserved.
+            {new Date().getFullYear()} einvite.me. {t.footer.rights}
           </p>
         </div>
       </footer>

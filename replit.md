@@ -13,6 +13,7 @@ A high-conversion landing page for "einvite.me" - a professional digital invitat
 - **Event Planners Page**: Partnership program for event professionals with tiered discounts (15%, 25%, 40%)
 - **Careers Page**: Job listings with application form for candidates to apply
 - **Admin Dashboard**: Full content management for site settings, pricing, jobs, candidates, partnerships, and orders
+- **EN/FR Bilingual Support**: Full English/French i18n with auto-detection from browser locale; EN/FR toggle in Header stores preference in localStorage
 
 ## Tech Stack
 - **Frontend**: React with TypeScript, Wouter for routing, TanStack Query for data fetching

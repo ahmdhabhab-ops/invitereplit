@@ -3,10 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import logoImage from "@assets/Logo_1769975575984.png";
+import { useLanguage } from "@/contexts/LanguageContext";
+import type { Language } from "@/lib/translations";
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { t, language, setLanguage } = useLanguage();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -22,6 +25,11 @@ export function Header() {
       element.scrollIntoView({ behavior: "smooth" });
       setIsMobileMenuOpen(false);
     }
+  };
+
+  const toggleLanguage = () => {
+    const next: Language = language === "en" ? "fr" : "en";
+    setLanguage(next);
   };
 
   return (
@@ -55,55 +63,74 @@ export function Header() {
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
               data-testid="link-samples"
             >
-              Samples
+              {t.nav.samples}
             </button>
             <button
               onClick={() => scrollToSection("how-it-works")}
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
               data-testid="link-how-it-works"
             >
-              How it Works
+              {t.nav.howItWorks}
             </button>
             <button
               onClick={() => scrollToSection("pricing")}
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
               data-testid="link-pricing"
             >
-              Pricing
+              {t.nav.pricing}
             </button>
             <a
               href="/event-planners"
               className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
               data-testid="link-event-planners"
             >
-              Event Planners
+              {t.nav.eventPlanners}
             </a>
             <a
               href="/careers"
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
               data-testid="link-careers"
             >
-              Careers
+              {t.nav.careers}
             </a>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={toggleLanguage}
+              className="font-semibold text-xs px-3 py-1 h-8 border-primary/30 text-primary hover:bg-primary/10"
+              data-testid="button-language-toggle"
+            >
+              {t.langToggle}
+            </Button>
             <Button
               onClick={() => scrollToSection("pricing")}
               className="font-medium"
               data-testid="button-get-started"
             >
-              Get Started
+              {t.nav.getStarted}
             </Button>
           </nav>
 
-          {/* Mobile Menu Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            data-testid="button-mobile-menu"
-          >
-            {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </Button>
+          {/* Mobile: language toggle + menu button */}
+          <div className="flex items-center gap-2 md:hidden">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={toggleLanguage}
+              className="font-semibold text-xs px-3 py-1 h-8 border-primary/30 text-primary hover:bg-primary/10"
+              data-testid="button-language-toggle-mobile"
+            >
+              {t.langToggle}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              data-testid="button-mobile-menu"
+            >
+              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -123,42 +150,42 @@ export function Header() {
                 className="text-left py-3 px-4 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
                 data-testid="link-samples-mobile"
               >
-                Samples
+                {t.nav.samples}
               </button>
               <button
                 onClick={() => scrollToSection("how-it-works")}
                 className="text-left py-3 px-4 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
                 data-testid="link-how-it-works-mobile"
               >
-                How it Works
+                {t.nav.howItWorks}
               </button>
               <button
                 onClick={() => scrollToSection("pricing")}
                 className="text-left py-3 px-4 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
                 data-testid="link-pricing-mobile"
               >
-                Pricing
+                {t.nav.pricing}
               </button>
               <a
                 href="/event-planners"
                 className="text-left py-3 px-4 text-sm font-medium text-primary hover:bg-muted rounded-md transition-colors"
                 data-testid="link-event-planners-mobile"
               >
-                Event Planners
+                {t.nav.eventPlanners}
               </a>
               <a
                 href="/careers"
                 className="text-left py-3 px-4 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
                 data-testid="link-careers-mobile"
               >
-                Careers
+                {t.nav.careers}
               </a>
               <Button
                 onClick={() => scrollToSection("pricing")}
                 className="mt-2 font-medium"
                 data-testid="button-get-started-mobile"
               >
-                Get Started
+                {t.nav.getStarted}
               </Button>
             </nav>
           </motion.div>

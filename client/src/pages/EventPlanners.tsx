@@ -41,6 +41,7 @@ import {
   Award
 } from "lucide-react";
 import logoImage from "@assets/Logo_1769975575984.png";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const partnershipFormSchema = z.object({
   companyName: z.string().min(2, "Company name is required"),
@@ -55,26 +56,18 @@ const partnershipFormSchema = z.object({
 
 type PartnershipFormData = z.infer<typeof partnershipFormSchema>;
 
-const eventTypeOptions = [
-  { id: "weddings", label: "Weddings" },
-  { id: "corporate", label: "Corporate Events" },
-  { id: "birthdays", label: "Birthday Parties" },
-  { id: "conferences", label: "Conferences" },
-  { id: "galas", label: "Galas & Fundraisers" },
-  { id: "other", label: "Other Events" },
-];
-
 const benefitIcons = [Percent, Headphones, Zap, Users, Star, Award];
 
 export default function EventPlanners() {
   const { toast } = useToast();
+  const { t } = useLanguage();
+  const tp = t.eventPlanners;
   const [submitted, setSubmitted] = useState(false);
 
   const { data: settings } = useQuery<SiteSettings>({
     queryKey: ["/api/settings"],
   });
 
-  // Dynamic content from settings
   const heroTitle = settings?.eventPlannersHeroTitle || "Partner With Einvite";
   const heroSubtitle = settings?.eventPlannersHeroSubtitle || "Join our exclusive partner program and offer your clients stunning digital invitations at special rates. Grow your business while providing premium service.";
   const heroBadge = settings?.eventPlannersBadge || "For Event Professionals";
@@ -112,6 +105,15 @@ export default function EventPlanners() {
       discount: settings?.eventPlannersPlatinumDiscount || "40%",
       features: settings?.eventPlannersPlatinumFeatures || ["40% discount on all packages", "Dedicated account manager", "Free rush delivery", "Co-marketing opportunities", "API access"],
     },
+  ];
+
+  const eventTypeOptions = [
+    { id: "weddings", label: tp.form.eventTypeOptions.weddings },
+    { id: "corporate", label: tp.form.eventTypeOptions.corporate },
+    { id: "birthdays", label: tp.form.eventTypeOptions.birthdays },
+    { id: "conferences", label: tp.form.eventTypeOptions.conferences },
+    { id: "galas", label: tp.form.eventTypeOptions.galas },
+    { id: "other", label: tp.form.eventTypeOptions.other },
   ];
 
   const form = useForm<PartnershipFormData>({
@@ -161,7 +163,7 @@ export default function EventPlanners() {
               data-testid="button-back-home"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Home
+              {tp.backHome}
             </Button>
           </div>
         </div>
@@ -203,9 +205,9 @@ export default function EventPlanners() {
       <section className="py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Partner Benefits</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">{tp.partnerBenefits}</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Unlock exclusive perks and grow your event planning business with Einvite
+              {tp.partnerBenefitsSubtitle}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -228,9 +230,9 @@ export default function EventPlanners() {
       <section className="py-16 md:py-24 bg-muted/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Partner Tiers</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">{tp.partnerTiers}</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Choose the partnership level that fits your business volume
+              {tp.partnerTiersSubtitle}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -243,7 +245,7 @@ export default function EventPlanners() {
                 {tier.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                     <span className="bg-primary text-primary-foreground text-xs font-medium px-3 py-1 rounded-full">
-                      Most Popular
+                      {tp.mostPopular}
                     </span>
                   </div>
                 )}
@@ -253,7 +255,7 @@ export default function EventPlanners() {
                 </CardHeader>
                 <CardContent className="text-center">
                   <div className="text-4xl font-bold text-primary mb-4">{tier.discount}</div>
-                  <p className="text-sm text-muted-foreground mb-6">discount on all packages</p>
+                  <p className="text-sm text-muted-foreground mb-6">{tp.discountOn}</p>
                   <ul className="space-y-3 text-left">
                     {tier.features.map((feature, i) => (
                       <li key={i} className="flex items-start gap-2 text-sm">
@@ -277,9 +279,9 @@ export default function EventPlanners() {
               <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                 <Calendar className="h-8 w-8 text-primary" />
               </div>
-              <CardTitle className="text-2xl">Apply for Partnership</CardTitle>
+              <CardTitle className="text-2xl">{tp.applyTitle}</CardTitle>
               <CardDescription>
-                Fill out the form below and we'll get back to you within 24 hours
+                {tp.applySubtitle}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -288,13 +290,12 @@ export default function EventPlanners() {
                   <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center mx-auto mb-4">
                     <Check className="h-8 w-8 text-green-600 dark:text-green-400" />
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">Request Submitted!</h3>
+                  <h3 className="text-xl font-semibold mb-2">{tp.successTitle}</h3>
                   <p className="text-muted-foreground mb-6">
-                    Thank you for your interest in partnering with Einvite. 
-                    Our team will review your application and contact you within 24 hours.
+                    {tp.successMessage}
                   </p>
                   <Button onClick={() => window.location.href = "/"} data-testid="button-back-home-success">
-                    Back to Home
+                    {tp.backHomeBtn}
                   </Button>
                 </div>
               ) : (
@@ -306,9 +307,9 @@ export default function EventPlanners() {
                         name="companyName"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Company Name *</FormLabel>
+                            <FormLabel>{tp.form.companyName}</FormLabel>
                             <FormControl>
-                              <Input placeholder="Your Company" {...field} data-testid="input-company-name" />
+                              <Input placeholder={tp.form.companyNamePlaceholder} {...field} data-testid="input-company-name" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -319,9 +320,9 @@ export default function EventPlanners() {
                         name="contactName"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Contact Name *</FormLabel>
+                            <FormLabel>{tp.form.contactName}</FormLabel>
                             <FormControl>
-                              <Input placeholder="Your Name" {...field} data-testid="input-contact-name" />
+                              <Input placeholder={tp.form.contactNamePlaceholder} {...field} data-testid="input-contact-name" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -335,9 +336,9 @@ export default function EventPlanners() {
                         name="email"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Email *</FormLabel>
+                            <FormLabel>{tp.form.email}</FormLabel>
                             <FormControl>
-                              <Input type="email" placeholder="email@company.com" {...field} data-testid="input-email" />
+                              <Input type="email" placeholder={tp.form.emailPlaceholder} {...field} data-testid="input-email" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -348,9 +349,9 @@ export default function EventPlanners() {
                         name="phone"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Phone Number *</FormLabel>
+                            <FormLabel>{tp.form.phone}</FormLabel>
                             <FormControl>
-                              <Input placeholder="+961 XX XXX XXX" {...field} data-testid="input-phone" />
+                              <Input placeholder={tp.form.phonePlaceholder} {...field} data-testid="input-phone" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -363,9 +364,9 @@ export default function EventPlanners() {
                       name="website"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Website</FormLabel>
+                          <FormLabel>{tp.form.website}</FormLabel>
                           <FormControl>
-                            <Input placeholder="https://yourcompany.com" {...field} data-testid="input-website" />
+                            <Input placeholder={tp.form.websitePlaceholder} {...field} data-testid="input-website" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -377,18 +378,17 @@ export default function EventPlanners() {
                       name="eventsPerYear"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Events Per Year *</FormLabel>
+                          <FormLabel>{tp.form.eventsPerYear}</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger data-testid="select-events-per-year">
-                                <SelectValue placeholder="Select volume" />
+                                <SelectValue placeholder={tp.form.eventsPerYearPlaceholder} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="1-10">1-10 events</SelectItem>
-                              <SelectItem value="11-50">11-50 events</SelectItem>
-                              <SelectItem value="51-100">51-100 events</SelectItem>
-                              <SelectItem value="100+">100+ events</SelectItem>
+                              {Object.entries(tp.form.volumeOptions).map(([value, label]) => (
+                                <SelectItem key={value} value={value}>{label}</SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -401,7 +401,7 @@ export default function EventPlanners() {
                       name="eventTypes"
                       render={() => (
                         <FormItem>
-                          <FormLabel>Event Types You Handle *</FormLabel>
+                          <FormLabel>{tp.form.eventTypesLabel}</FormLabel>
                           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
                             {eventTypeOptions.map((option) => (
                               <FormField
@@ -440,10 +440,10 @@ export default function EventPlanners() {
                       name="message"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Additional Message</FormLabel>
+                          <FormLabel>{tp.form.message}</FormLabel>
                           <FormControl>
                             <Textarea 
-                              placeholder="Tell us more about your business and partnership goals..."
+                              placeholder={tp.form.messagePlaceholder}
                               className="min-h-[100px]"
                               {...field} 
                               data-testid="input-message"
@@ -466,7 +466,7 @@ export default function EventPlanners() {
                       ) : (
                         <Send className="h-4 w-4 mr-2" />
                       )}
-                      Submit Partnership Request
+                      {tp.form.submit}
                     </Button>
                   </form>
                 </Form>
@@ -483,7 +483,7 @@ export default function EventPlanners() {
             <img src={logoImage} alt="Einvite.me" className="h-6 w-auto" />
           </a>
           <p className="text-sm text-muted-foreground">
-            {new Date().getFullYear()} einvite.me. All rights reserved.
+            {new Date().getFullYear()} einvite.me. {t.footer.rights}
           </p>
         </div>
       </footer>

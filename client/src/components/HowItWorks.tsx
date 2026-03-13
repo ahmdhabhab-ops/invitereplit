@@ -1,38 +1,19 @@
 import { motion } from "framer-motion";
 import { Package, FileEdit, Eye, Rocket } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-const steps = [
-  {
-    number: "01",
-    title: "Pick a Plan",
-    description: "Choose the perfect package that fits your celebration style and budget. We offer Essential, Premium, and Royal tiers.",
-    icon: Package,
-    color: "from-violet-500 to-purple-600",
-  },
-  {
-    number: "02",
-    title: "Fill the Form",
-    description: "Share your event details, photos, song preferences, and locations using our simple order form.",
-    icon: FileEdit,
-    color: "from-purple-500 to-indigo-600",
-  },
-  {
-    number: "03",
-    title: "Design Review",
-    description: "Our designers craft your unique invitation. You'll review the design and can request revisions.",
-    icon: Eye,
-    color: "from-indigo-500 to-violet-600",
-  },
-  {
-    number: "04",
-    title: "Go Live",
-    description: "Your stunning digital invitation is ready to share with friends and family via WhatsApp or link.",
-    icon: Rocket,
-    color: "from-purple-600 to-pink-500",
-  },
+const stepIcons = [Package, FileEdit, Eye, Rocket];
+const stepColors = [
+  "from-violet-500 to-purple-600",
+  "from-purple-500 to-indigo-600",
+  "from-indigo-500 to-violet-600",
+  "from-purple-600 to-pink-500",
 ];
+const stepNumbers = ["01", "02", "03", "04"];
 
 export function HowItWorks() {
+  const { t } = useLanguage();
+
   return (
     <section id="how-it-works" className="py-20 md:py-32 bg-gradient-to-b from-background via-secondary/20 to-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -49,13 +30,13 @@ export function HowItWorks() {
             viewport={{ once: true }}
             className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4"
           >
-            Simple Process
+            {t.howItWorks.badge}
           </motion.span>
           <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-semibold mb-4">
-            How It Works
+            {t.howItWorks.title}
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Four simple steps to create your perfect digital invitation
+            {t.howItWorks.subtitle}
           </p>
         </motion.div>
 
@@ -63,8 +44,8 @@ export function HowItWorks() {
           <div className="hidden lg:block absolute top-32 left-[15%] right-[15%] h-1 bg-gradient-to-r from-transparent via-primary/30 to-transparent rounded-full" />
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-6">
-            {steps.map((step, index) => {
-              const IconComponent = step.icon;
+            {t.howItWorks.steps.map((step, index) => {
+              const IconComponent = stepIcons[index];
               return (
                 <motion.div
                   key={step.title}
@@ -77,7 +58,7 @@ export function HowItWorks() {
                   <div className="bg-card rounded-2xl p-6 shadow-lg border border-border/50 h-full hover-elevate transition-all duration-300">
                     <div className="relative mx-auto mb-6 flex justify-center">
                       <motion.div 
-                        className={`w-24 h-24 rounded-2xl bg-gradient-to-br ${step.color} flex items-center justify-center shadow-lg`}
+                        className={`w-24 h-24 rounded-2xl bg-gradient-to-br ${stepColors[index]} flex items-center justify-center shadow-lg`}
                         whileHover={{ scale: 1.05 }}
                         transition={{ type: "spring", stiffness: 300 }}
                       >
@@ -97,7 +78,7 @@ export function HowItWorks() {
                         </motion.div>
                       </motion.div>
                       <div className="absolute -top-3 -right-3 w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg">
-                        <span className="text-white text-sm font-bold">{step.number}</span>
+                        <span className="text-white text-sm font-bold">{stepNumbers[index]}</span>
                       </div>
                     </div>
 
@@ -109,7 +90,7 @@ export function HowItWorks() {
                     </div>
                   </div>
 
-                  {index < steps.length - 1 && (
+                  {index < t.howItWorks.steps.length - 1 && (
                     <div className="hidden lg:flex absolute top-32 -right-3 z-10">
                       <motion.div
                         animate={{ x: [0, 5, 0] }}
@@ -121,7 +102,7 @@ export function HowItWorks() {
                     </div>
                   )}
 
-                  {index < steps.length - 1 && (
+                  {index < t.howItWorks.steps.length - 1 && (
                     <div className="lg:hidden flex justify-center mt-4 sm:hidden">
                       <motion.div
                         animate={{ y: [0, 5, 0] }}

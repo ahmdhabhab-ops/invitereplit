@@ -4,12 +4,14 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { sampleInvitations } from "@shared/schema";
 import { ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type Category = "weddings" | "events" | "birthdays";
 
 export function PhoneGallery() {
   const [activeCategory, setActiveCategory] = useState<Category>("weddings");
   const [activeIndex, setActiveIndex] = useState(0);
+  const { t } = useLanguage();
 
   const samples = sampleInvitations[activeCategory];
   const activeSample = samples[activeIndex];
@@ -39,10 +41,10 @@ export function PhoneGallery() {
           className="text-center mb-12"
         >
           <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-semibold mb-4">
-            Sample Gallery
+            {t.gallery.title}
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Explore our beautifully crafted digital invitations. Click to preview each design in action.
+            {t.gallery.subtitle}
           </p>
         </motion.div>
 
@@ -57,13 +59,13 @@ export function PhoneGallery() {
           <Tabs value={activeCategory} onValueChange={handleCategoryChange}>
             <TabsList className="bg-background/80 backdrop-blur-sm">
               <TabsTrigger value="weddings" className="font-medium" data-testid="tab-weddings">
-                Weddings
+                {t.gallery.tabs.weddings}
               </TabsTrigger>
               <TabsTrigger value="events" className="font-medium" data-testid="tab-events">
-                Events
+                {t.gallery.tabs.events}
               </TabsTrigger>
               <TabsTrigger value="birthdays" className="font-medium" data-testid="tab-birthdays">
-                Birthdays
+                {t.gallery.tabs.birthdays}
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -164,7 +166,7 @@ export function PhoneGallery() {
                 className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
                 data-testid="link-view-live"
               >
-                Open in new tab
+                {t.gallery.openTab}
                 <ExternalLink className="w-4 h-4" />
               </a>
             </motion.div>
@@ -198,7 +200,7 @@ export function PhoneGallery() {
               data-testid="button-prev-sample-mobile"
             >
               <ChevronLeft className="h-4 w-4 mr-1" />
-              Prev
+              {t.gallery.prev}
             </Button>
             <Button
               variant="outline"
@@ -207,7 +209,7 @@ export function PhoneGallery() {
               disabled={samples.length <= 1}
               data-testid="button-next-sample-mobile"
             >
-              Next
+              {t.gallery.next}
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           </div>

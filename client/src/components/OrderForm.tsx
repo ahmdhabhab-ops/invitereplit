@@ -52,6 +52,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface OrderFormProps {
   selectedPackage: string | null;
@@ -65,19 +66,19 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
   const [eventType, setEventType] = useState<string>("wedding");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const { toast } = useToast();
+  const { t } = useLanguage();
+  const tf = t.orderForm;
 
-  // Fetch settings for dynamic pricing
   const { data: settings } = useQuery<SiteSettings>({
     queryKey: ["/api/settings"],
   });
 
-  // Build dynamic pricing tiers from settings
   const dynamicPricingTiers = [
     {
       id: "essential",
       name: "Essential",
       price: settings?.essentialPrice ?? 49,
-      description: "Perfect for simple, elegant invitations",
+      description: t.pricing.plans.essential.description,
       features: settings?.essentialFeatures ?? [
         "Single-page invitation design",
         "Mobile responsive",
@@ -90,7 +91,7 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
       id: "premium",
       name: "Premium",
       price: settings?.premiumPrice ?? 99,
-      description: "Most popular for memorable events",
+      description: t.pricing.plans.premium.description,
       features: settings?.premiumFeatures ?? [
         "Multi-page interactive design",
         "Photo gallery integration",
@@ -105,7 +106,7 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
       id: "royal",
       name: "Royal",
       price: settings?.royalPrice ?? 199,
-      description: "Ultimate luxury experience",
+      description: t.pricing.plans.royal.description,
       features: settings?.royalFeatures ?? [
         "Everything in Premium",
         "Video backgrounds",
@@ -120,7 +121,6 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
 
   const selectedTier = dynamicPricingTiers.find((t) => t.id === selectedPackage);
 
-  // Form for step 1
   const eventForm = useForm<EventDetails>({
     resolver: zodResolver(eventDetailsSchema),
     defaultValues: {
@@ -150,7 +150,6 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
     }
   };
 
-  // Form for step 3
   const customizationForm = useForm<Customizations>({
     resolver: zodResolver(customizationsSchema),
     defaultValues: {
@@ -160,7 +159,6 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
     },
   });
 
-  // Form for step 4
   const contactForm = useForm<ContactPayment>({
     resolver: zodResolver(contactPaymentSchema),
     defaultValues: {
@@ -211,25 +209,24 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
       const paymentMethod = contactForm.getValues("paymentMethod");
       
       if (paymentMethod === "whatsapp") {
-        // Redirect to WhatsApp
         const message = encodeURIComponent(
-          `Hi! I'd like to order the ${selectedTier?.name} package for my ${eventType}.\n\nOrder ID: ${data.id}\nNames: ${eventForm.getValues("names")}\nEvent Date: ${eventForm.getValues("eventDate")}`
+          `${tf.whatsappMessage} ${selectedTier?.name} ${tf.whatsappPackage} ${eventType}.\n\n${tf.whatsappOrderId}: ${data.id}\n${tf.whatsappNames}: ${eventForm.getValues("names")}\n${tf.whatsappDate}: ${eventForm.getValues("eventDate")}`
         );
         const whatsappNum = settings?.whatsappNumber?.replace(/[^0-9]/g, "") || "96181824782";
         window.open(`https://wa.me/${whatsappNum}?text=${message}`, "_blank");
       }
       
       toast({
-        title: "Order Submitted!",
-        description: "We'll get back to you shortly with your custom invitation design.",
+        title: tf.successTitle,
+        description: tf.successDesc,
       });
       
       onClose();
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
+        title: tf.errorTitle,
+        description: tf.errorDesc,
         variant: "destructive",
       });
     },
@@ -283,6 +280,18 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
     exit: { opacity: 0, x: -20 },
   };
 
+  const namesLabel =
+    eventType === "wedding"
+      ? tf.names.wedding
+      : eventType === "birthday"
+      ? tf.names.birthday
+      : tf.names.event;
+
+  const namesPlaceholder =
+    eventType === "wedding"
+      ? tf.namePlaceholder.wedding
+      : tf.namePlaceholder.other;
+
   return (
     <Dialog open={!!selectedPackage} onOpenChange={() => onClose()}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
@@ -292,21 +301,20 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
             <span className="text-primary">${selectedTier?.price}</span>
           </DialogTitle>
           <DialogDescription>
-            Complete the form below to order your custom digital invitation.
+            {tf.description}
           </DialogDescription>
         </DialogHeader>
 
         {/* Progress */}
         <div className="mb-6">
           <div className="flex justify-between text-sm text-muted-foreground mb-2">
-            <span>Step {step} of 4</span>
-            <span>{Math.round(progress)}% Complete</span>
+            <span>{tf.step} {step} {tf.of} 4</span>
+            <span>{Math.round(progress)}% {tf.complete}</span>
           </div>
           <Progress value={progress} className="h-2" />
           
-          {/* Step Labels */}
           <div className="flex justify-between mt-3">
-            {["Details", "Photos", "Custom", "Payment"].map((label, i) => (
+            {tf.stepLabels.map((label, i) => (
               <span
                 key={label}
                 className={`text-xs font-medium ${
@@ -332,15 +340,14 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
             >
               <Form {...eventForm}>
                 <form className="space-y-4">
-                  {/* Event Type Selection */}
                   <div className="space-y-2">
-                    <Label>Event Type</Label>
+                    <Label>{tf.eventType}</Label>
                     <RadioGroup
                       value={eventType}
                       onValueChange={setEventType}
                       className="flex flex-wrap gap-3"
                     >
-                      {["wedding", "event", "birthday"].map((type) => (
+                      {(["wedding", "event", "birthday"] as const).map((type) => (
                         <div key={type} className="flex items-center">
                           <RadioGroupItem
                             value={type}
@@ -352,7 +359,7 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                             className="px-4 py-2 rounded-md border border-input cursor-pointer capitalize peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10"
                             data-testid={`radio-${type}`}
                           >
-                            {type}
+                            {tf.eventTypes[type]}
                           </Label>
                         </div>
                       ))}
@@ -366,19 +373,11 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">
                           <UserCheck className="w-4 h-4" />
-                          {eventType === "wedding"
-                            ? "Couple Names"
-                            : eventType === "birthday"
-                            ? "Birthday Person"
-                            : "Event Name"}
+                          {namesLabel}
                         </FormLabel>
                         <FormControl>
                           <Input
-                            placeholder={
-                              eventType === "wedding"
-                                ? "e.g., John & Jane"
-                                : "Enter name"
-                            }
+                            placeholder={namesPlaceholder}
                             {...field}
                             data-testid="input-names"
                           />
@@ -395,7 +394,7 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">
                           <Calendar className="w-4 h-4" />
-                          Event Date
+                          {tf.eventDate}
                         </FormLabel>
                         <FormControl>
                           <Input type="date" {...field} data-testid="input-date" />
@@ -405,12 +404,11 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                     )}
                   />
 
-                  {/* Multiple Locations */}
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <Label className="flex items-center gap-2">
                         <MapPin className="w-4 h-4" />
-                        Locations
+                        {tf.locations}
                       </Label>
                       <Button
                         type="button"
@@ -420,7 +418,7 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                         data-testid="button-add-location"
                       >
                         <Plus className="w-4 h-4 mr-1" />
-                        Add Location
+                        {tf.addLocation}
                       </Button>
                     </div>
                     
@@ -431,7 +429,7 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                       >
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-medium text-muted-foreground">
-                            Location {index + 1}
+                            {tf.locationLabel} {index + 1}
                           </span>
                           {locations.length > 1 && (
                             <Button
@@ -451,10 +449,10 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                           name={`locations.${index}.name`}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-xs">Location Name</FormLabel>
+                              <FormLabel className="text-xs">{tf.locationName}</FormLabel>
                               <FormControl>
                                 <Input
-                                  placeholder="e.g., Church, Reception Venue"
+                                  placeholder={tf.locationNamePlaceholder}
                                   {...field}
                                   data-testid={`input-location-name-${index}`}
                                 />
@@ -469,10 +467,10 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                           name={`locations.${index}.address`}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-xs">Address</FormLabel>
+                              <FormLabel className="text-xs">{tf.address}</FormLabel>
                               <FormControl>
                                 <Input
-                                  placeholder="e.g., Grand Hotel, Beirut"
+                                  placeholder={tf.addressPlaceholder}
                                   {...field}
                                   data-testid={`input-location-address-${index}`}
                                 />
@@ -487,7 +485,7 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                           name={`locations.${index}.mapLink`}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-xs">Google Maps Link (Optional)</FormLabel>
+                              <FormLabel className="text-xs">{tf.mapLink}</FormLabel>
                               <FormControl>
                                 <Input
                                   placeholder="https://maps.google.com/..."
@@ -505,7 +503,7 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
 
                   <div className="flex justify-end pt-4">
                     <Button type="button" onClick={handleStep1Submit} data-testid="button-next-step1">
-                      Next
+                      {tf.next}
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
                   </div>
@@ -528,10 +526,10 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                 <div>
                   <Label className="flex items-center gap-2 mb-2">
                     <Upload className="w-4 h-4" />
-                    Upload Photos for Gallery
+                    {tf.uploadTitle}
                   </Label>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Upload your favorite photos to include in your invitation gallery.
+                    {tf.uploadSubtitle}
                   </p>
                   
                   <label
@@ -540,10 +538,10 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                   >
                     <Upload className="w-10 h-10 text-muted-foreground mb-2" />
                     <span className="text-sm text-muted-foreground">
-                      Click to upload or drag and drop
+                      {tf.uploadCta}
                     </span>
                     <span className="text-xs text-muted-foreground mt-1">
-                      PNG, JPG up to 10MB
+                      {tf.uploadTypes}
                     </span>
                     <input
                       type="file"
@@ -556,10 +554,9 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                   </label>
                 </div>
 
-                {/* Uploaded Files Preview */}
                 {uploadedFiles.length > 0 && (
                   <div className="space-y-2">
-                    <Label>Uploaded Files</Label>
+                    <Label>{tf.uploadedFiles}</Label>
                     <div className="space-y-2">
                       {uploadedFiles.map((file, index) => (
                         <div
@@ -592,10 +589,10 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                     data-testid="button-back-step2"
                   >
                     <ArrowLeft className="w-4 h-4 mr-2" />
-                    Back
+                    {tf.back}
                   </Button>
                   <Button type="button" onClick={handleStep2Submit} data-testid="button-next-step2">
-                    Next
+                    {tf.next}
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </div>
@@ -622,7 +619,7 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">
                           <Music className="w-4 h-4" />
-                          Background Song (Optional)
+                          {tf.backgroundSong}
                         </FormLabel>
                         <FormControl>
                           <Input
@@ -641,30 +638,26 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                     name="rsvpPreference"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>RSVP Feature</FormLabel>
+                        <FormLabel>{tf.rsvpFeature}</FormLabel>
                         <FormControl>
                           <RadioGroup
                             value={field.value}
                             onValueChange={field.onChange}
                             className="flex gap-4"
                           >
-                            {[
-                              { value: "yes", label: "Enable RSVP" },
-                              { value: "no", label: "Disable" },
-                              { value: "maybe", label: "Optional" },
-                            ].map((option) => (
-                              <div key={option.value} className="flex items-center">
+                            {(["yes", "no", "maybe"] as const).map((option) => (
+                              <div key={option} className="flex items-center">
                                 <RadioGroupItem
-                                  value={option.value}
-                                  id={`rsvp-${option.value}`}
+                                  value={option}
+                                  id={`rsvp-${option}`}
                                   className="peer sr-only"
                                 />
                                 <Label
-                                  htmlFor={`rsvp-${option.value}`}
+                                  htmlFor={`rsvp-${option}`}
                                   className="px-4 py-2 rounded-md border border-input cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10"
-                                  data-testid={`radio-rsvp-${option.value}`}
+                                  data-testid={`radio-rsvp-${option}`}
                                 >
-                                  {option.label}
+                                  {tf.rsvpOptions[option]}
                                 </Label>
                               </div>
                             ))}
@@ -680,10 +673,10 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                     name="additionalNotes"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Additional Notes (Optional)</FormLabel>
+                        <FormLabel>{tf.additionalNotes}</FormLabel>
                         <FormControl>
                           <Textarea
-                            placeholder="Any special requests or preferences..."
+                            placeholder={tf.additionalNotesPlaceholder}
                             className="resize-none"
                             rows={3}
                             {...field}
@@ -703,10 +696,10 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                       data-testid="button-back-step3"
                     >
                       <ArrowLeft className="w-4 h-4 mr-2" />
-                      Back
+                      {tf.back}
                     </Button>
                     <Button type="button" onClick={handleStep3Submit} data-testid="button-next-step3">
-                      Next
+                      {tf.next}
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
                   </div>
@@ -732,10 +725,10 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                     name="contactName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Your Name</FormLabel>
+                        <FormLabel>{tf.yourName}</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="Enter your name"
+                            placeholder={tf.yourNamePlaceholder}
                             {...field}
                             data-testid="input-contact-name"
                           />
@@ -750,7 +743,7 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                     name="contactEmail"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email</FormLabel>
+                        <FormLabel>{tf.email}</FormLabel>
                         <FormControl>
                           <Input
                             type="email"
@@ -771,7 +764,7 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">
                           <Phone className="w-4 h-4" />
-                          Phone Number
+                          {tf.phone}
                         </FormLabel>
                         <FormControl>
                           <Input
@@ -793,7 +786,7 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">
                           <CreditCard className="w-4 h-4" />
-                          Payment Method
+                          {tf.paymentMethod}
                         </FormLabel>
                         <FormControl>
                           <RadioGroup
@@ -815,7 +808,7 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                                 <SiWhatsapp className="w-8 h-8 text-green-500 mb-2" />
                                 <span className="font-medium">WhatsApp</span>
                                 <span className="text-xs text-muted-foreground">
-                                  Pay via chat
+                                  {tf.whatsappPaymentDesc}
                                 </span>
                               </Label>
                             </div>
@@ -861,7 +854,7 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                       data-testid="button-back-step4"
                     >
                       <ArrowLeft className="w-4 h-4 mr-2" />
-                      Back
+                      {tf.back}
                     </Button>
                     <Button
                       type="button"
@@ -872,12 +865,12 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                       {submitMutation.isPending ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Submitting...
+                          {tf.submitting}
                         </>
                       ) : (
                         <>
                           <Check className="w-4 h-4 mr-2" />
-                          Complete Order
+                          {tf.submit}
                         </>
                       )}
                     </Button>

@@ -4,11 +4,13 @@ import { SiInstagram, SiFacebook, SiWhatsapp, SiTiktok, SiLinkedin } from "react
 import { useQuery } from "@tanstack/react-query";
 import logoImage from "@assets/Logo_1769975575984.png";
 import type { SiteSettings } from "@shared/schema";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function Footer() {
   const { data: settings } = useQuery<SiteSettings>({
     queryKey: ["/api/settings"],
   });
+  const { t } = useLanguage();
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
@@ -33,8 +35,7 @@ export function Footer() {
               />
             </a>
             <p className="text-muted-foreground text-sm leading-relaxed mb-6">
-              Creating beautiful digital invitations for your special moments. 
-              Elegant, interactive, and memorable.
+              {t.footer.tagline}
             </p>
             <div className="flex items-center gap-4 flex-wrap">
               {settings?.instagramUrl && (
@@ -96,7 +97,7 @@ export function Footer() {
           {/* Quick Links */}
           <div>
             <h3 className="font-semibold text-sm uppercase tracking-wider mb-4">
-              Quick Links
+              {t.footer.quickLinks}
             </h3>
             <ul className="space-y-3">
               <li>
@@ -105,7 +106,7 @@ export function Footer() {
                   className="text-muted-foreground hover:text-foreground transition-colors text-sm"
                   data-testid="link-footer-samples"
                 >
-                  Sample Gallery
+                  {t.footer.sampleGallery}
                 </button>
               </li>
               <li>
@@ -114,7 +115,7 @@ export function Footer() {
                   className="text-muted-foreground hover:text-foreground transition-colors text-sm"
                   data-testid="link-footer-how-it-works"
                 >
-                  How It Works
+                  {t.footer.howItWorks}
                 </button>
               </li>
               <li>
@@ -123,7 +124,7 @@ export function Footer() {
                   className="text-muted-foreground hover:text-foreground transition-colors text-sm"
                   data-testid="link-footer-pricing"
                 >
-                  Pricing
+                  {t.footer.pricing}
                 </button>
               </li>
               <li>
@@ -132,7 +133,7 @@ export function Footer() {
                   className="text-muted-foreground hover:text-foreground transition-colors text-sm"
                   data-testid="link-footer-about"
                 >
-                  About Us
+                  {t.footer.aboutUs}
                 </Link>
               </li>
             </ul>
@@ -141,20 +142,20 @@ export function Footer() {
           {/* Services */}
           <div>
             <h3 className="font-semibold text-sm uppercase tracking-wider mb-4">
-              Services
+              {t.footer.services}
             </h3>
             <ul className="space-y-3">
               <li>
-                <span className="text-muted-foreground text-sm">Wedding Invitations</span>
+                <span className="text-muted-foreground text-sm">{t.footer.weddingInvitations}</span>
               </li>
               <li>
-                <span className="text-muted-foreground text-sm">Event Invitations</span>
+                <span className="text-muted-foreground text-sm">{t.footer.eventInvitations}</span>
               </li>
               <li>
-                <span className="text-muted-foreground text-sm">Birthday Invitations</span>
+                <span className="text-muted-foreground text-sm">{t.footer.birthdayInvitations}</span>
               </li>
               <li>
-                <span className="text-muted-foreground text-sm">Custom Designs</span>
+                <span className="text-muted-foreground text-sm">{t.footer.customDesigns}</span>
               </li>
             </ul>
           </div>
@@ -162,7 +163,7 @@ export function Footer() {
           {/* Contact */}
           <div>
             <h3 className="font-semibold text-sm uppercase tracking-wider mb-4">
-              Contact Us
+              {t.footer.contactUs}
             </h3>
             <ul className="space-y-3">
               <li className="flex items-center gap-3 text-muted-foreground text-sm">
@@ -175,7 +176,7 @@ export function Footer() {
               </li>
               <li className="flex items-start gap-3 text-muted-foreground text-sm">
                 <MapPin className="w-4 h-4 shrink-0 mt-0.5" />
-                <span>Beirut, Lebanon</span>
+                <span>{t.footer.location}</span>
               </li>
             </ul>
           </div>
@@ -184,10 +185,10 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            {new Date().getFullYear()} einvite.me. All rights reserved.
+            {new Date().getFullYear()} einvite.me. {t.footer.rights}
           </p>
           <p className="text-sm text-muted-foreground flex items-center gap-1">
-            Made with <Heart className="w-4 h-4 text-primary fill-primary" /> in Lebanon
+            {t.footer.madeWith} <Heart className="w-4 h-4 text-primary fill-primary" /> {t.footer.inLebanon}
           </p>
         </div>
       </div>

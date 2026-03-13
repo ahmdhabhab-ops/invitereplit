@@ -1,14 +1,26 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Sparkles, Heart, Star, Send, Gift } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useQuery } from "@tanstack/react-query";
+import type { SiteSettings } from "@shared/schema";
 
 export function HeroSection() {
+  const { t } = useLanguage();
+  const { data: settings } = useQuery<SiteSettings>({
+    queryKey: ["/api/settings"],
+  });
+
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
     }
   };
+
+  const happyCouples = settings?.happyCouplesCount ?? "500+";
+  const eventsCreated = settings?.eventsCreatedCount ?? "1000+";
+  const customerRating = settings?.customerRating ?? "4.9";
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16 md:pt-20">
@@ -144,20 +156,19 @@ export function HeroSection() {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white shadow-md shadow-purple-100 border border-purple-100 mb-8"
           >
             <Sparkles className="w-4 h-4 text-purple-500" />
-            <span className="text-sm font-medium text-purple-700">#1 Digital Invitations in Lebanon</span>
+            <span className="text-sm font-medium text-purple-700">{t.hero.badge}</span>
           </motion.div>
 
           <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold leading-tight mb-6 text-gray-900">
-            Transform Your
+            {t.hero.title1}
             <br />
             <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-violet-600 bg-clip-text text-transparent">
-              Celebrations
+              {t.hero.title2}
             </span>
           </h1>
 
           <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto mb-10">
-            Beautiful, interactive digital invitations for your weddings, events, and celebrations. 
-            Share your special moments with elegance and style.
+            {t.hero.subtitle}
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -167,7 +178,7 @@ export function HeroSection() {
               className="w-full sm:w-auto min-w-[200px] font-medium text-base bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white shadow-lg shadow-purple-300/40"
               data-testid="button-hero-get-started"
             >
-              Get Started
+              {t.hero.cta}
             </Button>
             <Button
               size="lg"
@@ -176,7 +187,7 @@ export function HeroSection() {
               className="w-full sm:w-auto min-w-[200px] font-medium text-base border-purple-200 text-purple-700 hover:bg-purple-50 bg-white shadow-md"
               data-testid="button-hero-view-samples"
             >
-              View Samples
+              {t.hero.viewSamples}
             </Button>
           </div>
         </motion.div>
@@ -188,16 +199,16 @@ export function HeroSection() {
           className="flex flex-wrap justify-center gap-8 md:gap-16 mt-16 pt-8 border-t border-purple-100"
         >
           <div className="text-center">
-            <div className="font-serif text-3xl md:text-4xl font-semibold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">500+</div>
-            <div className="text-sm text-gray-500 mt-1">Happy Couples</div>
+            <div className="font-serif text-3xl md:text-4xl font-semibold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent" data-testid="stat-couples-count">{happyCouples}</div>
+            <div className="text-sm text-gray-500 mt-1">{t.hero.stats.couples}</div>
           </div>
           <div className="text-center">
-            <div className="font-serif text-3xl md:text-4xl font-semibold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">1000+</div>
-            <div className="text-sm text-gray-500 mt-1">Events Created</div>
+            <div className="font-serif text-3xl md:text-4xl font-semibold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent" data-testid="stat-events-count">{eventsCreated}</div>
+            <div className="text-sm text-gray-500 mt-1">{t.hero.stats.events}</div>
           </div>
           <div className="text-center">
-            <div className="font-serif text-3xl md:text-4xl font-semibold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">4.9</div>
-            <div className="text-sm text-gray-500 mt-1">Customer Rating</div>
+            <div className="font-serif text-3xl md:text-4xl font-semibold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent" data-testid="stat-rating">{customerRating}</div>
+            <div className="text-sm text-gray-500 mt-1">{t.hero.stats.rating}</div>
           </div>
         </motion.div>
       </div>

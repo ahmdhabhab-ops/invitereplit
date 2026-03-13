@@ -5,6 +5,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import type { SiteSettings } from "@shared/schema";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface PricingSectionProps {
   onSelectPackage: (packageId: string) => void;
@@ -14,13 +15,14 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
   const { data: settings, isLoading } = useQuery<SiteSettings>({
     queryKey: ["/api/settings"],
   });
+  const { t } = useLanguage();
 
   const pricingTiers = [
     {
       id: "essential",
       name: "Essential",
       price: settings?.essentialPrice ?? 49,
-      description: "Perfect for simple, elegant invitations",
+      description: t.pricing.plans.essential.description,
       features: settings?.essentialFeatures ?? [
         "Single-page invitation design",
         "Mobile responsive",
@@ -33,7 +35,7 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
       id: "premium",
       name: "Premium",
       price: settings?.premiumPrice ?? 99,
-      description: "Most popular for memorable events",
+      description: t.pricing.plans.premium.description,
       features: settings?.premiumFeatures ?? [
         "Multi-page interactive design",
         "Photo gallery integration",
@@ -48,7 +50,7 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
       id: "royal",
       name: "Royal",
       price: settings?.royalPrice ?? 199,
-      description: "Ultimate luxury experience",
+      description: t.pricing.plans.royal.description,
       features: settings?.royalFeatures ?? [
         "Everything in Premium",
         "Video backgrounds",
@@ -73,10 +75,10 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
           className="text-center mb-16"
         >
           <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-semibold mb-4">
-            Choose Your Package
+            {t.pricing.title}
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Select the perfect plan for your special occasion. All packages include our premium design service.
+            {t.pricing.subtitle}
           </p>
         </motion.div>
 
@@ -104,7 +106,7 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
                     <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
                       <Badge className="bg-primary text-primary-foreground px-4 py-1">
                         <Sparkles className="w-3 h-3 mr-1" />
-                        Most Popular
+                        {t.pricing.mostPopular}
                       </Badge>
                     </div>
                   )}
@@ -121,7 +123,7 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
                       <p className="text-muted-foreground text-sm mt-1">{tier.description}</p>
                       <div className="mt-4">
                         <span className="font-serif text-4xl font-semibold" data-testid={`price-${tier.id}`}>${tier.price}</span>
-                        <span className="text-muted-foreground text-sm ml-1">one-time</span>
+                        <span className="text-muted-foreground text-sm ml-1">{t.pricing.oneTime}</span>
                       </div>
                     </CardHeader>
                     
@@ -143,7 +145,7 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
                         onClick={() => onSelectPackage(tier.id)}
                         data-testid={`button-select-${tier.id}`}
                       >
-                        Select Package
+                        {t.pricing.selectPackage}
                       </Button>
                     </CardFooter>
                   </Card>
@@ -163,15 +165,15 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
         >
           <div className="flex items-center gap-2 text-muted-foreground">
             <Check className="w-5 h-5 text-primary" />
-            <span className="text-sm">Secure Payment</span>
+            <span className="text-sm">{t.pricing.trust.securePayment}</span>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Check className="w-5 h-5 text-primary" />
-            <span className="text-sm">Fast Delivery</span>
+            <span className="text-sm">{t.pricing.trust.fastDelivery}</span>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Check className="w-5 h-5 text-primary" />
-            <span className="text-sm">Satisfaction Guaranteed</span>
+            <span className="text-sm">{t.pricing.trust.satisfaction}</span>
           </div>
         </motion.div>
       </div>
