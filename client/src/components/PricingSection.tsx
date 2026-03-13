@@ -15,7 +15,12 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
   const { data: settings, isLoading } = useQuery<SiteSettings>({
     queryKey: ["/api/settings"],
   });
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+
+  const getFeatures = (dbFeatures: string[] | null | undefined, translatedFeatures: readonly string[]) => {
+    if (language === "fr") return translatedFeatures;
+    return dbFeatures ?? translatedFeatures;
+  };
 
   const pricingTiers = [
     {
@@ -23,14 +28,14 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
       name: t.pricing.plans.essential.name,
       price: settings?.essentialPrice ?? 49,
       description: t.pricing.plans.essential.description,
-      features: settings?.essentialFeatures ?? t.pricing.plans.essential.features,
+      features: getFeatures(settings?.essentialFeatures, t.pricing.plans.essential.features),
     },
     {
       id: "premium",
       name: t.pricing.plans.premium.name,
       price: settings?.premiumPrice ?? 99,
       description: t.pricing.plans.premium.description,
-      features: settings?.premiumFeatures ?? t.pricing.plans.premium.features,
+      features: getFeatures(settings?.premiumFeatures, t.pricing.plans.premium.features),
       popular: true,
     },
     {
@@ -38,7 +43,7 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
       name: t.pricing.plans.royal.name,
       price: settings?.royalPrice ?? 199,
       description: t.pricing.plans.royal.description,
-      features: settings?.royalFeatures ?? t.pricing.plans.royal.features,
+      features: getFeatures(settings?.royalFeatures, t.pricing.plans.royal.features),
     },
   ];
 
