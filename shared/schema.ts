@@ -456,6 +456,7 @@ export const pricingTiers = [
 // Sample invitations for the gallery
 export const sampleInvitations = {
   weddings: [
+    { id: "emma-and-lucas", name: "Emma & Lucas", url: "https://app.einvite.me/emma-and-lucas" },
     { id: "georges-rita", name: "Georges & Rita", url: "https://app.einvite.me/georges-rita" },
     { id: "yyouhanna-vanessa", name: "Youhanna & Vanessa", url: "https://app.einvite.me/yyouhanna-vanessa" },
     { id: "john-jane", name: "John & Jane", url: "https://app.einvite.me/john-jane" },

@@ -124,6 +124,6 @@ The admin panel at `/admin` allows managing:
 The application runs on port 5000 with `npm run dev`. Database migrations can be pushed with `npm run db:push`.
 
 ## Sample Invitations
-- **Weddings**: georges-rita, yyouhanna-vanessa, john-jane, ahmad-rim
+- **Weddings**: emma-and-lucas (first), georges-rita, yyouhanna-vanessa, john-jane, ahmad-rim
 - **Events**: dj-camp
 - **Birthdays**: itta
