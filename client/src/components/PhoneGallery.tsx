@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { sampleInvitations } from "@shared/schema";
@@ -11,9 +11,35 @@ type Category = "weddings" | "events" | "birthdays";
 export function PhoneGallery() {
   const [activeCategory, setActiveCategory] = useState<Category>("weddings");
   const [activeIndex, setActiveIndex] = useState(0);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
-  const samples = sampleInvitations[activeCategory];
+  const getLocalizedSamples = (category: Category) => {
+    const raw = sampleInvitations[category];
+    if (language !== "fr") return raw as { id: string; name: string; url: string }[];
+
+    const withLang = raw.map((s) => ({
+      ...s,
+      url: s.url + "?lg=fr",
+    }));
+
+    if (category === "weddings") {
+      const frenchFirst = "georges-rita";
+      const idx = withLang.findIndex((s) => s.id === frenchFirst);
+      if (idx > 0) {
+        const reordered = [...withLang];
+        const [item] = reordered.splice(idx, 1);
+        reordered.unshift(item);
+        return reordered;
+      }
+    }
+    return withLang;
+  };
+
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [language]);
+
+  const samples = getLocalizedSamples(activeCategory);
   const activeSample = samples[activeIndex];
 
   const handleCategoryChange = (category: string) => {
