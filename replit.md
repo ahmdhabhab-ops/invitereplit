@@ -127,3 +127,4 @@ The application runs on port 5000 with `npm run dev`. Database migrations can be
 - **Weddings**: emma-and-lucas (first), georges-rita, yyouhanna-vanessa, john-jane, ahmad-rim
 - **Events**: dj-camp
 - **Birthdays**: itta
+- **Baptisms**: roy

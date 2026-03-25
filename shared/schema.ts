@@ -468,4 +468,7 @@ export const sampleInvitations = {
   birthdays: [
     { id: "itta", name: "Itta's Birthday", url: "https://app.einvite.me/itta" },
   ],
+  baptisms: [
+    { id: "roy", name: "Roy's Baptism", url: "https://app.einvite.me/roy" },
+  ],
 } as const;

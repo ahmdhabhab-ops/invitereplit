@@ -6,7 +6,7 @@ import { ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-type Category = "weddings" | "events" | "birthdays";
+type Category = "weddings" | "events" | "birthdays" | "baptisms";
 
 export function PhoneGallery() {
   const [activeCategory, setActiveCategory] = useState<Category>("weddings");
@@ -92,6 +92,9 @@ export function PhoneGallery() {
               </TabsTrigger>
               <TabsTrigger value="birthdays" className="font-medium" data-testid="tab-birthdays">
                 {t.gallery.tabs.birthdays}
+              </TabsTrigger>
+              <TabsTrigger value="baptisms" className="font-medium" data-testid="tab-baptisms">
+                {t.gallery.tabs.baptisms}
               </TabsTrigger>
             </TabsList>
           </Tabs>
