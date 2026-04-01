@@ -10,7 +10,7 @@ import { WhyChooseUs } from "@/components/WhyChooseUs";
 import { FAQ } from "@/components/FAQ";
 import { OrderForm } from "@/components/OrderForm";
 import { Footer } from "@/components/Footer";
-import { SpinWheel, SpinBanner } from "@/components/SpinWheel";
+import { SpinWheel, SpinBanner, SpinFloatingButton } from "@/components/SpinWheel";
 
 export default function LandingPage() {
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
@@ -48,6 +48,9 @@ export default function LandingPage() {
 
       {/* Spin the Wheel Modal */}
       <SpinWheel isOpen={spinOpen} onClose={() => setSpinOpen(false)} />
+
+      {/* Floating spin button */}
+      <SpinFloatingButton onOpen={() => setSpinOpen(true)} />
     </div>
   );
 }

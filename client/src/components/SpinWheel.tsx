@@ -664,3 +664,100 @@ export function SpinBanner({ onOpen }: SpinBannerProps) {
     </section>
   );
 }
+
+// --- Floating action button ---
+interface SpinFloatingButtonProps {
+  onOpen: () => void;
+}
+
+export function SpinFloatingButton({ onOpen }: SpinFloatingButtonProps) {
+  return (
+    <>
+      <style>{`
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
+        }
+        @keyframes pulse-ring {
+          0%   { transform: scale(1);   opacity: 0.7; }
+          70%  { transform: scale(1.55); opacity: 0; }
+          100% { transform: scale(1.55); opacity: 0; }
+        }
+        @keyframes pulse-ring2 {
+          0%   { transform: scale(1);   opacity: 0.5; }
+          70%  { transform: scale(1.85); opacity: 0; }
+          100% { transform: scale(1.85); opacity: 0; }
+        }
+        @keyframes badge-bounce {
+          0%, 100% { transform: translateY(0); }
+          50%       { transform: translateY(-4px); }
+        }
+        .spin-float-btn:hover .spin-emoji {
+          animation-duration: 0.6s;
+        }
+      `}</style>
+
+      <div
+        className="fixed bottom-6 right-6 z-50 flex flex-col items-center gap-2"
+        style={{ pointerEvents: "none" }}
+      >
+        {/* Bouncing badge label */}
+        <div
+          className="bg-yellow-400 text-yellow-900 text-xs font-extrabold px-3 py-1 rounded-full shadow-lg select-none"
+          style={{
+            animation: "badge-bounce 2s ease-in-out infinite",
+            pointerEvents: "none",
+            letterSpacing: "0.02em",
+            whiteSpace: "nowrap",
+          }}
+        >
+          🎁 Spin & Win!
+        </div>
+
+        {/* Button with pulsing rings */}
+        <div className="relative" style={{ pointerEvents: "auto" }}>
+          {/* Outer pulse ring */}
+          <span
+            className="absolute inset-0 rounded-full"
+            style={{
+              background: "radial-gradient(circle, #a855f7 0%, #7c3aed 100%)",
+              animation: "pulse-ring2 2.4s ease-out infinite",
+              animationDelay: "0.4s",
+            }}
+          />
+          {/* Inner pulse ring */}
+          <span
+            className="absolute inset-0 rounded-full"
+            style={{
+              background: "radial-gradient(circle, #a855f7 0%, #7c3aed 100%)",
+              animation: "pulse-ring 2.4s ease-out infinite",
+            }}
+          />
+
+          {/* Main button */}
+          <button
+            onClick={onOpen}
+            className="spin-float-btn relative flex flex-col items-center justify-center w-16 h-16 rounded-full shadow-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 transition-transform duration-200 hover:scale-110 active:scale-95"
+            style={{
+              background: "linear-gradient(135deg, #7c3aed 0%, #9333ea 50%, #c026d3 100%)",
+              border: "2px solid rgba(255,255,255,0.25)",
+            }}
+            data-testid="button-spin-float"
+            aria-label="Spin the Wheel to win a discount"
+          >
+            {/* Spinning wheel emoji */}
+            <span
+              className="spin-emoji text-2xl leading-none"
+              style={{ animation: "spin-slow 3s linear infinite" }}
+            >
+              🎡
+            </span>
+            <span className="text-white text-[9px] font-bold mt-0.5 leading-none tracking-wide">
+              FREE SPIN
+            </span>
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
