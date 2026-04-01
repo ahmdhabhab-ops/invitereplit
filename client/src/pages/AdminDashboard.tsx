@@ -73,10 +73,18 @@ import {
   LogOut,
   Home,
   Image,
-  Send
+  Send,
+  Gift,
+  RotateCcw,
+  AlertCircle,
+  Percent,
+  ToggleLeft,
+  ToggleRight,
+  Table2,
+  Info
 } from "lucide-react";
 import { SiTiktok } from "react-icons/si";
-import type { SiteSettings, Order, JobOpening, JobApplication, PartnershipRequest, AdminUserSafe } from "@shared/schema";
+import type { SiteSettings, Order, JobOpening, JobApplication, PartnershipRequest, AdminUserSafe, SpinPrize, SpinEntry } from "@shared/schema";
 import { InvoiceManager } from "@/components/InvoiceManager";
 import { ProposalManager } from "@/components/ProposalManager";
 import logoPath from "@assets/Logo_1769975575984.png";
@@ -116,6 +124,7 @@ type ActiveSection =
   | "candidates" 
   | "partnerships" 
   | "users"
+  | "spin"
   | "general" 
   | "pricing" 
   | "contact" 
@@ -133,6 +142,7 @@ const allMenuItems = [
   { id: "candidates" as ActiveSection, label: "Candidates", icon: Users, roles: ["admin"] as UserRole[] },
   { id: "partnerships" as ActiveSection, label: "Partnerships", icon: Handshake, roles: ["admin"] as UserRole[] },
   { id: "users" as ActiveSection, label: "Team Members", icon: Users, roles: ["admin"] as UserRole[] },
+  { id: "spin" as ActiveSection, label: "Spin the Wheel", icon: Gift, roles: ["admin"] as UserRole[] },
 ];
 
 const settingsItems = [
@@ -201,6 +211,29 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/users"],
     enabled: sessionData?.isAdmin === true && sessionData?.role === "admin",
   });
+
+  // Get spin prizes (admin only)
+  const { data: spinPrizesList, isLoading: spinPrizesLoading, refetch: refetchSpinPrizes } = useQuery<SpinPrize[]>({
+    queryKey: ["/api/admin/spin/prizes"],
+    enabled: sessionData?.isAdmin === true && sessionData?.role === "admin",
+  });
+
+  // Get spin entries (admin only)
+  const { data: spinEntriesList, isLoading: spinEntriesLoading } = useQuery<SpinEntry[]>({
+    queryKey: ["/api/admin/spin/entries"],
+    enabled: sessionData?.isAdmin === true && sessionData?.role === "admin",
+  });
+
+  // Local editable copy of spin prizes
+  const [localPrizes, setLocalPrizes] = useState<SpinPrize[]>([]);
+  const [spinTab, setSpinTab] = useState<"prizes" | "history">("prizes");
+
+  useEffect(() => {
+    if (spinPrizesList) setLocalPrizes(spinPrizesList);
+  }, [spinPrizesList]);
+
+  const totalProbability = localPrizes.reduce((sum, p) => sum + (p.isEnabled === "true" ? p.probability : 0), 0);
+  const isProbabilityValid = totalProbability === 100;
 
   const userRole = (sessionData?.role as UserRole) || "sales";
   const isAdminUser = userRole === "admin";
@@ -392,6 +425,74 @@ export default function AdminDashboard() {
       toast({ title: "Failed to delete user", variant: "destructive" });
     },
   });
+
+  // Save spin prize mutation
+  const saveSpinPrizeMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<SpinPrize> }) => {
+      const res = await apiRequest("PATCH", `/api/admin/spin/prizes/${id}`, data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/spin/prizes"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/spin/prizes"] });
+      toast({ title: "Prize updated successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to update prize", variant: "destructive" });
+    },
+  });
+
+  // Reset spin prizes mutation
+  const resetSpinPrizesMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/admin/spin/prizes/reset", {});
+      return res.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/spin/prizes"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/spin/prizes"] });
+      setLocalPrizes(data);
+      toast({ title: "Prizes reset to defaults" });
+    },
+    onError: () => {
+      toast({ title: "Failed to reset prizes", variant: "destructive" });
+    },
+  });
+
+  const handleSaveAllPrizes = async () => {
+    if (!isProbabilityValid) {
+      toast({ title: "Total probability must equal 100%", variant: "destructive" });
+      return;
+    }
+    // Save each prize that changed
+    for (const prize of localPrizes) {
+      const original = spinPrizesList?.find(p => p.id === prize.id);
+      if (!original) continue;
+      if (
+        prize.name !== original.name ||
+        prize.emoji !== original.emoji ||
+        prize.probability !== original.probability ||
+        prize.color !== original.color ||
+        prize.isEnabled !== original.isEnabled
+      ) {
+        await saveSpinPrizeMutation.mutateAsync({
+          id: prize.id,
+          data: {
+            name: prize.name,
+            emoji: prize.emoji,
+            probability: prize.probability,
+            color: prize.color,
+            isEnabled: prize.isEnabled,
+          },
+        });
+      }
+    }
+    toast({ title: "All prizes saved!" });
+  };
+
+  const updateLocalPrize = (id: string, field: keyof SpinPrize, value: any) => {
+    setLocalPrizes(prev => prev.map(p => p.id === id ? { ...p, [field]: value } : p));
+  };
 
   useEffect(() => {
     if (siteSettings) {
@@ -1872,6 +1973,250 @@ export default function AdminDashboard() {
                 </Card>
               )}
             </div>
+          </div>
+        );
+
+      case "spin":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight">Spin the Wheel</h2>
+              <p className="text-muted-foreground">Manage prizes, probabilities, and view spin history.</p>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex gap-2 border-b pb-0">
+              <button
+                onClick={() => setSpinTab("prizes")}
+                className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${spinTab === "prizes" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+                data-testid="tab-spin-prizes"
+              >
+                <Gift className="h-4 w-4 inline-block mr-1.5 mb-0.5" />
+                Prize Management
+              </button>
+              <button
+                onClick={() => setSpinTab("history")}
+                className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${spinTab === "history" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+                data-testid="tab-spin-history"
+              >
+                <Table2 className="h-4 w-4 inline-block mr-1.5 mb-0.5" />
+                Spin History ({spinEntriesList?.length ?? 0})
+              </button>
+            </div>
+
+            {/* Prize Management Tab */}
+            {spinTab === "prizes" && (
+              <div className="space-y-4">
+                {/* Total probability indicator */}
+                <div className={`flex items-center justify-between p-4 rounded-xl border-2 ${isProbabilityValid ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}`}>
+                  <div className="flex items-center gap-2">
+                    {isProbabilityValid ? (
+                      <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
+                        <span className="text-white text-xs">✓</span>
+                      </div>
+                    ) : (
+                      <AlertCircle className="h-5 w-5 text-red-500" />
+                    )}
+                    <span className={`font-semibold text-sm ${isProbabilityValid ? "text-green-700" : "text-red-700"}`}>
+                      {isProbabilityValid ? "Total probability is valid (100%)" : `Total: ${totalProbability}% — Must equal 100%`}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => resetSpinPrizesMutation.mutate()}
+                      disabled={resetSpinPrizesMutation.isPending}
+                      data-testid="button-reset-spin-prizes"
+                    >
+                      <RotateCcw className="h-4 w-4 mr-1.5" />
+                      Reset to Defaults
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={handleSaveAllPrizes}
+                      disabled={!isProbabilityValid || saveSpinPrizeMutation.isPending}
+                      data-testid="button-save-spin-prizes"
+                    >
+                      <Save className="h-4 w-4 mr-1.5" />
+                      Save All
+                    </Button>
+                  </div>
+                </div>
+
+                {spinPrizesLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {localPrizes.map((prize, index) => (
+                      <Card key={prize.id} className={`border ${prize.isEnabled === "true" ? "border-border" : "border-muted opacity-60"}`} data-testid={`card-prize-${index}`}>
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-4 flex-wrap">
+                            {/* Color swatch */}
+                            <div
+                              className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-xl shadow-sm border-2 border-white"
+                              style={{ backgroundColor: prize.color }}
+                            >
+                              {prize.emoji}
+                            </div>
+
+                            {/* Emoji input */}
+                            <div className="flex-shrink-0">
+                              <Label className="text-xs text-muted-foreground mb-1 block">Emoji</Label>
+                              <Input
+                                value={prize.emoji}
+                                onChange={(e) => updateLocalPrize(prize.id, "emoji", e.target.value)}
+                                className="w-16 text-center text-lg"
+                                data-testid={`input-prize-emoji-${index}`}
+                              />
+                            </div>
+
+                            {/* Name */}
+                            <div className="flex-1 min-w-[150px]">
+                              <Label className="text-xs text-muted-foreground mb-1 block">Prize Name</Label>
+                              <Input
+                                value={prize.name}
+                                onChange={(e) => updateLocalPrize(prize.id, "name", e.target.value)}
+                                placeholder="Prize name"
+                                data-testid={`input-prize-name-${index}`}
+                              />
+                            </div>
+
+                            {/* Probability */}
+                            <div className="w-28">
+                              <Label className="text-xs text-muted-foreground mb-1 flex items-center gap-1 block">
+                                <Percent className="h-3 w-3" /> Probability
+                              </Label>
+                              <Input
+                                type="number"
+                                min="0"
+                                max="100"
+                                value={prize.probability}
+                                onChange={(e) => updateLocalPrize(prize.id, "probability", parseInt(e.target.value) || 0)}
+                                disabled={prize.isEnabled !== "true"}
+                                className="text-center"
+                                data-testid={`input-prize-probability-${index}`}
+                              />
+                            </div>
+
+                            {/* Color picker */}
+                            <div className="flex-shrink-0">
+                              <Label className="text-xs text-muted-foreground mb-1 block">Color</Label>
+                              <input
+                                type="color"
+                                value={prize.color}
+                                onChange={(e) => updateLocalPrize(prize.id, "color", e.target.value)}
+                                className="w-10 h-10 rounded cursor-pointer border border-border"
+                                data-testid={`input-prize-color-${index}`}
+                              />
+                            </div>
+
+                            {/* Enable/disable toggle */}
+                            <div className="flex-shrink-0">
+                              <Label className="text-xs text-muted-foreground mb-1 block">Active</Label>
+                              <button
+                                onClick={() => updateLocalPrize(prize.id, "isEnabled", prize.isEnabled === "true" ? "false" : "true")}
+                                className="focus:outline-none"
+                                data-testid={`toggle-prize-enabled-${index}`}
+                              >
+                                {prize.isEnabled === "true" ? (
+                                  <ToggleRight className="h-8 w-8 text-primary" />
+                                ) : (
+                                  <ToggleLeft className="h-8 w-8 text-muted-foreground" />
+                                )}
+                              </button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+
+                <Card className="bg-purple-50 border-purple-200">
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-2">
+                      <Info className="h-4 w-4 text-purple-600 mt-0.5 flex-shrink-0" />
+                      <div className="text-sm text-purple-700 space-y-1">
+                        <p className="font-semibold">How probabilities work</p>
+                        <p>Enabled prizes must total exactly 100%. Disabled prizes are excluded from both the total calculation and the wheel. The wheel picks winners using weighted random selection on the server side.</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* History Tab */}
+            {spinTab === "history" && (
+              <div className="space-y-4">
+                {spinEntriesLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  </div>
+                ) : !spinEntriesList || spinEntriesList.length === 0 ? (
+                  <Card>
+                    <CardContent className="p-12 text-center">
+                      <Gift className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+                      <p className="text-muted-foreground">No spins yet. Users will appear here once they use the spin wheel.</p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <Card>
+                    <CardContent className="p-0">
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b bg-muted/40">
+                              <th className="text-left px-4 py-3 font-semibold">Name</th>
+                              <th className="text-left px-4 py-3 font-semibold">Wedding Date</th>
+                              <th className="text-left px-4 py-3 font-semibold">Prize</th>
+                              <th className="text-left px-4 py-3 font-semibold">Code</th>
+                              <th className="text-left px-4 py-3 font-semibold">IP Address</th>
+                              <th className="text-left px-4 py-3 font-semibold">Expires</th>
+                              <th className="text-left px-4 py-3 font-semibold">Date</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {spinEntriesList.map((entry, i) => {
+                              const expired = new Date(entry.expiresAt) < new Date();
+                              return (
+                                <tr key={entry.id} className="border-b hover:bg-muted/20" data-testid={`row-spin-entry-${i}`}>
+                                  <td className="px-4 py-3 font-medium">{entry.fullName}</td>
+                                  <td className="px-4 py-3 text-muted-foreground">{entry.weddingDate}</td>
+                                  <td className="px-4 py-3">
+                                    <span className="flex items-center gap-1.5">
+                                      <span>{entry.prizeEmoji}</span>
+                                      <span>{entry.prizeName}</span>
+                                    </span>
+                                  </td>
+                                  <td className="px-4 py-3">
+                                    <Badge variant="outline" className="font-mono text-xs tracking-wider">
+                                      {entry.discountCode}
+                                    </Badge>
+                                  </td>
+                                  <td className="px-4 py-3 text-muted-foreground font-mono text-xs">{entry.ipAddress}</td>
+                                  <td className="px-4 py-3">
+                                    <Badge variant={expired ? "secondary" : "default"} className="text-xs">
+                                      {expired ? "Expired" : new Date(entry.expiresAt).toLocaleDateString()}
+                                    </Badge>
+                                  </td>
+                                  <td className="px-4 py-3 text-muted-foreground text-xs">
+                                    {entry.createdAt ? new Date(entry.createdAt).toLocaleDateString() : "-"}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            )}
           </div>
         );
 

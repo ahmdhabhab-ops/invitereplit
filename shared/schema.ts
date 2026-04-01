@@ -381,6 +381,47 @@ export const insertProposalSchema = createInsertSchema(proposals).omit({
 export type InsertProposal = z.infer<typeof insertProposalSchema>;
 export type Proposal = typeof proposals.$inferSelect;
 
+// Spin the Wheel - Prize configuration
+export const spinPrizes = pgTable("spin_prizes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  emoji: text("emoji").notNull().default("🎁"),
+  probability: integer("probability").notNull().default(14),
+  color: text("color").notNull().default("#9333ea"),
+  isEnabled: text("is_enabled").notNull().default("true"),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertSpinPrizeSchema = createInsertSchema(spinPrizes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertSpinPrize = z.infer<typeof insertSpinPrizeSchema>;
+export type SpinPrize = typeof spinPrizes.$inferSelect;
+
+// Spin the Wheel - User entries (one per IP)
+export const spinEntries = pgTable("spin_entries", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  fullName: text("full_name").notNull(),
+  weddingDate: text("wedding_date").notNull(),
+  prizeName: text("prize_name").notNull(),
+  prizeEmoji: text("prize_emoji").notNull().default("🎁"),
+  discountCode: text("discount_code").notNull().unique(),
+  ipAddress: text("ip_address").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertSpinEntrySchema = createInsertSchema(spinEntries).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertSpinEntry = z.infer<typeof insertSpinEntrySchema>;
+export type SpinEntry = typeof spinEntries.$inferSelect;
+
 // Admin users with role-based access
 export const adminUsers = pgTable("admin_users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

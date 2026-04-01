@@ -1,6 +1,16 @@
-import { type Order, type InsertOrder, type SiteSettings, type InsertSiteSettings, type PartnershipRequest, type InsertPartnershipRequest, type JobOpening, type InsertJobOpening, type JobApplication, type InsertJobApplication, type Invoice, type InsertInvoice, type Proposal, type InsertProposal, type AdminUser, type AdminUserSafe, orders, siteSettings, partnershipRequests, jobOpenings, jobApplications, invoices, proposals, adminUsers } from "@shared/schema";
+import { type Order, type InsertOrder, type SiteSettings, type InsertSiteSettings, type PartnershipRequest, type InsertPartnershipRequest, type JobOpening, type InsertJobOpening, type JobApplication, type InsertJobApplication, type Invoice, type InsertInvoice, type Proposal, type InsertProposal, type AdminUser, type AdminUserSafe, type SpinPrize, type InsertSpinPrize, type SpinEntry, type InsertSpinEntry, orders, siteSettings, partnershipRequests, jobOpenings, jobApplications, invoices, proposals, adminUsers, spinPrizes, spinEntries } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, asc } from "drizzle-orm";
+
+const DEFAULT_SPIN_PRIZES = [
+  { name: "10% Discount", emoji: "💸", probability: 25, color: "#f472b6", isEnabled: "true", sortOrder: 0 },
+  { name: "Free QR Code Entry", emoji: "🔑", probability: 15, color: "#a78bfa", isEnabled: "true", sortOrder: 1 },
+  { name: "25% Discount", emoji: "🔥", probability: 20, color: "#fb923c", isEnabled: "true", sortOrder: 2 },
+  { name: "WhatsApp Reminder", emoji: "📱", probability: 15, color: "#34d399", isEnabled: "true", sortOrder: 3 },
+  { name: "Free Unlimited Edits", emoji: "✍️", probability: 12, color: "#60a5fa", isEnabled: "true", sortOrder: 4 },
+  { name: "FREE Invitation Suite", emoji: "🎁", probability: 3, color: "#fbbf24", isEnabled: "true", sortOrder: 5 },
+  { name: "50% Discount", emoji: "💣", probability: 10, color: "#f87171", isEnabled: "true", sortOrder: 6 },
+];
 
 export interface IStorage {
   // Order operations
@@ -54,6 +64,15 @@ export interface IStorage {
   createAdminUser(user: { name: string; email: string; passwordHash: string; role: string; isActive?: string }): Promise<AdminUserSafe>;
   updateAdminUser(id: string, data: Partial<{ name: string; email: string; passwordHash: string; role: string; isActive: string }>): Promise<AdminUserSafe | undefined>;
   deleteAdminUser(id: string): Promise<boolean>;
+
+  // Spin the Wheel operations
+  getSpinPrizes(activeOnly?: boolean): Promise<SpinPrize[]>;
+  updateSpinPrize(id: string, data: Partial<InsertSpinPrize>): Promise<SpinPrize | undefined>;
+  resetSpinPrizesToDefaults(): Promise<SpinPrize[]>;
+  seedSpinPrizesIfEmpty(): Promise<void>;
+  getSpinEntries(): Promise<SpinEntry[]>;
+  getSpinEntryByIp(ip: string): Promise<SpinEntry | undefined>;
+  createSpinEntry(entry: InsertSpinEntry): Promise<SpinEntry>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -297,6 +316,48 @@ export class DatabaseStorage implements IStorage {
   async deleteAdminUser(id: string): Promise<boolean> {
     await db.delete(adminUsers).where(eq(adminUsers.id, id));
     return true;
+  }
+
+  async seedSpinPrizesIfEmpty(): Promise<void> {
+    const existing = await db.select().from(spinPrizes);
+    if (existing.length === 0) {
+      await db.insert(spinPrizes).values(DEFAULT_SPIN_PRIZES as any);
+    }
+  }
+
+  async getSpinPrizes(activeOnly: boolean = false): Promise<SpinPrize[]> {
+    const prizes = await db.select().from(spinPrizes).orderBy(asc(spinPrizes.sortOrder));
+    if (activeOnly) return prizes.filter(p => p.isEnabled === "true");
+    return prizes;
+  }
+
+  async updateSpinPrize(id: string, data: Partial<InsertSpinPrize>): Promise<SpinPrize | undefined> {
+    const [updated] = await db
+      .update(spinPrizes)
+      .set({ ...data, updatedAt: new Date() } as any)
+      .where(eq(spinPrizes.id, id))
+      .returning();
+    return updated;
+  }
+
+  async resetSpinPrizesToDefaults(): Promise<SpinPrize[]> {
+    await db.delete(spinPrizes);
+    await db.insert(spinPrizes).values(DEFAULT_SPIN_PRIZES as any);
+    return db.select().from(spinPrizes).orderBy(asc(spinPrizes.sortOrder));
+  }
+
+  async getSpinEntries(): Promise<SpinEntry[]> {
+    return db.select().from(spinEntries).orderBy(desc(spinEntries.createdAt));
+  }
+
+  async getSpinEntryByIp(ip: string): Promise<SpinEntry | undefined> {
+    const [entry] = await db.select().from(spinEntries).where(eq(spinEntries.ipAddress, ip));
+    return entry;
+  }
+
+  async createSpinEntry(entry: InsertSpinEntry): Promise<SpinEntry> {
+    const [created] = await db.insert(spinEntries).values(entry as any).returning();
+    return created;
   }
 }
 

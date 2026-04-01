@@ -12,7 +12,8 @@ A high-conversion landing page for "einvite.me" - a professional digital invitat
 - **Multi-Step Order Form**: 4-step form for order submissions with WhatsApp payment integration
 - **Event Planners Page**: Partnership program for event professionals with tiered discounts (15%, 25%, 40%)
 - **Careers Page**: Job listings with application form for candidates to apply
-- **Admin Dashboard**: Full content management for site settings, pricing, jobs, candidates, partnerships, and orders
+- **Admin Dashboard**: Full content management for site settings, pricing, jobs, candidates, partnerships, orders, and spin wheel
+- **Spin the Wheel**: Lead-capture discount feature — canvas-based animated wheel with form capture, weighted random prizes, 48h codes (WED-XXXXXX format), IP + localStorage anti-abuse, admin prize management & history
 - **EN/FR Bilingual Support**: Full English/French i18n with auto-detection from browser locale; EN/FR toggle in Header stores preference in localStorage
 
 ## Tech Stack

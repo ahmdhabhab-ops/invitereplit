@@ -1,0 +1,88 @@
+I want to implement a complete “Spin the Wheel” discount feature with admin control and anti-abuse protection.
+
+FEATURE OVERVIEW:
+Users can spin a wheel to win a prize (discount or free feature), but only after submitting their details. The system must be dynamic, secure, and visually appealing.
+
+USER FLOW:
+Before spinning, the user must fill:
+Full Name
+Wedding Date
+After submitting:
+Enable the spin wheel
+Animate the wheel smoothly
+After the spin:
+Display the prize won in a popup
+Generate a unique code (e.g. WED-XXXX)
+Show message: “Valid for 48 hours”
+Show a countdown timer (48 hours)
+Store the following in the database:
+Name
+Wedding date
+Prize won
+Discount code
+Expiration date (2 days from creation)
+Timestamp
+User IP address
+PRIZES ON THE WHEEL:
+10% Discount 💸
+Free QR Code Entry 🔑
+25% Discount 🔥
+Free WhatsApp Reminder 📱
+Free Unlimited Edits ✍️
+FREE Invitation Suite 🎁 (Jackpot)
+50% Discount 💣
+ADMIN DASHBOARD:
+
+Create a protected admin panel with login.
+
+Admin should be able to:
+
+View all prizes
+Edit for each prize:
+Prize name
+Probability percentage
+Enable/disable toggle
+Validation:
+Total probability must equal 100%
+Show real-time total (e.g. “Total: 100%”)
+Prevent saving if total is not 100%
+Store probabilities in database (NOT hardcoded)
+Add features:
+“Reset to default probabilities” button
+(Optional) history of changes
+SPIN LOGIC:
+Fetch prize probabilities dynamically from database
+Ignore disabled prizes
+Use weighted random selection based on percentages
+Wheel UI must automatically reflect updated probabilities (no redeploy needed)
+ANTI-ABUSE PROTECTION:
+Restrict to ONE spin per IP address:
+Capture user IP (req.ip or x-forwarded-for)
+Before spin, check if IP already exists in database
+If yes → block spin and show message:
+“You have already used your spin.”
+Handle proxies properly (extract real IP safely)
+Also implement additional protection:
+Use localStorage flag to prevent multiple spins from same browser
+Important:
+Do not break experience for shared WiFi users
+Just show a friendly message if blocked
+UI / UX:
+Elegant wedding-themed design (soft colors, gold/white tones)
+Smooth spinning animation
+Confetti animation when user wins
+Mobile-friendly design
+Clear result popup
+BONUS FEATURES:
+Send the discount code via email
+Show countdown timer for expiration (48 hours)
+TECH STACK:
+Frontend: HTML, CSS, JavaScript (canvas or wheel library)
+Backend: Node.js (Express)
+Database: MongoDB or SQLite
+IMPORTANT:
+Code must be clean and modular
+Easy to integrate into existing website
+All logic (probabilities, validation, restrictions) handled on backend securely
+
+Please implement the full feature and explain how to integrate it step by step into my existing project.

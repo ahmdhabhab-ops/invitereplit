@@ -1,7 +1,7 @@
 import type { Express, RequestHandler } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertOrderSchema, insertSiteSettingsSchema, insertPartnershipRequestSchema, insertJobOpeningSchema, insertJobApplicationSchema, insertInvoiceSchema, insertProposalSchema, insertAdminUserSchema } from "@shared/schema";
+import { insertOrderSchema, insertSiteSettingsSchema, insertPartnershipRequestSchema, insertJobOpeningSchema, insertJobApplicationSchema, insertInvoiceSchema, insertProposalSchema, insertAdminUserSchema, insertSpinPrizeSchema } from "@shared/schema";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import session from "express-session";
@@ -137,6 +137,9 @@ export async function registerRoutes(
 
   // Seed initial admin user on startup
   await seedInitialAdmin();
+  
+  // Seed spin prizes if empty
+  await storage.seedSpinPrizesIfEmpty();
 
   // Admin login endpoint
   app.post("/api/admin/login", async (req, res) => {
@@ -760,6 +763,179 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error deleting admin user:", error);
       res.status(500).json({ error: "Failed to delete user" });
+    }
+  });
+
+  // ─── SPIN THE WHEEL ─────────────────────────────────────────────────────────
+
+  // Helper: extract real IP
+  function getClientIp(req: any): string {
+    const forwarded = req.headers["x-forwarded-for"];
+    if (forwarded) {
+      const ips = (forwarded as string).split(",").map(s => s.trim());
+      return ips[0];
+    }
+    return req.ip || req.connection?.remoteAddress || "unknown";
+  }
+
+  // Helper: generate discount code
+  function generateDiscountCode(): string {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let code = "WED-";
+    for (let i = 0; i < 6; i++) {
+      code += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return code;
+  }
+
+  // Helper: weighted random selection
+  function pickWeightedPrize(prizes: any[]): { prize: any; index: number } {
+    const enabled = prizes.filter(p => p.isEnabled === "true");
+    if (enabled.length === 0) throw new Error("No prizes enabled");
+    const total = enabled.reduce((sum, p) => sum + p.probability, 0);
+    let rand = Math.random() * total;
+    for (let i = 0; i < enabled.length; i++) {
+      rand -= enabled[i].probability;
+      if (rand <= 0) return { prize: enabled[i], index: prizes.indexOf(enabled[i]) };
+    }
+    return { prize: enabled[enabled.length - 1], index: prizes.indexOf(enabled[enabled.length - 1]) };
+  }
+
+  // GET /api/spin/prizes - public: returns active prizes for wheel display
+  app.get("/api/spin/prizes", async (req, res) => {
+    try {
+      const prizes = await storage.getSpinPrizes(true);
+      res.json(prizes);
+    } catch (error) {
+      console.error("Error fetching spin prizes:", error);
+      res.status(500).json({ error: "Failed to fetch prizes" });
+    }
+  });
+
+  // POST /api/spin - public: submit details, pick prize, store entry
+  app.post("/api/spin", async (req, res) => {
+    try {
+      const { fullName, weddingDate } = req.body;
+      if (!fullName || !weddingDate) {
+        return res.status(400).json({ error: "Full name and wedding date are required" });
+      }
+
+      const ip = getClientIp(req);
+
+      // Check if IP already spun
+      const existing = await storage.getSpinEntryByIp(ip);
+      if (existing) {
+        return res.json({
+          blocked: true,
+          message: "You have already used your spin.",
+          discountCode: existing.discountCode,
+          prizeName: existing.prizeName,
+          prizeEmoji: existing.prizeEmoji,
+          expiresAt: existing.expiresAt,
+        });
+      }
+
+      // Get all prizes (active only) for weighted selection
+      const allPrizes = await storage.getSpinPrizes(false);
+      const activePrizes = allPrizes.filter(p => p.isEnabled === "true");
+      if (activePrizes.length === 0) {
+        return res.status(500).json({ error: "No prizes configured" });
+      }
+
+      // Pick winner using weighted random
+      const { prize, index: prizeIndex } = pickWeightedPrize(allPrizes);
+
+      // Generate unique discount code
+      let discountCode = generateDiscountCode();
+      // Retry if code already exists (extremely rare)
+      let attempts = 0;
+      while (attempts < 5) {
+        try {
+          const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000);
+          const entry = await storage.createSpinEntry({
+            fullName,
+            weddingDate,
+            prizeName: prize.name,
+            prizeEmoji: prize.emoji,
+            discountCode,
+            ipAddress: ip,
+            expiresAt,
+          });
+          
+          // Return winning info + prizeIndex for wheel animation
+          const activePrizesList = allPrizes.filter(p => p.isEnabled === "true");
+          const activePrizeIndex = activePrizesList.findIndex(p => p.id === prize.id);
+          
+          return res.json({
+            success: true,
+            prizeIndex: activePrizeIndex >= 0 ? activePrizeIndex : 0,
+            prizeName: entry.prizeName,
+            prizeEmoji: entry.prizeEmoji,
+            discountCode: entry.discountCode,
+            expiresAt: entry.expiresAt,
+          });
+        } catch (err: any) {
+          if (err.code === "23505") {
+            // Duplicate code, try again
+            const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+            discountCode = "WED-";
+            for (let i = 0; i < 6; i++) discountCode += chars[Math.floor(Math.random() * chars.length)];
+            attempts++;
+          } else {
+            throw err;
+          }
+        }
+      }
+      res.status(500).json({ error: "Failed to generate unique code" });
+    } catch (error) {
+      console.error("Error processing spin:", error);
+      res.status(500).json({ error: "Failed to process spin" });
+    }
+  });
+
+  // GET /api/admin/spin/prizes - admin: get all prizes
+  app.get("/api/admin/spin/prizes", isAdminRole, async (req, res) => {
+    try {
+      const prizes = await storage.getSpinPrizes(false);
+      res.json(prizes);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch prizes" });
+    }
+  });
+
+  // PATCH /api/admin/spin/prizes/:id - admin: update a prize
+  app.patch("/api/admin/spin/prizes/:id", isAdminRole, async (req, res) => {
+    try {
+      const schema = insertSpinPrizeSchema.partial();
+      const data = schema.parse(req.body);
+      const updated = await storage.updateSpinPrize(req.params.id, data);
+      if (!updated) return res.status(404).json({ error: "Prize not found" });
+      res.json(updated);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation failed", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update prize" });
+    }
+  });
+
+  // POST /api/admin/spin/prizes/reset - admin: reset to defaults
+  app.post("/api/admin/spin/prizes/reset", isAdminRole, async (req, res) => {
+    try {
+      const prizes = await storage.resetSpinPrizesToDefaults();
+      res.json(prizes);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to reset prizes" });
+    }
+  });
+
+  // GET /api/admin/spin/entries - admin: get all spin entries
+  app.get("/api/admin/spin/entries", isAdminRole, async (req, res) => {
+    try {
+      const entries = await storage.getSpinEntries();
+      res.json(entries);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch entries" });
     }
   });
 

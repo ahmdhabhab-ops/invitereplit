@@ -10,9 +10,11 @@ import { WhyChooseUs } from "@/components/WhyChooseUs";
 import { FAQ } from "@/components/FAQ";
 import { OrderForm } from "@/components/OrderForm";
 import { Footer } from "@/components/Footer";
+import { SpinWheel, SpinBanner } from "@/components/SpinWheel";
 
 export default function LandingPage() {
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
+  const [spinOpen, setSpinOpen] = useState(false);
 
   const handleSelectPackage = (packageId: string) => {
     setSelectedPackage(packageId);
@@ -32,6 +34,7 @@ export default function LandingPage() {
         <HowItWorks />
         <FeaturedEvents />
         <PricingSection onSelectPackage={handleSelectPackage} />
+        <SpinBanner onOpen={() => setSpinOpen(true)} />
         <WhyChooseUs />
         <FAQ />
       </main>
@@ -42,6 +45,9 @@ export default function LandingPage() {
         selectedPackage={selectedPackage}
         onClose={handleCloseForm}
       />
+
+      {/* Spin the Wheel Modal */}
+      <SpinWheel isOpen={spinOpen} onClose={() => setSpinOpen(false)} />
     </div>
   );
 }
