@@ -815,9 +815,9 @@ export async function registerRoutes(
   // POST /api/spin - public: submit details, pick prize, store entry
   app.post("/api/spin", async (req, res) => {
     try {
-      const { fullName, weddingDate } = req.body;
-      if (!fullName || !weddingDate) {
-        return res.status(400).json({ error: "Full name and wedding date are required" });
+      const { fullName, email, phone, weddingDate } = req.body;
+      if (!fullName || !email || !weddingDate) {
+        return res.status(400).json({ error: "Full name, email, and wedding date are required" });
       }
 
       const ip = getClientIp(req);
@@ -854,6 +854,8 @@ export async function registerRoutes(
           const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000);
           const entry = await storage.createSpinEntry({
             fullName,
+            email,
+            phone: phone || "",
             weddingDate,
             prizeName: prize.name,
             prizeEmoji: prize.emoji,

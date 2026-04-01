@@ -54,6 +54,8 @@ export function SpinWheel({ isOpen, onClose }: SpinWheelProps) {
 
   const [step, setStep] = useState<Step>("form");
   const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [weddingDate, setWeddingDate] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [spinResult, setSpinResult] = useState<SpinResult | null>(null);
@@ -282,7 +284,7 @@ export function SpinWheel({ isOpen, onClose }: SpinWheelProps) {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName.trim() || !weddingDate) return;
+    if (!fullName.trim() || !email.trim() || !weddingDate) return;
 
     // Client-side anti-abuse (localStorage)
     const alreadySpun = localStorage.getItem("einvite_spin_used");
@@ -295,7 +297,7 @@ export function SpinWheel({ isOpen, onClose }: SpinWheelProps) {
 
     setIsSubmitting(true);
     try {
-      const res = await apiRequest("POST", "/api/spin", { fullName: fullName.trim(), weddingDate });
+      const res = await apiRequest("POST", "/api/spin", { fullName: fullName.trim(), email: email.trim(), phone: phone.trim(), weddingDate });
       const data: SpinResult = await res.json();
 
       if (data.blocked) {
@@ -353,6 +355,8 @@ export function SpinWheel({ isOpen, onClose }: SpinWheelProps) {
     cancelAnimationFrame(confettiFrameRef.current);
     setStep("form");
     setFullName("");
+    setEmail("");
+    setPhone("");
     setWeddingDate("");
     setSpinResult(null);
     setCopied(false);
@@ -391,14 +395,14 @@ export function SpinWheel({ isOpen, onClose }: SpinWheelProps) {
         <div className="bg-white">
           {/* STEP 1: Form */}
           {step === "form" && (
-            <form onSubmit={handleFormSubmit} className="p-6 space-y-5">
+            <form onSubmit={handleFormSubmit} className="p-6 space-y-4">
               <p className="text-center text-gray-500 text-sm">
                 Fill in your details to unlock your free spin! 🎊
               </p>
 
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <Label htmlFor="spin-name" className="text-sm font-semibold text-gray-700">
-                  Full Name
+                  Full Name <span className="text-red-400">*</span>
                 </Label>
                 <Input
                   id="spin-name"
@@ -412,9 +416,40 @@ export function SpinWheel({ isOpen, onClose }: SpinWheelProps) {
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="spin-email" className="text-sm font-semibold text-gray-700">
+                  Email Address <span className="text-red-400">*</span>
+                </Label>
+                <Input
+                  id="spin-email"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  data-testid="input-spin-email"
+                  className="border-purple-200 focus:border-purple-400"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="spin-phone" className="text-sm font-semibold text-gray-700">
+                  Phone Number <span className="text-gray-400 font-normal text-xs">(optional)</span>
+                </Label>
+                <Input
+                  id="spin-phone"
+                  type="tel"
+                  placeholder="+961 71 000 000"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  data-testid="input-spin-phone"
+                  className="border-purple-200 focus:border-purple-400"
+                />
+              </div>
+
+              <div className="space-y-1.5">
                 <Label htmlFor="spin-date" className="text-sm font-semibold text-gray-700">
-                  Wedding Date
+                  Wedding / Event Date <span className="text-red-400">*</span>
                 </Label>
                 <Input
                   id="spin-date"
@@ -430,7 +465,7 @@ export function SpinWheel({ isOpen, onClose }: SpinWheelProps) {
               <Button
                 type="submit"
                 className="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white font-bold py-3 text-base shadow-lg"
-                disabled={isSubmitting || !fullName.trim() || !weddingDate}
+                disabled={isSubmitting || !fullName.trim() || !email.trim() || !weddingDate}
                 data-testid="button-spin-submit"
               >
                 {isSubmitting ? (

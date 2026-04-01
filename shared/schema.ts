@@ -406,6 +406,8 @@ export type SpinPrize = typeof spinPrizes.$inferSelect;
 export const spinEntries = pgTable("spin_entries", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   fullName: text("full_name").notNull(),
+  email: text("email").notNull().default(""),
+  phone: text("phone").notNull().default(""),
   weddingDate: text("wedding_date").notNull(),
   prizeName: text("prize_name").notNull(),
   prizeEmoji: text("prize_emoji").notNull().default("🎁"),

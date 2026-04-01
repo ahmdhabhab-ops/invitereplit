@@ -2171,10 +2171,11 @@ export default function AdminDashboard() {
                           <thead>
                             <tr className="border-b bg-muted/40">
                               <th className="text-left px-4 py-3 font-semibold">Name</th>
+                              <th className="text-left px-4 py-3 font-semibold">Email</th>
+                              <th className="text-left px-4 py-3 font-semibold">Phone</th>
                               <th className="text-left px-4 py-3 font-semibold">Wedding Date</th>
                               <th className="text-left px-4 py-3 font-semibold">Prize</th>
                               <th className="text-left px-4 py-3 font-semibold">Code</th>
-                              <th className="text-left px-4 py-3 font-semibold">IP Address</th>
                               <th className="text-left px-4 py-3 font-semibold">Expires</th>
                               <th className="text-left px-4 py-3 font-semibold">Date</th>
                             </tr>
@@ -2185,6 +2186,8 @@ export default function AdminDashboard() {
                               return (
                                 <tr key={entry.id} className="border-b hover:bg-muted/20" data-testid={`row-spin-entry-${i}`}>
                                   <td className="px-4 py-3 font-medium">{entry.fullName}</td>
+                                  <td className="px-4 py-3 text-muted-foreground text-xs">{entry.email || "—"}</td>
+                                  <td className="px-4 py-3 text-muted-foreground text-xs">{entry.phone || "—"}</td>
                                   <td className="px-4 py-3 text-muted-foreground">{entry.weddingDate}</td>
                                   <td className="px-4 py-3">
                                     <span className="flex items-center gap-1.5">
@@ -2197,7 +2200,6 @@ export default function AdminDashboard() {
                                       {entry.discountCode}
                                     </Badge>
                                   </td>
-                                  <td className="px-4 py-3 text-muted-foreground font-mono text-xs">{entry.ipAddress}</td>
                                   <td className="px-4 py-3">
                                     <Badge variant={expired ? "secondary" : "default"} className="text-xs">
                                       {expired ? "Expired" : new Date(entry.expiresAt).toLocaleDateString()}
