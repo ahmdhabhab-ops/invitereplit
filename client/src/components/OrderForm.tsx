@@ -50,6 +50,7 @@ import {
   X,
   Plus,
   Trash2,
+  Info,
 } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -820,6 +821,14 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                       </FormItem>
                     )}
                   />
+
+                  {/* 50% deposit non-refundable notice */}
+                  <div className="flex items-start gap-2.5 mt-4 p-3.5 rounded-lg bg-amber-50 border border-amber-200">
+                    <Info className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                    <p className="text-xs text-amber-800 leading-relaxed">
+                      <span className="font-semibold">{tf.depositNote}</span>
+                    </p>
+                  </div>
 
                   {/* Order Summary */}
                   <div className="mt-6 p-4 bg-muted/50 rounded-lg">
