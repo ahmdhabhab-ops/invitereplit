@@ -11,6 +11,7 @@ import Careers from "@/pages/Careers";
 import AboutUs from "@/pages/AboutUs";
 import WeddingInvitationsLebanon from "@/pages/WeddingInvitationsLebanon";
 import BirthdayEventInvites from "@/pages/BirthdayEventInvites";
+import ReferralPage from "@/pages/ReferralPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -23,6 +24,7 @@ function Router() {
       <Route path="/about" component={AboutUs} />
       <Route path="/wedding-invitations-lebanon" component={WeddingInvitationsLebanon} />
       <Route path="/birthday-event-invites" component={BirthdayEventInvites} />
+      <Route path="/referral" component={ReferralPage} />
       <Route component={NotFound} />
     </Switch>
   );

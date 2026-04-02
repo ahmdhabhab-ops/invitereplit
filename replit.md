@@ -14,6 +14,7 @@ A high-conversion landing page for "einvite.me" - a professional digital invitat
 - **Careers Page**: Job listings with application form for candidates to apply
 - **Admin Dashboard**: Full content management for site settings, pricing, jobs, candidates, partnerships, orders, and spin wheel
 - **Spin the Wheel**: Lead-capture discount feature — canvas-based animated wheel with form capture, weighted random prizes, 48h codes (WED-XXXXXX format), IP + localStorage anti-abuse, admin prize management & history
+- **Make Money With Us (Referral Program)**: Affiliate program at `/referral` — self-registration with unique 8-char code, 30% commission on confirmed orders, personal dashboard (stats, link copy, commission history), admin management panel with approve/mark-paid workflow
 - **EN/FR Bilingual Support**: Full English/French i18n with auto-detection from browser locale; EN/FR toggle in Header stores preference in localStorage
 
 ## Tech Stack
@@ -94,6 +95,8 @@ shared/
 - **job_applications**: id, jobId, fullName, email, phone, resumeUrl, portfolioUrl, linkedinUrl, coverLetter, yearsOfExperience, status, notes, createdAt
 - **proposals**: id, proposalNumber, clientName, clientEmail, clientPhone, proposalDate, validUntil, eventType, packageRecommendation, introMessage, items (JSONB), subtotal, discountType, discountValue, discountAmount, taxRate, taxAmount, total, terms, notes, status (draft/sent/accepted/rejected), createdAt, updatedAt
 - **admin_users**: id, name, email, passwordHash, role (admin/sales), isActive, createdAt, updatedAt
+- **referral_users**: id, fullName, email, passwordHash, referralCode (unique 8-char), isActive, createdAt
+- **referral_commissions**: id, referralUserId (FK), orderId (FK), clientName, orderAmount, commissionRate (30), commissionAmount, status (pending/approved/paid), createdAt
 
 ## Admin Dashboard Features
 The admin panel at `/admin` allows managing:

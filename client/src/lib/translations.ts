@@ -211,6 +211,7 @@ export const translations = {
       rights: "All rights reserved.",
       madeWith: "Made with",
       inLebanon: "in Lebanon",
+      makeMoneyWithUs: "Make Money With Us",
     },
 
     // Event Planners
@@ -655,6 +656,7 @@ export const translations = {
       rights: "Tous droits réservés.",
       madeWith: "Fait avec",
       inLebanon: "au Liban",
+      makeMoneyWithUs: "Gagnez de l'Argent avec Nous",
     },
 
     // Event Planners

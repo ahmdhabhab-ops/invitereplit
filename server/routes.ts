@@ -66,8 +66,23 @@ declare module "express-session" {
     adminEmail?: string;
     adminRole?: string;
     adminUserId?: string;
+    referralUserId?: string;
   }
 }
+
+// Referral auth middleware
+const isReferralUser: RequestHandler = (req, res, next) => {
+  if (req.session?.referralUserId) return next();
+  return res.status(401).json({ error: "Not authenticated" });
+};
+
+// Generate unique 8-char referral code (letters + digits)
+function generateReferralCode(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  return Array.from({ length: 8 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+}
+
+const COMMISSION_RATE = 30; // percent
 
 // Middleware: any authenticated admin/sales user
 const isAuthenticated: RequestHandler = (req, res, next) => {
@@ -226,6 +241,32 @@ export async function registerRoutes(
       // Validate request body
       const validatedData = insertOrderSchema.parse(req.body);
       const order = await storage.createOrder(validatedData);
+
+      // If a referral code was provided, record commission (anti-self-referral: check different email)
+      if (validatedData.referralCode) {
+        const referrer = await storage.getReferralUserByCode(validatedData.referralCode);
+        if (referrer && referrer.isActive && referrer.email !== validatedData.contactEmail) {
+          const settings = await storage.getSiteSettings();
+          // Use the package price from site settings
+          const priceMap: Record<string, number> = {
+            essential: settings?.essentialPrice ?? 49,
+            premium: settings?.premiumPrice ?? 99,
+            royal: settings?.royalPrice ?? 199,
+          };
+          const orderAmount = priceMap[validatedData.packageType] ?? 99;
+          const commissionAmount = Math.round(orderAmount * COMMISSION_RATE / 100);
+          await storage.createReferralCommission({
+            referralUserId: referrer.id,
+            orderId: order.id,
+            clientName: validatedData.contactName,
+            orderAmount,
+            commissionRate: COMMISSION_RATE,
+            commissionAmount,
+            status: "pending",
+          });
+        }
+      }
+
       res.status(201).json(order);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -938,6 +979,135 @@ export async function registerRoutes(
       res.json(entries);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch entries" });
+    }
+  });
+
+  // ── Referral / Affiliate Program Routes ───────────────────────────────────
+
+  // POST /api/referral/register
+  app.post("/api/referral/register", async (req, res) => {
+    try {
+      const { fullName, email, password } = req.body;
+      if (!fullName || !email || !password) {
+        return res.status(400).json({ error: "fullName, email and password are required" });
+      }
+      const existing = await storage.getReferralUserByEmail(email);
+      if (existing) {
+        return res.status(409).json({ error: "An account with this email already exists" });
+      }
+      const passwordHash = await bcrypt.hash(password, 10);
+      // Generate a unique referral code
+      let referralCode = generateReferralCode();
+      while (await storage.getReferralUserByCode(referralCode)) {
+        referralCode = generateReferralCode();
+      }
+      const user = await storage.createReferralUser({ fullName, email, passwordHash, referralCode });
+      req.session.referralUserId = user.id;
+      const { passwordHash: _, ...safe } = user;
+      res.status(201).json(safe);
+    } catch (error) {
+      console.error("Referral register error:", error);
+      res.status(500).json({ error: "Failed to register" });
+    }
+  });
+
+  // POST /api/referral/login
+  app.post("/api/referral/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      if (!email || !password) return res.status(400).json({ error: "Email and password are required" });
+      const user = await storage.getReferralUserByEmail(email);
+      if (!user || !user.isActive) return res.status(401).json({ error: "Invalid credentials" });
+      const match = await bcrypt.compare(password, user.passwordHash);
+      if (!match) return res.status(401).json({ error: "Invalid credentials" });
+      req.session.referralUserId = user.id;
+      const { passwordHash: _, ...safe } = user;
+      res.json(safe);
+    } catch (error) {
+      console.error("Referral login error:", error);
+      res.status(500).json({ error: "Failed to login" });
+    }
+  });
+
+  // POST /api/referral/logout
+  app.post("/api/referral/logout", (req, res) => {
+    req.session.referralUserId = undefined;
+    res.json({ ok: true });
+  });
+
+  // GET /api/referral/me
+  app.get("/api/referral/me", isReferralUser, async (req, res) => {
+    try {
+      const user = await storage.getReferralUserById(req.session.referralUserId!);
+      if (!user) return res.status(404).json({ error: "Not found" });
+      const { passwordHash: _, ...safe } = user;
+      res.json(safe);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch profile" });
+    }
+  });
+
+  // GET /api/referral/dashboard
+  app.get("/api/referral/dashboard", isReferralUser, async (req, res) => {
+    try {
+      const userId = req.session.referralUserId!;
+      const user = await storage.getReferralUserById(userId);
+      if (!user) return res.status(404).json({ error: "Not found" });
+      const commissions = await storage.getReferralCommissions(userId);
+      const total = commissions.reduce((s, c) => s + c.commissionAmount, 0);
+      const pending = commissions.filter(c => c.status === "pending").reduce((s, c) => s + c.commissionAmount, 0);
+      const paid = commissions.filter(c => c.status === "paid").reduce((s, c) => s + c.commissionAmount, 0);
+      const { passwordHash: _, ...safe } = user;
+      res.json({ user: safe, commissions, stats: { total, pending, paid, count: commissions.length } });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch dashboard" });
+    }
+  });
+
+  // GET /api/referral/check/:code - public: verify a referral code exists
+  app.get("/api/referral/check/:code", async (req, res) => {
+    try {
+      const user = await storage.getReferralUserByCode(req.params.code);
+      if (!user || !user.isActive) return res.status(404).json({ valid: false });
+      res.json({ valid: true, referrerName: user.fullName });
+    } catch (error) {
+      res.status(500).json({ valid: false });
+    }
+  });
+
+  // Admin referral routes
+  // GET /api/admin/referrals/users
+  app.get("/api/admin/referrals/users", isAdminRole, async (req, res) => {
+    try {
+      const users = await storage.getAllReferralUsers();
+      res.json(users.map(({ passwordHash: _, ...u }) => u));
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch referral users" });
+    }
+  });
+
+  // GET /api/admin/referrals/commissions
+  app.get("/api/admin/referrals/commissions", isAdminRole, async (req, res) => {
+    try {
+      const commissions = await storage.getReferralCommissions();
+      res.json(commissions);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch commissions" });
+    }
+  });
+
+  // PATCH /api/admin/referrals/commissions/:id/status
+  app.patch("/api/admin/referrals/commissions/:id/status", isAdminRole, async (req, res) => {
+    try {
+      const { status } = req.body;
+      if (!["pending", "approved", "paid"].includes(status)) {
+        return res.status(400).json({ error: "Invalid status" });
+      }
+      const updated = await storage.updateReferralCommissionStatus(req.params.id, status);
+      if (!updated) return res.status(404).json({ error: "Commission not found" });
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update commission status" });
     }
   });
 

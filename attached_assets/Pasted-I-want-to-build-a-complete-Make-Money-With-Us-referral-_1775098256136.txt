@@ -1,0 +1,146 @@
+I want to build a complete “Make Money With Us!” referral/affiliate program for my e-invite website.
+
+GOAL:
+Allow users to register, refer clients, and earn a 30% commission on every successful sale they bring.
+
+---
+
+## USER EXPERIENCE (FRONTEND):
+
+Create a landing page titled:
+
+“Make Money With Us!”
+
+It should be attractive, modern, and persuasive. Explain clearly:
+
+* Anyone can join for free
+* They get a personal referral link
+* They earn 30% commission on every successful purchase made through their link
+* No limits on earnings
+
+Make it exciting but realistic and trustworthy (not spammy or exaggerated).
+
+---
+
+## HOW IT WORKS (DISPLAY ON PAGE):
+
+1. Sign up for free
+2. Get your unique referral link
+3. Share it with friends, couples, or on social media
+4. Earn 30% commission every time someone purchases through your link
+5. Track your earnings in your dashboard
+
+---
+
+## USER REGISTRATION:
+
+Users must create an account with:
+
+* Full name
+* Email
+* Password
+
+After signup:
+
+* Generate a unique referral ID/link (example: website.com/?ref=USER123)
+* Save user in database
+
+---
+
+## REFERRAL TRACKING:
+
+* When someone visits the site using a referral link:
+
+  * Store referral ID (via cookies or localStorage)
+
+* When that visitor makes a purchase:
+
+  * Link the sale to the referring user
+  * Record commission (30% of sale amount)
+
+---
+
+## USER DASHBOARD:
+
+Each registered user should have a dashboard showing:
+
+* Total earnings
+* Number of referrals
+* Successful sales
+* Pending commissions
+* Paid commissions
+* Their unique referral link (with copy button)
+
+---
+
+## ADMIN PANEL:
+
+Admin should be able to:
+
+* View all users
+* View all referrals and sales
+* See commissions generated
+* Mark commissions as “paid”
+* Adjust commission rate (default 30%)
+
+---
+
+## COMMISSION SYSTEM:
+
+* Commission = 30% of total sale
+* Status:
+
+  * Pending (after sale)
+  * Approved
+  * Paid
+
+---
+
+## ANTI-ABUSE:
+
+* Prevent users from referring themselves
+* Basic fraud checks (same email/IP warnings)
+* Validate real purchases only
+
+---
+
+## UI / DESIGN:
+
+* Clean, modern, and wedding-themed
+* Use trust-building elements:
+
+  * “No upfront cost”
+  * “Real earnings”
+  * “Simple process”
+
+---
+
+## MARKETING TEXT (IMPORTANT):
+
+Include persuasive but honest messaging like:
+
+* “Turn your network into income”
+* “Earn 30% on every successful referral”
+* “Perfect for wedding planners, influencers, and anyone who knows engaged couples”
+* “No experience needed”
+
+Avoid unrealistic claims. Keep it professional and trustworthy.
+
+---
+
+## TECH STACK:
+
+* Frontend: HTML/CSS/JavaScript (or React)
+* Backend: Node.js (Express)
+* Database: MongoDB or SQL
+
+---
+
+## IMPORTANT:
+
+* System must be fully functional end-to-end
+* Clean and modular code
+* Easy to integrate into existing website
+* Secure handling of referral tracking and commissions
+
+Please build the full system and explain how to integrate and deploy it.

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { HeroSection } from "@/components/HeroSection";
 import { PhoneGallery } from "@/components/PhoneGallery";
@@ -15,6 +15,15 @@ import { SpinWheel, SpinBanner, SpinFloatingButton } from "@/components/SpinWhee
 export default function LandingPage() {
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
   const [spinOpen, setSpinOpen] = useState(false);
+
+  // Capture ?ref= query param and store in localStorage
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref");
+    if (ref) {
+      localStorage.setItem("einvite_ref_code", ref);
+    }
+  }, []);
 
   const handleSelectPackage = (packageId: string) => {
     setSelectedPackage(packageId);

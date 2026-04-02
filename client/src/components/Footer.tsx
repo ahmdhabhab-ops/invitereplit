@@ -136,6 +136,15 @@ export function Footer() {
                   {t.footer.aboutUs}
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/referral"
+                  className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium"
+                  data-testid="link-footer-referral"
+                >
+                  💰 {t.footer.makeMoneyWithUs}
+                </Link>
+              </li>
             </ul>
           </div>
 

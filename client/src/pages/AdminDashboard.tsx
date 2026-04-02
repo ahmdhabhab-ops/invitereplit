@@ -84,7 +84,7 @@ import {
   Info
 } from "lucide-react";
 import { SiTiktok } from "react-icons/si";
-import type { SiteSettings, Order, JobOpening, JobApplication, PartnershipRequest, AdminUserSafe, SpinPrize, SpinEntry } from "@shared/schema";
+import type { SiteSettings, Order, JobOpening, JobApplication, PartnershipRequest, AdminUserSafe, SpinPrize, SpinEntry, ReferralUser, ReferralCommission } from "@shared/schema";
 import { InvoiceManager } from "@/components/InvoiceManager";
 import { ProposalManager } from "@/components/ProposalManager";
 import logoPath from "@assets/Logo_1769975575984.png";
@@ -125,6 +125,7 @@ type ActiveSection =
   | "partnerships" 
   | "users"
   | "spin"
+  | "referrals"
   | "general" 
   | "pricing" 
   | "contact" 
@@ -143,6 +144,7 @@ const allMenuItems = [
   { id: "partnerships" as ActiveSection, label: "Partnerships", icon: Handshake, roles: ["admin"] as UserRole[] },
   { id: "users" as ActiveSection, label: "Team Members", icon: Users, roles: ["admin"] as UserRole[] },
   { id: "spin" as ActiveSection, label: "Spin the Wheel", icon: Gift, roles: ["admin"] as UserRole[] },
+  { id: "referrals" as ActiveSection, label: "Referral Program", icon: DollarSign, roles: ["admin"] as UserRole[] },
 ];
 
 const settingsItems = [
@@ -223,6 +225,17 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/spin/entries"],
     enabled: sessionData?.isAdmin === true && sessionData?.role === "admin",
   });
+
+  // Referral data (admin only)
+  const { data: referralUsersList, isLoading: referralUsersLoading, refetch: refetchReferralUsers } = useQuery<Omit<ReferralUser, "passwordHash">[]>({
+    queryKey: ["/api/admin/referrals/users"],
+    enabled: activeSection === "referrals",
+  });
+  const { data: referralCommissionsList, isLoading: referralCommissionsLoading, refetch: refetchReferralCommissions } = useQuery<ReferralCommission[]>({
+    queryKey: ["/api/admin/referrals/commissions"],
+    enabled: activeSection === "referrals",
+  });
+  const [referralTab, setReferralTab] = useState<"users" | "commissions">("commissions");
 
   // Local editable copy of spin prizes
   const [localPrizes, setLocalPrizes] = useState<SpinPrize[]>([]);
@@ -457,6 +470,19 @@ export default function AdminDashboard() {
     onError: () => {
       toast({ title: "Failed to reset prizes", variant: "destructive" });
     },
+  });
+
+  const updateCommissionStatusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const res = await apiRequest("PATCH", `/api/admin/referrals/commissions/${id}/status`, { status });
+      if (!res.ok) throw new Error("Failed to update");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/referrals/commissions"] });
+      toast({ title: "Commission status updated" });
+    },
+    onError: () => toast({ title: "Failed to update commission status", variant: "destructive" }),
   });
 
   const handleSaveAllPrizes = async () => {
@@ -2218,6 +2244,164 @@ export default function AdminDashboard() {
                   </Card>
                 )}
               </div>
+            )}
+          </div>
+        );
+
+      case "referrals":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight">Referral Program</h2>
+              <p className="text-muted-foreground">Manage affiliate partners and their commissions.</p>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex gap-2 border-b pb-0">
+              <button
+                onClick={() => setReferralTab("commissions")}
+                className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${referralTab === "commissions" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+                data-testid="tab-referral-commissions"
+              >
+                Commissions ({referralCommissionsList?.length ?? 0})
+              </button>
+              <button
+                onClick={() => setReferralTab("users")}
+                className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${referralTab === "users" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+                data-testid="tab-referral-users"
+              >
+                Affiliates ({referralUsersList?.length ?? 0})
+              </button>
+            </div>
+
+            {referralTab === "commissions" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Commission History</CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  {referralCommissionsLoading ? (
+                    <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
+                  ) : !referralCommissionsList || referralCommissionsList.length === 0 ? (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <DollarSign className="w-10 h-10 mx-auto mb-3 opacity-30" />
+                      <p>No commissions yet.</p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead className="border-b bg-muted/30">
+                          <tr>
+                            <th className="px-4 py-3 text-left font-medium">Affiliate</th>
+                            <th className="px-4 py-3 text-left font-medium">Client</th>
+                            <th className="px-4 py-3 text-right font-medium">Order</th>
+                            <th className="px-4 py-3 text-right font-medium">Commission (30%)</th>
+                            <th className="px-4 py-3 text-left font-medium">Status</th>
+                            <th className="px-4 py-3 text-left font-medium">Date</th>
+                            <th className="px-4 py-3 text-left font-medium">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y">
+                          {referralCommissionsList.map(c => {
+                            const affiliateName = referralUsersList?.find(u => u.id === c.referralUserId)?.fullName ?? c.referralUserId.slice(0, 8);
+                            return (
+                              <tr key={c.id} className="hover:bg-muted/20" data-testid={`row-admin-commission-${c.id}`}>
+                                <td className="px-4 py-3 font-medium">{affiliateName}</td>
+                                <td className="px-4 py-3 text-muted-foreground">{c.clientName}</td>
+                                <td className="px-4 py-3 text-right">${c.orderAmount}</td>
+                                <td className="px-4 py-3 text-right font-semibold text-violet-700">${c.commissionAmount}</td>
+                                <td className="px-4 py-3">
+                                  <Badge variant={c.status === "paid" ? "default" : c.status === "approved" ? "secondary" : "outline"} className="text-xs">
+                                    {c.status}
+                                  </Badge>
+                                </td>
+                                <td className="px-4 py-3 text-muted-foreground text-xs">{c.createdAt ? new Date(c.createdAt).toLocaleDateString() : "-"}</td>
+                                <td className="px-4 py-3">
+                                  <div className="flex gap-1">
+                                    {c.status === "pending" && (
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="text-xs h-7"
+                                        onClick={() => updateCommissionStatusMutation.mutate({ id: c.id, status: "approved" })}
+                                        disabled={updateCommissionStatusMutation.isPending}
+                                        data-testid={`button-approve-commission-${c.id}`}
+                                      >
+                                        Approve
+                                      </Button>
+                                    )}
+                                    {c.status === "approved" && (
+                                      <Button
+                                        size="sm"
+                                        className="text-xs h-7"
+                                        onClick={() => updateCommissionStatusMutation.mutate({ id: c.id, status: "paid" })}
+                                        disabled={updateCommissionStatusMutation.isPending}
+                                        data-testid={`button-mark-paid-commission-${c.id}`}
+                                      >
+                                        Mark Paid
+                                      </Button>
+                                    )}
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {referralTab === "users" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Affiliate Partners</CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  {referralUsersLoading ? (
+                    <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
+                  ) : !referralUsersList || referralUsersList.length === 0 ? (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <Users className="w-10 h-10 mx-auto mb-3 opacity-30" />
+                      <p>No affiliates yet. They register at /referral.</p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead className="border-b bg-muted/30">
+                          <tr>
+                            <th className="px-4 py-3 text-left font-medium">Name</th>
+                            <th className="px-4 py-3 text-left font-medium">Email</th>
+                            <th className="px-4 py-3 text-left font-medium">Referral Code</th>
+                            <th className="px-4 py-3 text-right font-medium">Total Earned</th>
+                            <th className="px-4 py-3 text-left font-medium">Joined</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y">
+                          {referralUsersList.map(u => {
+                            const earned = referralCommissionsList
+                              ?.filter(c => c.referralUserId === u.id)
+                              .reduce((s, c) => s + c.commissionAmount, 0) ?? 0;
+                            return (
+                              <tr key={u.id} className="hover:bg-muted/20" data-testid={`row-affiliate-${u.id}`}>
+                                <td className="px-4 py-3 font-medium">{u.fullName}</td>
+                                <td className="px-4 py-3 text-muted-foreground">{u.email}</td>
+                                <td className="px-4 py-3">
+                                  <code className="bg-muted px-2 py-0.5 rounded text-xs font-mono">{u.referralCode}</code>
+                                </td>
+                                <td className="px-4 py-3 text-right font-semibold text-violet-700">${earned}</td>
+                                <td className="px-4 py-3 text-muted-foreground text-xs">{u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "-"}</td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             )}
           </div>
         );

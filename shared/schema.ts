@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, jsonb, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, jsonb, integer, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -31,6 +31,7 @@ export const orders = pgTable("orders", {
   contactPhone: text("contact_phone").notNull(),
   paymentMethod: text("payment_method").notNull(), // stripe, whatsapp
   paymentStatus: text("payment_status").default("pending"), // pending, completed, failed
+  referralCode: text("referral_code"), // optional: affiliate referral code
   
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -515,3 +516,42 @@ export const sampleInvitations = {
     { id: "roy", name: "Roy's Baptism", url: "https://app.einvite.me/roy" },
   ],
 } as const;
+
+// ─── Referral / Affiliate Program ────────────────────────────────────────────
+
+export const referralUsers = pgTable("referral_users", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  fullName: text("full_name").notNull(),
+  email: text("email").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  referralCode: text("referral_code").notNull().unique(),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertReferralUserSchema = createInsertSchema(referralUsers).omit({
+  id: true,
+  createdAt: true,
+  isActive: true,
+});
+export type InsertReferralUser = z.infer<typeof insertReferralUserSchema>;
+export type ReferralUser = typeof referralUsers.$inferSelect;
+
+export const referralCommissions = pgTable("referral_commissions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  referralUserId: varchar("referral_user_id").notNull(),
+  orderId: varchar("order_id").notNull(),
+  clientName: text("client_name").notNull().default(""),
+  orderAmount: integer("order_amount").notNull(), // in cents or whole USD
+  commissionRate: integer("commission_rate").notNull().default(30), // percent
+  commissionAmount: integer("commission_amount").notNull(), // order_amount * rate / 100
+  status: text("status").notNull().default("pending"), // pending | approved | paid
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertReferralCommissionSchema = createInsertSchema(referralCommissions).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertReferralCommission = z.infer<typeof insertReferralCommissionSchema>;
+export type ReferralCommission = typeof referralCommissions.$inferSelect;

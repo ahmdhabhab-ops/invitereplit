@@ -177,6 +177,7 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
         mediaUrls = uploadData.urls;
       }
 
+      const storedRef = localStorage.getItem("einvite_ref_code") || undefined;
       const orderData = {
         packageType: selectedPackage,
         eventType,
@@ -185,6 +186,7 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
         ...data.contact,
         mediaUrls,
         paymentStatus: "pending",
+        ...(storedRef ? { referralCode: storedRef } : {}),
       };
       
       const response = await apiRequest("POST", "/api/orders", orderData);

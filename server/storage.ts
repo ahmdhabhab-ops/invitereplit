@@ -1,4 +1,4 @@
-import { type Order, type InsertOrder, type SiteSettings, type InsertSiteSettings, type PartnershipRequest, type InsertPartnershipRequest, type JobOpening, type InsertJobOpening, type JobApplication, type InsertJobApplication, type Invoice, type InsertInvoice, type Proposal, type InsertProposal, type AdminUser, type AdminUserSafe, type SpinPrize, type InsertSpinPrize, type SpinEntry, type InsertSpinEntry, orders, siteSettings, partnershipRequests, jobOpenings, jobApplications, invoices, proposals, adminUsers, spinPrizes, spinEntries } from "@shared/schema";
+import { type Order, type InsertOrder, type SiteSettings, type InsertSiteSettings, type PartnershipRequest, type InsertPartnershipRequest, type JobOpening, type InsertJobOpening, type JobApplication, type InsertJobApplication, type Invoice, type InsertInvoice, type Proposal, type InsertProposal, type AdminUser, type AdminUserSafe, type SpinPrize, type InsertSpinPrize, type SpinEntry, type InsertSpinEntry, type ReferralUser, type InsertReferralUser, type ReferralCommission, type InsertReferralCommission, orders, siteSettings, partnershipRequests, jobOpenings, jobApplications, invoices, proposals, adminUsers, spinPrizes, spinEntries, referralUsers, referralCommissions } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, asc } from "drizzle-orm";
 
@@ -73,6 +73,16 @@ export interface IStorage {
   getSpinEntries(): Promise<SpinEntry[]>;
   getSpinEntryByIp(ip: string): Promise<SpinEntry | undefined>;
   createSpinEntry(entry: InsertSpinEntry): Promise<SpinEntry>;
+
+  // Referral program operations
+  getReferralUserByEmail(email: string): Promise<ReferralUser | undefined>;
+  getReferralUserByCode(code: string): Promise<ReferralUser | undefined>;
+  getReferralUserById(id: string): Promise<ReferralUser | undefined>;
+  createReferralUser(user: InsertReferralUser): Promise<ReferralUser>;
+  getAllReferralUsers(): Promise<ReferralUser[]>;
+  getReferralCommissions(referralUserId?: string): Promise<ReferralCommission[]>;
+  createReferralCommission(commission: InsertReferralCommission): Promise<ReferralCommission>;
+  updateReferralCommissionStatus(id: string, status: string): Promise<ReferralCommission | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -358,6 +368,53 @@ export class DatabaseStorage implements IStorage {
   async createSpinEntry(entry: InsertSpinEntry): Promise<SpinEntry> {
     const [created] = await db.insert(spinEntries).values(entry as any).returning();
     return created;
+  }
+
+  // ── Referral program ──────────────────────────────────────────────────────
+  async getReferralUserByEmail(email: string): Promise<ReferralUser | undefined> {
+    const [user] = await db.select().from(referralUsers).where(eq(referralUsers.email, email));
+    return user;
+  }
+
+  async getReferralUserByCode(code: string): Promise<ReferralUser | undefined> {
+    const [user] = await db.select().from(referralUsers).where(eq(referralUsers.referralCode, code));
+    return user;
+  }
+
+  async getReferralUserById(id: string): Promise<ReferralUser | undefined> {
+    const [user] = await db.select().from(referralUsers).where(eq(referralUsers.id, id));
+    return user;
+  }
+
+  async createReferralUser(user: InsertReferralUser): Promise<ReferralUser> {
+    const [created] = await db.insert(referralUsers).values(user as any).returning();
+    return created;
+  }
+
+  async getAllReferralUsers(): Promise<ReferralUser[]> {
+    return db.select().from(referralUsers).orderBy(desc(referralUsers.createdAt));
+  }
+
+  async getReferralCommissions(referralUserId?: string): Promise<ReferralCommission[]> {
+    if (referralUserId) {
+      return db.select().from(referralCommissions)
+        .where(eq(referralCommissions.referralUserId, referralUserId))
+        .orderBy(desc(referralCommissions.createdAt));
+    }
+    return db.select().from(referralCommissions).orderBy(desc(referralCommissions.createdAt));
+  }
+
+  async createReferralCommission(commission: InsertReferralCommission): Promise<ReferralCommission> {
+    const [created] = await db.insert(referralCommissions).values(commission as any).returning();
+    return created;
+  }
+
+  async updateReferralCommissionStatus(id: string, status: string): Promise<ReferralCommission | undefined> {
+    const [updated] = await db.update(referralCommissions)
+      .set({ status })
+      .where(eq(referralCommissions.id, id))
+      .returning();
+    return updated;
   }
 }
 
