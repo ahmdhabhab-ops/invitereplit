@@ -80,6 +80,7 @@ export const translations = {
         fastDelivery: "Fast Delivery",
         satisfaction: "Satisfaction Guaranteed",
       },
+      nonRefundableNotice: "All fees are non-refundable. By selecting a package, you acknowledge that no refunds will be issued once your order is placed.",
       plans: {
         essential: {
           name: "Essential",
@@ -173,6 +174,7 @@ export const translations = {
       whatsappPayment: "Pay via WhatsApp",
       whatsappPaymentDesc: "Complete payment through WhatsApp conversation",
       depositNote: "A 50% deposit is required to confirm your order. Please note that this deposit is non-refundable once the design process has begun.",
+      nonRefundableNotice: "All fees paid are strictly non-refundable. By submitting your order, you acknowledge that no refunds will be issued once payment is confirmed.",
       bankTransfer: "Bank Transfer",
       bankTransferDesc: "Transfer to our bank account",
       package: "Package",
@@ -327,6 +329,10 @@ export const translations = {
       title: "Frequently Asked Questions",
       subtitle: "Everything you need to know about our digital invitation service in Lebanon",
       items: [
+        {
+          question: "What is your refund policy?",
+          answer: "All fees paid to Einvite are strictly non-refundable. Once your order is placed and payment is confirmed, no refunds will be issued under any circumstances. We encourage you to review all package details carefully before submitting your order.",
+        },
         {
           question: "How long does it take to get my digital invite in Lebanon?",
           answer: "Most digital invitations are ready within 24-48 hours after you submit your order and provide all the necessary details. For rush orders, we offer express delivery within 12 hours for an additional fee.",
@@ -525,6 +531,7 @@ export const translations = {
         fastDelivery: "Livraison Rapide",
         satisfaction: "Satisfaction Garantie",
       },
+      nonRefundableNotice: "Tous les frais sont non remboursables. En choisissant un forfait, vous reconnaissez qu'aucun remboursement ne sera effectué une fois votre commande passée.",
       plans: {
         essential: {
           name: "Essentiel",
@@ -618,6 +625,7 @@ export const translations = {
       whatsappPayment: "Payer via WhatsApp",
       whatsappPaymentDesc: "Complétez le paiement par conversation WhatsApp",
       depositNote: "Un acompte de 50% est requis pour confirmer votre commande. Veuillez noter que cet acompte est non remboursable une fois le processus de conception commencé.",
+      nonRefundableNotice: "Tous les frais payés sont strictement non remboursables. En soumettant votre commande, vous reconnaissez qu'aucun remboursement ne sera effectué une fois le paiement confirmé.",
       bankTransfer: "Virement Bancaire",
       bankTransferDesc: "Transférez sur notre compte bancaire",
       package: "Forfait",
@@ -772,6 +780,10 @@ export const translations = {
       title: "Questions Fréquemment Posées",
       subtitle: "Tout ce que vous devez savoir sur notre service d'invitation numérique au Liban",
       items: [
+        {
+          question: "Quelle est votre politique de remboursement ?",
+          answer: "Tous les frais payés à Einvite sont strictement non remboursables. Une fois votre commande passée et le paiement confirmé, aucun remboursement ne sera effectué en aucune circonstance. Nous vous encourageons à examiner attentivement tous les détails du forfait avant de soumettre votre commande.",
+        },
         {
           question: "Combien de temps faut-il pour recevoir mon invitation numérique au Liban ?",
           answer: "La plupart des invitations numériques sont prêtes sous 24 à 48 heures après votre commande et la fourniture de tous les détails nécessaires. Pour les commandes urgentes, nous proposons une livraison express en 12 heures moyennant un supplément.",

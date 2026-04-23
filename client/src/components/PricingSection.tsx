@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Check, Sparkles, Loader2 } from "lucide-react";
+import { Check, Sparkles, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -138,6 +138,21 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
             })}
           </div>
         )}
+
+        {/* Non-refundable notice */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="flex items-start gap-2.5 max-w-2xl mx-auto mt-8 p-4 rounded-lg bg-amber-50 border border-amber-200"
+          data-testid="pricing-nonrefundable-notice"
+        >
+          <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+          <p className="text-xs text-amber-800 leading-relaxed">
+            {t.pricing.nonRefundableNotice}
+          </p>
+        </motion.div>
 
         {/* Trust badges */}
         <motion.div

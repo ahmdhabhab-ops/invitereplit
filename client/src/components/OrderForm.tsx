@@ -824,12 +824,20 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                     )}
                   />
 
-                  {/* 50% deposit non-refundable notice */}
-                  <div className="flex items-start gap-2.5 mt-4 p-3.5 rounded-lg bg-amber-50 border border-amber-200">
-                    <Info className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
-                    <p className="text-xs text-amber-800 leading-relaxed">
-                      <span className="font-semibold">{tf.depositNote}</span>
-                    </p>
+                  {/* Deposit & non-refundable notice */}
+                  <div className="space-y-2 mt-4" data-testid="payment-nonrefundable-notice">
+                    <div className="flex items-start gap-2.5 p-3.5 rounded-lg bg-amber-50 border border-amber-200">
+                      <Info className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                      <p className="text-xs text-amber-800 leading-relaxed">
+                        <span className="font-semibold">{tf.depositNote}</span>
+                      </p>
+                    </div>
+                    <div className="flex items-start gap-2.5 p-3.5 rounded-lg bg-red-50 border border-red-200">
+                      <Info className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+                      <p className="text-xs text-red-800 leading-relaxed font-medium">
+                        {tf.nonRefundableNotice}
+                      </p>
+                    </div>
                   </div>
 
                   {/* Order Summary */}
