@@ -150,7 +150,7 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
         >
           <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
           <p className="text-xs text-amber-800 leading-relaxed">
-            {t.pricing.nonRefundableNotice}
+            {settings?.nonRefundableNotice || t.pricing.nonRefundableNotice}
           </p>
         </motion.div>
 

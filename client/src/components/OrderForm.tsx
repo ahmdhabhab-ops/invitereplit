@@ -835,7 +835,7 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                     <div className="flex items-start gap-2.5 p-3.5 rounded-lg bg-red-50 border border-red-200">
                       <Info className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
                       <p className="text-xs text-red-800 leading-relaxed font-medium">
-                        {tf.nonRefundableNotice}
+                        {settings?.nonRefundableNotice || tf.nonRefundableNotice}
                       </p>
                     </div>
                   </div>

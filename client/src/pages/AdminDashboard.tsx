@@ -1606,6 +1606,29 @@ export default function AdminDashboard() {
                 </CardContent>
               </Card>
             ))}
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <AlertCircle className="h-5 w-5" />
+                  Non-Refundable Notice
+                </CardTitle>
+                <CardDescription>This text appears in the pricing section and order form payment step</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <Label htmlFor="nonRefundableNotice">Notice Text</Label>
+                  <Textarea
+                    id="nonRefundableNotice"
+                    value={settings.nonRefundableNotice || ""}
+                    onChange={(e) => updateField("nonRefundableNotice", e.target.value)}
+                    placeholder="All fees are non-refundable. By selecting a package, you acknowledge that no refunds will be issued once your order is placed."
+                    rows={3}
+                    data-testid="input-non-refundable-notice"
+                  />
+                </div>
+              </CardContent>
+            </Card>
           </div>
         );
 

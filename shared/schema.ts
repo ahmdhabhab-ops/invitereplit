@@ -125,6 +125,9 @@ export const siteSettings = pgTable("site_settings", {
   eventsCreatedCount: text("events_created_count").default("1000+"),
   customerRating: text("customer_rating").default("4.9"),
   
+  // Non-refundable notice text (shown in pricing section and order form)
+  nonRefundableNotice: text("non_refundable_notice").default("All fees are non-refundable. By selecting a package, you acknowledge that no refunds will be issued once your order is placed."),
+  
   // Admin emails (users who can access admin panel)
   adminEmails: jsonb("admin_emails").$type<string[]>().default([]),
   
