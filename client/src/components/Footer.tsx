@@ -196,9 +196,27 @@ export function Footer() {
           <p className="text-sm text-muted-foreground">
             {new Date().getFullYear()} einvite.me. {t.footer.rights}
           </p>
-          <p className="text-sm text-muted-foreground flex items-center gap-1">
-            {t.footer.madeWith} <Heart className="w-4 h-4 text-primary fill-primary" /> {t.footer.inLebanon}
-          </p>
+          <div className="flex items-center gap-4 flex-wrap justify-center">
+            <Link
+              href="/terms"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              data-testid="link-footer-terms"
+            >
+              {t.footer.termsAndConditions}
+            </Link>
+            <span className="text-muted-foreground/40 text-sm">|</span>
+            <Link
+              href="/privacy"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              data-testid="link-footer-privacy"
+            >
+              {t.footer.privacyPolicy}
+            </Link>
+            <span className="text-muted-foreground/40 text-sm hidden md:inline">|</span>
+            <p className="text-sm text-muted-foreground flex items-center gap-1">
+              {t.footer.madeWith} <Heart className="w-4 h-4 text-primary fill-primary" /> {t.footer.inLebanon}
+            </p>
+          </div>
         </div>
       </div>
     </footer>

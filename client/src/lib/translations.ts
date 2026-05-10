@@ -214,6 +214,128 @@ export const translations = {
       madeWith: "Made with",
       inLebanon: "in Lebanon",
       makeMoneyWithUs: "Make Money With Us",
+      termsAndConditions: "Terms & Conditions",
+      privacyPolicy: "Privacy Policy",
+    },
+
+    // Terms & Conditions
+    terms: {
+      backHome: "Back to Home",
+      title: "Terms & Conditions",
+      lastUpdated: "Last Updated",
+      lastUpdatedDate: "April 23, 2026",
+      sections: {
+        acceptance: {
+          title: "Acceptance of Terms",
+          content: "By accessing or using the einvite.me platform operated by Digicore Solutions SARL, you agree to be bound by these Terms and Conditions. If you do not agree to these terms, please do not use our services. These terms apply to all visitors, users, and customers of our digital invitation service.",
+        },
+        service: {
+          title: "Description of Service",
+          content: "einvite.me provides custom digital invitation design and hosting services. Our offerings include:",
+          items: [
+            "Custom-designed digital invitations for weddings, birthdays, and events",
+            "Interactive invitation pages with RSVP functionality",
+            "Photo gallery integration and background music options",
+            "Shareable links for distribution via WhatsApp, SMS, or email",
+            "Design revision rounds as specified in the selected package",
+          ],
+        },
+        payment: {
+          title: "Payment Terms & No-Refund Policy",
+          content: "All service fees are due at the time of order placement. We accept payment via WhatsApp-confirmed bank transfer. Prices are displayed in USD and are subject to change without notice.",
+          noRefundTitle: "All fees paid to einvite.me are strictly non-refundable.",
+          noRefundContent: "Once your order is placed and payment is confirmed, no refunds will be issued under any circumstances, including but not limited to: change of mind, event cancellation, dissatisfaction with design (beyond included revision rounds), or failure to provide required content in a timely manner. By submitting an order, you explicitly acknowledge and accept this no-refund policy.",
+          depositNote: "For orders requiring a deposit, the 50% deposit is non-refundable once the design process has commenced. The remaining balance is due upon completion before the invitation is made live.",
+        },
+        ip: {
+          title: "Intellectual Property",
+          content: "All design templates, graphics, and creative assets produced by einvite.me remain the intellectual property of Digicore Solutions SARL. The customer is granted a non-exclusive license to use the delivered invitation for their personal event. Reproduction, resale, or redistribution of our designs without written consent is strictly prohibited. Content provided by the customer (photos, text, music) remains the property of the customer, and by submitting it, the customer grants einvite.me a limited license to use it solely for fulfilling the order.",
+        },
+        userContent: {
+          title: "Customer-Provided Content",
+          content: "By submitting photos, text, music, or any other content to einvite.me, you represent and warrant that you have the right to use such content and that it does not infringe upon any third-party intellectual property rights. einvite.me reserves the right to refuse content that is offensive, illegal, or otherwise inappropriate. You remain solely responsible for any content you provide.",
+        },
+        liability: {
+          title: "Limitation of Liability",
+          content: "einvite.me and Digicore Solutions SARL shall not be liable for any indirect, incidental, or consequential damages arising from the use of our services. Our total liability for any claim related to your order shall not exceed the amount paid for that specific order. We make no guarantee of uninterrupted service availability, though we strive for the highest uptime possible.",
+        },
+        contact: {
+          title: "Contact Information",
+          content: "For any questions regarding these Terms and Conditions, please contact us:",
+          companyLabel: "Company",
+          emailLabel: "Email",
+          addressLabel: "Address",
+        },
+      },
+    },
+
+    // Privacy Policy
+    privacy: {
+      backHome: "Back to Home",
+      title: "Privacy Policy",
+      lastUpdated: "Last Updated",
+      lastUpdatedDate: "April 23, 2026",
+      sections: {
+        intro: {
+          title: "Introduction",
+          content: "Digicore Solutions SARL (\"einvite.me\", \"we\", \"us\", or \"our\") is committed to protecting your personal information. This Privacy Policy explains how we collect, use, and safeguard data when you use our digital invitation service. By using einvite.me, you consent to the practices described in this policy.",
+        },
+        dataCollected: {
+          title: "Information We Collect",
+          content: "We collect the following categories of personal information:",
+          items: [
+            "Contact details: your name, email address, and phone number provided during order submission",
+            "Event information: event type, date, venue locations, and names of honorees",
+            "Payment-related data: transaction references (we do not store full payment credentials)",
+            "Uploaded content: photos, music preferences, and custom text you submit for your invitation",
+            "Usage data: pages visited, browser type, and device information collected automatically via server logs",
+          ],
+        },
+        howWeUse: {
+          title: "How We Use Your Information",
+          content: "The information we collect is used to:",
+          items: [
+            "Create and deliver your custom digital invitation",
+            "Communicate with you regarding your order status and design revisions",
+            "Process and confirm payments",
+            "Improve our platform and services",
+            "Respond to customer support inquiries",
+            "Send service-related communications (no marketing without explicit consent)",
+          ],
+        },
+        thirdParty: {
+          title: "Third-Party Sharing",
+          content: "We do not sell your personal information. We may share your data with trusted third parties only as necessary to deliver our services:",
+          items: [
+            "Hosting and infrastructure providers (for storing your invitation and uploaded assets)",
+            "WhatsApp (for order communication and payment coordination)",
+            "Google Maps (for embedding venue locations in invitations)",
+            "Analytics tools (for aggregated, anonymized usage insights)",
+          ],
+        },
+        dataSecurity: {
+          title: "Data Security",
+          content: "We implement appropriate technical and organizational measures to protect your personal data against unauthorized access, alteration, disclosure, or destruction. While no system can guarantee absolute security, we strive to use commercially acceptable means to protect your information. Data submitted through our platform is transmitted over encrypted (HTTPS) connections.",
+        },
+        yourRights: {
+          title: "Your Rights",
+          content: "You have the right to:",
+          items: [
+            "Access the personal data we hold about you",
+            "Request correction of inaccurate information",
+            "Request deletion of your personal data (subject to legal and contractual obligations)",
+            "Withdraw consent for non-essential data processing",
+            "Lodge a complaint with the relevant data protection authority",
+          ],
+        },
+        contact: {
+          title: "Contact for Data Requests",
+          content: "To exercise any of your rights or to ask questions about this Privacy Policy, please contact our privacy team:",
+          companyLabel: "Company",
+          emailLabel: "Email",
+          addressLabel: "Address",
+        },
+      },
     },
 
     // Event Planners
@@ -665,6 +787,128 @@ export const translations = {
       madeWith: "Fait avec",
       inLebanon: "au Liban",
       makeMoneyWithUs: "Gagnez de l'Argent avec Nous",
+      termsAndConditions: "Conditions Générales",
+      privacyPolicy: "Politique de Confidentialité",
+    },
+
+    // Terms & Conditions
+    terms: {
+      backHome: "Retour à l'Accueil",
+      title: "Conditions Générales d'Utilisation",
+      lastUpdated: "Dernière Mise à Jour",
+      lastUpdatedDate: "23 avril 2026",
+      sections: {
+        acceptance: {
+          title: "Acceptation des Conditions",
+          content: "En accédant à la plateforme einvite.me exploitée par Digicore Solutions SARL ou en l'utilisant, vous acceptez d'être lié par ces Conditions Générales. Si vous n'acceptez pas ces conditions, veuillez ne pas utiliser nos services. Ces conditions s'appliquent à tous les visiteurs, utilisateurs et clients de notre service d'invitations numériques.",
+        },
+        service: {
+          title: "Description du Service",
+          content: "einvite.me fournit des services de conception et d'hébergement d'invitations numériques personnalisées. Nos offres comprennent :",
+          items: [
+            "Invitations numériques personnalisées pour mariages, anniversaires et événements",
+            "Pages d'invitation interactives avec fonctionnalité RSVP",
+            "Intégration de galerie photos et options de musique de fond",
+            "Liens partageables pour diffusion via WhatsApp, SMS ou e-mail",
+            "Tours de révision de design selon le forfait choisi",
+          ],
+        },
+        payment: {
+          title: "Conditions de Paiement et Politique de Non-Remboursement",
+          content: "Tous les frais de service sont exigibles au moment de la passation de commande. Nous acceptons le paiement par virement bancaire confirmé via WhatsApp. Les prix sont affichés en USD et peuvent être modifiés sans préavis.",
+          noRefundTitle: "Tous les frais payés à einvite.me sont strictement non remboursables.",
+          noRefundContent: "Une fois votre commande passée et le paiement confirmé, aucun remboursement ne sera effectué en aucune circonstance, y compris mais sans s'y limiter : changement d'avis, annulation de l'événement, insatisfaction concernant le design (au-delà des tours de révision inclus), ou défaut de fourniture du contenu requis dans les délais. En soumettant une commande, vous reconnaissez et acceptez explicitement cette politique de non-remboursement.",
+          depositNote: "Pour les commandes nécessitant un acompte, l'acompte de 50 % est non remboursable une fois le processus de conception commencé. Le solde restant est dû à la finalisation, avant la mise en ligne de l'invitation.",
+        },
+        ip: {
+          title: "Propriété Intellectuelle",
+          content: "Tous les modèles de design, graphiques et créations produits par einvite.me restent la propriété intellectuelle de Digicore Solutions SARL. Le client se voit accorder une licence non exclusive pour utiliser l'invitation livrée pour son événement personnel. La reproduction, la revente ou la redistribution de nos designs sans consentement écrit est strictement interdite. Le contenu fourni par le client (photos, texte, musique) reste la propriété du client, et en le soumettant, le client accorde à einvite.me une licence limitée pour l'utiliser uniquement dans le cadre de l'exécution de la commande.",
+        },
+        userContent: {
+          title: "Contenu Fourni par le Client",
+          content: "En soumettant des photos, textes, musiques ou tout autre contenu à einvite.me, vous déclarez et garantissez que vous avez le droit d'utiliser ce contenu et qu'il ne porte pas atteinte aux droits de propriété intellectuelle de tiers. einvite.me se réserve le droit de refuser tout contenu offensant, illégal ou autrement inapproprié. Vous êtes seul responsable de tout contenu que vous fournissez.",
+        },
+        liability: {
+          title: "Limitation de Responsabilité",
+          content: "einvite.me et Digicore Solutions SARL ne sauraient être tenus responsables des dommages indirects, accessoires ou consécutifs découlant de l'utilisation de nos services. Notre responsabilité totale pour toute réclamation liée à votre commande ne dépassera pas le montant payé pour cette commande spécifique. Nous ne garantissons pas une disponibilité ininterrompue du service, bien que nous nous efforcions d'assurer le temps de fonctionnement le plus élevé possible.",
+        },
+        contact: {
+          title: "Coordonnées",
+          content: "Pour toute question concernant ces Conditions Générales, veuillez nous contacter :",
+          companyLabel: "Société",
+          emailLabel: "E-mail",
+          addressLabel: "Adresse",
+        },
+      },
+    },
+
+    // Privacy Policy
+    privacy: {
+      backHome: "Retour à l'Accueil",
+      title: "Politique de Confidentialité",
+      lastUpdated: "Dernière Mise à Jour",
+      lastUpdatedDate: "23 avril 2026",
+      sections: {
+        intro: {
+          title: "Introduction",
+          content: "Digicore Solutions SARL (« einvite.me », « nous » ou « notre ») s'engage à protéger vos informations personnelles. Cette Politique de Confidentialité explique comment nous collectons, utilisons et protégeons les données lorsque vous utilisez notre service d'invitations numériques. En utilisant einvite.me, vous consentez aux pratiques décrites dans cette politique.",
+        },
+        dataCollected: {
+          title: "Informations que Nous Collectons",
+          content: "Nous collectons les catégories suivantes d'informations personnelles :",
+          items: [
+            "Coordonnées : votre nom, adresse e-mail et numéro de téléphone fournis lors de la soumission de la commande",
+            "Informations sur l'événement : type d'événement, date, lieux et noms des personnes honorées",
+            "Données liées au paiement : références de transaction (nous ne stockons pas les identifiants de paiement complets)",
+            "Contenu téléchargé : photos, préférences musicales et texte personnalisé soumis pour votre invitation",
+            "Données d'utilisation : pages visitées, type de navigateur et informations sur l'appareil collectées automatiquement via les journaux du serveur",
+          ],
+        },
+        howWeUse: {
+          title: "Comment Nous Utilisons Vos Informations",
+          content: "Les informations que nous collectons sont utilisées pour :",
+          items: [
+            "Créer et livrer votre invitation numérique personnalisée",
+            "Communiquer avec vous concernant l'état de votre commande et les révisions de design",
+            "Traiter et confirmer les paiements",
+            "Améliorer notre plateforme et nos services",
+            "Répondre aux demandes de support client",
+            "Envoyer des communications liées au service (pas de marketing sans consentement explicite)",
+          ],
+        },
+        thirdParty: {
+          title: "Partage avec des Tiers",
+          content: "Nous ne vendons pas vos informations personnelles. Nous pouvons partager vos données avec des tiers de confiance uniquement dans la mesure nécessaire à la prestation de nos services :",
+          items: [
+            "Fournisseurs d'hébergement et d'infrastructure (pour stocker votre invitation et les fichiers téléchargés)",
+            "WhatsApp (pour la communication des commandes et la coordination des paiements)",
+            "Google Maps (pour intégrer les lieux dans les invitations)",
+            "Outils d'analyse (pour des informations d'utilisation agrégées et anonymisées)",
+          ],
+        },
+        dataSecurity: {
+          title: "Sécurité des Données",
+          content: "Nous mettons en œuvre des mesures techniques et organisationnelles appropriées pour protéger vos données personnelles contre tout accès, modification, divulgation ou destruction non autorisés. Bien qu'aucun système ne puisse garantir une sécurité absolue, nous nous efforçons d'utiliser des moyens commercialement acceptables pour protéger vos informations. Les données soumises via notre plateforme sont transmises via des connexions chiffrées (HTTPS).",
+        },
+        yourRights: {
+          title: "Vos Droits",
+          content: "Vous avez le droit de :",
+          items: [
+            "Accéder aux données personnelles que nous détenons vous concernant",
+            "Demander la correction d'informations inexactes",
+            "Demander la suppression de vos données personnelles (sous réserve d'obligations légales et contractuelles)",
+            "Retirer votre consentement au traitement de données non essentielles",
+            "Déposer une plainte auprès de l'autorité de protection des données compétente",
+          ],
+        },
+        contact: {
+          title: "Contact pour les Demandes de Données",
+          content: "Pour exercer l'un de vos droits ou pour poser des questions sur cette Politique de Confidentialité, veuillez contacter notre équipe chargée de la confidentialité :",
+          companyLabel: "Société",
+          emailLabel: "E-mail",
+          addressLabel: "Adresse",
+        },
+      },
     },
 
     // Event Planners
