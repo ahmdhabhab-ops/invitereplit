@@ -835,7 +835,16 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                     <div className="flex items-start gap-2.5 p-3.5 rounded-lg bg-red-50 border border-red-200">
                       <Info className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
                       <p className="text-xs text-red-800 leading-relaxed font-medium">
-                        {settings?.nonRefundableNotice || tf.nonRefundableNotice}
+                        {settings?.nonRefundableNotice || tf.nonRefundableNotice}{" "}
+                        <a
+                          href="/terms"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline text-red-700 hover:text-red-900 whitespace-nowrap"
+                          data-testid="link-terms-and-conditions"
+                        >
+                          {tf.viewTerms}
+                        </a>
                       </p>
                     </div>
                   </div>
