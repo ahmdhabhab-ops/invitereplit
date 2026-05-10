@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Einvite · White-Label Partnership Proposal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & Base ─────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --purple: #7c3aed;
+      --purple-dark: #5b21b6;
+      --purple-light: #ede9fe;
+      --purple-mid: #a78bfa;
+      --gold: #d4a843;
+      --gold-light: #fef3c7;
+      --dark: #1e1b4b;
+      --gray: #6b7280;
+      --light: #f9fafb;
+      --white: #ffffff;
+      --border: #e5e7eb;
+    }
+
+    html { font-size: 15px; }
+
+    body {
+      font-family: "Montserrat", sans-serif;
+      color: #1f2937;
+      background: #f3f0ff;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    /* ── Print setup ──────────────────────────────────────────────────── */
+    @page {
+      size: A4;
+      margin: 0;
+    }
+
+    @media print {
+      body { background: white; }
+      .no-print { display: none !important; }
+      .page { box-shadow: none !important; margin: 0 !important; border-radius: 0 !important; }
+      .page-break { page-break-before: always; }
+    }
+
+    /* ── Layout ───────────────────────────────────────────────────────── */
+    .wrapper {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+
+    .page {
+      background: var(--white);
+      border-radius: 16px;
+      box-shadow: 0 4px 40px rgba(124,58,237,0.12);
+      overflow: hidden;
+      margin-bottom: 32px;
+    }
+
+    /* ── Cover ────────────────────────────────────────────────────────── */
+    .cover {
+      background: linear-gradient(135deg, var(--purple-dark) 0%, var(--purple) 50%, #9333ea 100%);
+      padding: 64px 56px 56px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cover::before {
+      content: "";
+      position: absolute;
+      top: -80px; right: -80px;
+      width: 320px; height: 320px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+    }
+
+    .cover::after {
+      content: "";
+      position: absolute;
+      bottom: -60px; left: 60px;
+      width: 200px; height: 200px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+    }
+
+    .cover-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 64px;
+    }
+
+    .cover-logo img {
+      height: 40px;
+      filter: brightness(0) invert(1);
+    }
+
+    .cover-tag {
+      display: inline-block;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 100px;
+      margin-bottom: 24px;
+    }
+
+    .cover-title {
+      font-family: "Cormorant Garamond", serif;
+      font-size: 48px;
+      font-weight: 700;
+      color: white;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+
+    .cover-subtitle {
+      font-size: 15px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.78);
+      max-width: 440px;
+      line-height: 1.7;
+      margin-bottom: 48px;
+    }
+
+    .cover-meta {
+      display: flex;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .cover-meta-item {
+      color: rgba(255,255,255,0.65);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .cover-meta-item strong {
+      display: block;
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: none;
+      letter-spacing: 0;
+      margin-top: 4px;
+    }
+
+    /* ── Content sections ─────────────────────────────────────────────── */
+    .content { padding: 52px 56px; }
+
+    .section { margin-bottom: 48px; }
+
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--purple);
+      margin-bottom: 14px;
+    }
+
+    .section-label::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, var(--purple-mid), transparent);
+      opacity: 0.4;
+    }
+
+    .section-title {
+      font-family: "Cormorant Garamond", serif;
+      font-size: 30px;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 14px;
+      line-height: 1.2;
+    }
+
+    .section-body {
+      font-size: 14px;
+      line-height: 1.85;
+      color: #374151;
+    }
+
+    /* ── Intro highlight box ──────────────────────────────────────────── */
+    .intro-highlight {
+      background: var(--purple-light);
+      border-left: 4px solid var(--purple);
+      border-radius: 0 12px 12px 0;
+      padding: 20px 24px;
+      margin-top: 20px;
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--dark);
+    }
+
+    /* ── Pricing cards ────────────────────────────────────────────────── */
+    .plans-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 8px;
+    }
+
+    .plan-card {
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .plan-card.featured {
+      border-color: var(--purple);
+      box-shadow: 0 0 0 4px rgba(124,58,237,0.08);
+    }
+
+    .plan-header {
+      padding: 28px 28px 20px;
+      background: var(--light);
+    }
+
+    .plan-card.featured .plan-header {
+      background: linear-gradient(135deg, var(--purple-dark), var(--purple));
+    }
+
+    .plan-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 100px;
+      margin-bottom: 14px;
+      background: var(--purple-light);
+      color: var(--purple);
+    }
+
+    .plan-card.featured .plan-badge {
+      background: rgba(255,255,255,0.2);
+      color: white;
+    }
+
+    .plan-name {
+      font-family: "Cormorant Garamond", serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 6px;
+    }
+
+    .plan-card.featured .plan-name { color: white; }
+
+    .plan-tagline {
+      font-size: 12px;
+      color: var(--gray);
+      line-height: 1.5;
+    }
+
+    .plan-card.featured .plan-tagline { color: rgba(255,255,255,0.75); }
+
+    .plan-price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      margin-top: 18px;
+    }
+
+    .plan-currency {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--purple);
+    }
+
+    .plan-card.featured .plan-currency { color: #c4b5fd; }
+
+    .plan-amount {
+      font-size: 52px;
+      font-weight: 800;
+      color: var(--dark);
+      line-height: 1;
+    }
+
+    .plan-card.featured .plan-amount { color: white; }
+
+    .plan-per {
+      font-size: 13px;
+      color: var(--gray);
+      font-weight: 500;
+    }
+
+    .plan-card.featured .plan-per { color: rgba(255,255,255,0.65); }
+
+    .plan-body { padding: 24px 28px; }
+
+    .plan-feature {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #374151;
+    }
+
+    .check {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), #9333ea);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+
+    .check::after {
+      content: "✓";
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    /* ── Comparison table ─────────────────────────────────────────────── */
+    .compare-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-top: 8px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .compare-table thead tr {
+      background: linear-gradient(135deg, var(--purple-dark), var(--purple));
+    }
+
+    .compare-table th {
+      padding: 16px 20px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      color: white;
+      letter-spacing: 0.5px;
+    }
+
+    .compare-table th:not(:first-child) { text-align: center; }
+
+    .compare-table td {
+      padding: 13px 20px;
+      font-size: 13px;
+      color: #374151;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .compare-table td:not(:first-child) { text-align: center; }
+
+    .compare-table tbody tr:last-child td { border-bottom: none; }
+
+    .compare-table tbody tr:nth-child(even) td { background: #faf9ff; }
+
+    .yes { color: var(--purple); font-weight: 700; font-size: 16px; }
+    .no  { color: #d1d5db; font-size: 16px; }
+
+    /* ── Notes / callout boxes ────────────────────────────────────────── */
+    .note-box {
+      border-radius: 14px;
+      padding: 22px 26px;
+      margin-bottom: 16px;
+      display: flex;
+      gap: 18px;
+      align-items: flex-start;
+    }
+
+    .note-box.gold {
+      background: var(--gold-light);
+      border: 1px solid #fde68a;
+    }
+
+    .note-box.purple {
+      background: var(--purple-light);
+      border: 1px solid #c4b5fd;
+    }
+
+    .note-icon {
+      font-size: 26px;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+
+    .note-title {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--dark);
+      margin-bottom: 6px;
+    }
+
+    .note-body {
+      font-size: 13px;
+      line-height: 1.7;
+      color: #374151;
+    }
+
+    /* ── Why Einvite section ──────────────────────────────────────────── */
+    .benefits-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    .benefit-card {
+      background: var(--light);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .benefit-icon {
+      font-size: 26px;
+      margin-bottom: 10px;
+    }
+
+    .benefit-title {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--dark);
+      margin-bottom: 6px;
+    }
+
+    .benefit-body {
+      font-size: 12.5px;
+      line-height: 1.65;
+      color: var(--gray);
+    }
+
+    /* ── How it works ─────────────────────────────────────────────────── */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-top: 8px;
+    }
+
+    .step {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      position: relative;
+    }
+
+    .step:not(:last-child) .step-line {
+      position: absolute;
+      left: 19px;
+      top: 40px;
+      bottom: -16px;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--purple-mid), transparent);
+    }
+
+    .step-num {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple-dark), var(--purple));
+      color: white;
+      font-weight: 800;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .step-content { padding: 8px 0 28px; }
+
+    .step-title {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--dark);
+      margin-bottom: 5px;
+    }
+
+    .step-body {
+      font-size: 13px;
+      line-height: 1.65;
+      color: var(--gray);
+    }
+
+    /* ── CTA footer ───────────────────────────────────────────────────── */
+    .cta-section {
+      background: linear-gradient(135deg, var(--purple-dark) 0%, var(--purple) 60%, #9333ea 100%);
+      padding: 52px 56px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-section::before {
+      content: "";
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 250px; height: 250px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+    }
+
+    .cta-title {
+      font-family: "Cormorant Garamond", serif;
+      font-size: 36px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 14px;
+    }
+
+    .cta-body {
+      font-size: 14px;
+      color: rgba(255,255,255,0.78);
+      max-width: 460px;
+      margin: 0 auto 32px;
+      line-height: 1.7;
+    }
+
+    .cta-contacts {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+
+    .cta-contact-item {
+      color: rgba(255,255,255,0.65);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .cta-contact-item strong {
+      display: block;
+      color: white;
+      font-size: 15px;
+      font-weight: 600;
+      text-transform: none;
+      letter-spacing: 0;
+      margin-top: 4px;
+    }
+
+    /* ── Print button ─────────────────────────────────────────────────── */
+    .no-print {
+      text-align: center;
+      padding: 24px 0 8px;
+    }
+
+    .print-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--purple-dark), var(--purple));
+      color: white;
+      font-family: "Montserrat", sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 14px 32px;
+      border-radius: 100px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(124,58,237,0.35);
+      letter-spacing: 0.3px;
+    }
+
+    .print-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(124,58,237,0.45);
+    }
+
+    /* ── Divider ──────────────────────────────────────────────────────── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 36px 0;
+    }
+
+    /* ── Footer strip ─────────────────────────────────────────────────── */
+    .footer-strip {
+      background: var(--dark);
+      padding: 16px 56px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .footer-strip span {
+      font-size: 11px;
+      color: rgba(255,255,255,0.45);
+    }
+
+    .footer-strip a {
+      color: var(--purple-mid);
+      text-decoration: none;
+      font-size: 11px;
+    }
+
+    /* ── Utility ──────────────────────────────────────────────────────── */
+    .text-purple { color: var(--purple); }
+    .fw-700 { font-weight: 700; }
+    .mt-8 { margin-top: 8px; }
+    .mt-16 { margin-top: 16px; }
+    .tag-pill {
+      display: inline-block;
+      background: var(--purple-light);
+      color: var(--purple);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 100px;
+      margin-right: 6px;
+      margin-bottom: 6px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="no-print" style="background:#7c3aed;padding:12px 0;text-align:center">
+  <span style="color:rgba(255,255,255,0.8);font-size:13px;font-family:Montserrat,sans-serif">
+    Einvite · White-Label Proposal &nbsp;|&nbsp;
+  </span>
+  <button class="print-btn" onclick="window.print()" style="margin:0;padding:8px 22px;font-size:13px;box-shadow:none">
+    ⬇ Download / Print as PDF
+  </button>
+</div>
+
+<div class="wrapper">
+
+  <!-- ═══════════════════════════════════════════════════════════ PAGE 1 -->
+  <div class="page">
+
+    <!-- Cover -->
+    <div class="cover">
+      <div class="cover-logo">
+        <img src="https://einvite.me/assets/Logo_1769975575984.png"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
+             alt="Einvite Logo" />
+        <span style="display:none;color:white;font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;letter-spacing:1px">einvite</span>
+        <span style="color:rgba(255,255,255,0);font-size:0">·</span>
+      </div>
+      <div class="cover-tag">White-Label Partnership Proposal</div>
+      <h1 class="cover-title">
+        Grow Your Events Business<br/>
+        with Einvite's Platform
+      </h1>
+      <p class="cover-subtitle">
+        A tailored white-label digital invitation solution designed exclusively
+        for professional event planners — so you deliver more value to your clients
+        without the technical overhead.
+      </p>
+      <div class="cover-meta">
+        <div class="cover-meta-item">
+          Prepared by
+          <strong>Einvite Team</strong>
+        </div>
+        <div class="cover-meta-item">
+          Prepared for
+          <strong>Event Planner Partner</strong>
+        </div>
+        <div class="cover-meta-item">
+          Date
+          <strong id="doc-date"></strong>
+        </div>
+        <div class="cover-meta-item">
+          Valid for
+          <strong>30 Days</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Introduction -->
+    <div class="content">
+      <div class="section">
+        <div class="section-label">Introduction</div>
+        <h2 class="section-title">Built for Event Professionals Like You</h2>
+        <p class="section-body">
+          At <strong>Einvite</strong>, we specialize in crafting stunning, interactive digital invitations
+          that leave lasting impressions. We power weddings, corporate events, birthdays, baptisms,
+          and every celebration in between — serving hundreds of clients across Lebanon and the region.
+        </p>
+        <div class="intro-highlight">
+          <strong>Our white-label program</strong> lets you offer our full digital invitation platform
+          directly under your brand. Your clients experience a seamless service; you earn the revenue.
+          We handle every byte of technology — you focus on what you do best: creating unforgettable events.
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">Why White-Label</div>
+        <div class="benefits-grid">
+          <div class="benefit-card">
+            <div class="benefit-icon">🎨</div>
+            <div class="benefit-title">Your Brand, Our Platform</div>
+            <div class="benefit-body">Invitations are delivered under your business identity. Clients see your logo, your name — not ours.</div>
+          </div>
+          <div class="benefit-card">
+            <div class="benefit-icon">⚡</div>
+            <div class="benefit-title">Zero Tech Overhead</div>
+            <div class="benefit-body">No servers, no developers, no maintenance. We run the platform so you never have a technical headache.</div>
+          </div>
+          <div class="benefit-card">
+            <div class="benefit-icon">📈</div>
+            <div class="benefit-title">Instant Revenue Stream</div>
+            <div class="benefit-body">Add a premium digital service to your portfolio and charge your clients whatever rate you set.</div>
+          </div>
+          <div class="benefit-card">
+            <div class="benefit-icon">🤝</div>
+            <div class="benefit-title">Dedicated Partnership</div>
+            <div class="benefit-body">You get a priority partner relationship with direct access to our team for fast turnaround.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ PAGE 2 -->
+  <div class="page page-break">
+    <div class="content">
+
+      <!-- Pricing -->
+      <div class="section">
+        <div class="section-label">Pricing Plans</div>
+        <h2 class="section-title">Two Simple Options, Designed for Your Workflow</h2>
+        <p class="section-body">
+          Choose the plan that fits how you work. Both plans grant you full access to our platform,
+          priority support, and the ability to deliver premium digital invitations to your clients.
+        </p>
+
+        <div class="plans-grid" style="margin-top:28px">
+
+          <!-- Plan A -->
+          <div class="plan-card">
+            <div class="plan-header">
+              <div class="plan-badge">Plan A — Self-Design</div>
+              <div class="plan-name">Design Your Own</div>
+              <div class="plan-tagline">You or your team handle the invitation design for your clients.</div>
+              <div class="plan-price-row">
+                <span class="plan-currency">$</span>
+                <span class="plan-amount">40</span>
+                <span class="plan-per">/ event</span>
+              </div>
+            </div>
+            <div class="plan-body">
+              <div class="plan-feature"><div class="check"></div>Full platform access per event</div>
+              <div class="plan-feature"><div class="check"></div>Mobile-responsive invitation page</div>
+              <div class="plan-feature"><div class="check"></div>Custom branding &amp; colors</div>
+              <div class="plan-feature"><div class="check"></div>RSVP tracking &amp; guest management</div>
+              <div class="plan-feature"><div class="check"></div>Shareable link &amp; QR code</div>
+              <div class="plan-feature"><div class="check"></div>24/7 technical infrastructure</div>
+              <div class="plan-feature"><div class="check"></div>WhatsApp reminders support</div>
+              <div class="plan-feature"><div class="check"></div>Partner dashboard access</div>
+            </div>
+          </div>
+
+          <!-- Plan B -->
+          <div class="plan-card featured">
+            <div class="plan-header">
+              <div class="plan-badge">Plan B — Full Service</div>
+              <div class="plan-name">We Design For You</div>
+              <div class="plan-tagline">Our designers craft the invitation on behalf of your clients.</div>
+              <div class="plan-price-row">
+                <span class="plan-currency">$</span>
+                <span class="plan-amount">70</span>
+                <span class="plan-per">/ event</span>
+              </div>
+            </div>
+            <div class="plan-body">
+              <div class="plan-feature"><div class="check"></div>Everything in Plan A</div>
+              <div class="plan-feature"><div class="check"></div><strong>Professional design by Einvite team</strong></div>
+              <div class="plan-feature"><div class="check"></div>Custom animations &amp; transitions</div>
+              <div class="plan-feature"><div class="check"></div>Photo gallery integration</div>
+              <div class="plan-feature"><div class="check"></div>Background music support</div>
+              <div class="plan-feature"><div class="check"></div>Up to 3 design revisions</div>
+              <div class="plan-feature"><div class="check"></div>48-hour delivery guarantee</div>
+              <div class="plan-feature"><div class="check"></div>Priority design queue</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Important Notes -->
+      <div class="section">
+        <div class="section-label">Important Notes</div>
+        <h2 class="section-title">Our Commitments to You</h2>
+
+        <div class="note-box gold" style="margin-top:18px">
+          <div class="note-icon">💡</div>
+          <div>
+            <div class="note-title">Pricing Evaluation & Volume Discounts</div>
+            <div class="note-body">
+              The above pricing is our starting point for this partnership. As your event volume grows,
+              we are fully open to re-evaluating rates and applying <strong>custom volume discounts</strong>
+              tailored to your business size. A formal pricing review can be scheduled at any time with our
+              sales team — simply reach out and we will sit down together to find the best structure for you.
+            </div>
+          </div>
+        </div>
+
+        <div class="note-box purple" style="margin-top:0">
+          <div class="note-icon">🛡️</div>
+          <div>
+            <div class="note-title">We Own All Technical Responsibilities — 24/7</div>
+            <div class="note-body">
+              From hosting and security to uptime and performance, <strong>Einvite handles 100% of the technical
+              infrastructure</strong> around the clock. Your clients' invitations stay live, fast, and secure — always.
+              If anything ever requires attention, our technical team is on call 24 hours a day, 7 days a week,
+              365 days a year. You will never have to worry about a link going down on a wedding day.
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ PAGE 3 -->
+  <div class="page page-break">
+    <div class="content">
+
+      <!-- Comparison table -->
+      <div class="section">
+        <div class="section-label">Plan Comparison</div>
+        <h2 class="section-title">Side-by-Side Overview</h2>
+
+        <table class="compare-table" style="margin-top:20px">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Plan A · $40</th>
+              <th>Plan B · $70</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Platform access &amp; hosting</td>
+              <td><span class="yes">✓</span></td>
+              <td><span class="yes">✓</span></td>
+            </tr>
+            <tr>
+              <td>Mobile-responsive invitation</td>
+              <td><span class="yes">✓</span></td>
+              <td><span class="yes">✓</span></td>
+            </tr>
+            <tr>
+              <td>Custom branding &amp; domain link</td>
+              <td><span class="yes">✓</span></td>
+              <td><span class="yes">✓</span></td>
+            </tr>
+            <tr>
+              <td>RSVP &amp; guest tracking</td>
+              <td><span class="yes">✓</span></td>
+              <td><span class="yes">✓</span></td>
+            </tr>
+            <tr>
+              <td>WhatsApp reminders</td>
+              <td><span class="yes">✓</span></td>
+              <td><span class="yes">✓</span></td>
+            </tr>
+            <tr>
+              <td>24/7 technical support</td>
+              <td><span class="yes">✓</span></td>
+              <td><span class="yes">✓</span></td>
+            </tr>
+            <tr>
+              <td>Design by Einvite team</td>
+              <td><span class="no">—</span></td>
+              <td><span class="yes">✓</span></td>
+            </tr>
+            <tr>
+              <td>Custom animations &amp; music</td>
+              <td><span class="no">—</span></td>
+              <td><span class="yes">✓</span></td>
+            </tr>
+            <tr>
+              <td>Photo gallery integration</td>
+              <td><span class="no">—</span></td>
+              <td><span class="yes">✓</span></td>
+            </tr>
+            <tr>
+              <td>Up to 3 design revisions</td>
+              <td><span class="no">—</span></td>
+              <td><span class="yes">✓</span></td>
+            </tr>
+            <tr>
+              <td>48-hour delivery guarantee</td>
+              <td><span class="no">—</span></td>
+              <td><span class="yes">✓</span></td>
+            </tr>
+            <tr>
+              <td>Volume discount eligibility</td>
+              <td><span class="yes">✓</span></td>
+              <td><span class="yes">✓</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- How it works -->
+      <div class="section">
+        <div class="section-label">Process</div>
+        <h2 class="section-title">How the Partnership Works</h2>
+
+        <div class="steps" style="margin-top:20px">
+          <div class="step">
+            <div class="step-line"></div>
+            <div class="step-num">1</div>
+            <div class="step-content">
+              <div class="step-title">Sign the Partnership Agreement</div>
+              <div class="step-body">We finalize the terms, select your plan, and set you up with a dedicated partner account on our platform.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-line"></div>
+            <div class="step-num">2</div>
+            <div class="step-content">
+              <div class="step-title">You Submit an Event Order</div>
+              <div class="step-body">For each new event, you send us the client's details, event date, location, and any assets (photos, music). A simple form — takes under 5 minutes.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-line"></div>
+            <div class="step-num">3</div>
+            <div class="step-content">
+              <div class="step-title">We Build &amp; Deliver</div>
+              <div class="step-body">Plan A: platform is provisioned instantly. Plan B: our designers produce the invitation within 48 hours, with revisions until you are satisfied.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-line"></div>
+            <div class="step-num">4</div>
+            <div class="step-content">
+              <div class="step-title">You Deliver to Your Client</div>
+              <div class="step-body">You share the live invitation link with your client under your brand. You set your own margin — charge whatever you see fit.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-content">
+              <div class="step-title">Grow &amp; Scale</div>
+              <div class="step-body">As your volume increases, revisit pricing with our sales team. Discounts grow with your business — it's a true long-term partnership.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ PAGE 4 CTA -->
+  <div class="page page-break">
+    <div class="content">
+
+      <div class="section">
+        <div class="section-label">About Einvite</div>
+        <h2 class="section-title">Lebanon's #1 Digital Invitation Platform</h2>
+        <p class="section-body">
+          Einvite was born from a simple belief: every celebration deserves a stunning invitation.
+          Since our launch, we have delivered over <strong>1,000+ digital invitations</strong> for weddings,
+          corporate events, birthdays, and more — with a <strong>4.9★ customer satisfaction rating</strong>.
+        </p>
+
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:20px">
+          <span class="tag-pill">🎊 Weddings</span>
+          <span class="tag-pill">🎂 Birthdays</span>
+          <span class="tag-pill">💼 Corporate Events</span>
+          <span class="tag-pill">🎉 Celebrations</span>
+          <span class="tag-pill">⛪ Baptisms</span>
+          <span class="tag-pill">🎓 Graduations</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">Our Commitment</div>
+        <h2 class="section-title">What You Can Always Count On</h2>
+
+        <div class="benefits-grid" style="margin-top:16px">
+          <div class="benefit-card">
+            <div class="benefit-icon">🕐</div>
+            <div class="benefit-title">24/7/365 Uptime</div>
+            <div class="benefit-body">Our infrastructure never sleeps. Invitations stay live and accessible every hour of every day — including your client's wedding night.</div>
+          </div>
+          <div class="benefit-card">
+            <div class="benefit-icon">🔒</div>
+            <div class="benefit-title">Enterprise-Grade Security</div>
+            <div class="benefit-body">All data is encrypted, hosted on secure cloud infrastructure. Your clients' personal information stays private and protected.</div>
+          </div>
+          <div class="benefit-card">
+            <div class="benefit-icon">📱</div>
+            <div class="benefit-title">Mobile-First Design</div>
+            <div class="benefit-body">Every invitation looks perfect on any device — phone, tablet, or desktop — without any extra effort from you.</div>
+          </div>
+          <div class="benefit-card">
+            <div class="benefit-icon">💬</div>
+            <div class="benefit-title">Dedicated Partner Support</div>
+            <div class="benefit-body">Reach our team directly via WhatsApp or email. You are not a ticket — you are a partner, and we treat you like one.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-section">
+      <h2 class="cta-title">Ready to Start?</h2>
+      <p class="cta-body">
+        Let's schedule a quick call to finalize the details and get you set up as an Einvite partner.
+        This proposal is valid for <strong>30 days</strong> from the date above.
+      </p>
+      <div class="cta-contacts">
+        <div class="cta-contact-item">
+          WhatsApp
+          <strong>+961 81 82 47 82</strong>
+        </div>
+        <div class="cta-contact-item">
+          Email
+          <strong>info@einvite.me</strong>
+        </div>
+        <div class="cta-contact-item">
+          Website
+          <strong>einvite.me</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-strip">
+      <span>© 2025 Einvite · einvite.me · All rights reserved</span>
+      <span>Confidential — prepared exclusively for the named recipient</span>
+    </div>
+  </div>
+
+</div><!-- /wrapper -->
+
+<script>
+  // Set today's date
+  const d = new Date();
+  const months = ["January","February","March","April","May","June",
+                  "July","August","September","October","November","December"];
+  document.getElementById("doc-date").textContent =
+    months[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear();
+</script>
+</body>
+</html>

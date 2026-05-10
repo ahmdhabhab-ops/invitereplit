@@ -150,6 +150,12 @@ export async function registerRoutes(
     },
   }));
 
+  // Serve white-label proposal HTML
+  app.get("/proposal/whitelabel", (req, res) => {
+    const proposalPath = path.join(process.cwd(), "proposals", "einvite-whitelabel-proposal.html");
+    res.sendFile(proposalPath);
+  });
+
   // Seed initial admin user on startup
   await seedInitialAdmin();
   
