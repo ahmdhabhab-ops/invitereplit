@@ -1,3 +1,4 @@
+import express from "express";
 import type { Express, RequestHandler } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
@@ -149,6 +150,9 @@ export async function registerRoutes(
       maxAge: sessionTtl,
     },
   }));
+
+  // Serve attached assets for proposals (logo etc.)
+  app.use("/proposal-assets", express.static(path.join(process.cwd(), "attached_assets")));
 
   // Serve white-label proposal HTML
   app.get("/proposal/whitelabel", (req, res) => {
