@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>White-Label Partnership Agreement — Einvite &amp; Hasan Mokbel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --purple:       #7c3aed;
+      --purple-dark:  #5b21b6;
+      --purple-light: #ede9fe;
+      --dark:         #1e1b4b;
+      --gray:         #6b7280;
+      --border:       #d1d5db;
+      --light:        #f9fafb;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    @page {
+      size: A4;
+      margin: 20mm 18mm 20mm 18mm;
+    }
+
+    html { font-size: 13px; }
+
+    body {
+      font-family: "Montserrat", sans-serif;
+      color: #1f2937;
+      background: #f0ebff;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      line-height: 1.7;
+    }
+
+    @media print {
+      body        { background: white; }
+      .no-print   { display: none !important; }
+      .screen-wrap { max-width: none; padding: 0; }
+    }
+
+    .screen-wrap {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 28px 20px 60px;
+    }
+
+    .page-start {
+      page-break-before: always;
+      break-before: page;
+      padding-top: 6mm;
+    }
+
+    .no-break {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    /* ── Download bar ──────────────────────────────────────────────────── */
+    .no-print {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--purple-dark);
+      padding: 11px 24px;
+      display: flex; align-items: center; justify-content: center; gap: 16px;
+    }
+    .print-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: white; color: var(--purple);
+      font-family: "Montserrat", sans-serif;
+      font-size: 13px; font-weight: 700;
+      padding: 9px 24px; border-radius: 100px;
+      border: none; cursor: pointer;
+    }
+    .print-hint { color: rgba(255,255,255,0.7); font-size: 12px; font-family: "Montserrat", sans-serif; }
+
+    /* ── Cover ─────────────────────────────────────────────────────────── */
+    .cover {
+      background: linear-gradient(135deg, var(--purple-dark) 0%, var(--purple) 55%, #9333ea 100%);
+      border-radius: 14px;
+      padding: 52px 52px 48px;
+      position: relative;
+      overflow: hidden;
+      break-inside: avoid;
+      page-break-inside: avoid;
+      margin-bottom: 0;
+    }
+    .cover::before {
+      content: "";
+      position: absolute; top: -80px; right: -80px;
+      width: 320px; height: 320px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+    }
+
+    .cover-logo-wrap {
+      margin-bottom: 48px;
+      position: relative; z-index: 1;
+    }
+    .cover-logo-wrap div {
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 8px 18px;
+      display: inline-block;
+      line-height: 0;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .cover-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 2.5px;
+      text-transform: uppercase; color: rgba(255,255,255,0.6);
+      position: relative; z-index: 1; margin-bottom: 10px;
+    }
+
+    .cover-title {
+      font-family: "Cormorant Garamond", serif;
+      font-size: 38px; font-weight: 700;
+      color: white; line-height: 1.15;
+      margin-bottom: 10px;
+      position: relative; z-index: 1;
+    }
+
+    .cover-sub {
+      font-size: 13px; color: rgba(255,255,255,0.7);
+      margin-bottom: 44px;
+      position: relative; z-index: 1;
+    }
+
+    .cover-parties {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 16px; position: relative; z-index: 1;
+    }
+
+    .cover-party {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 10px;
+      padding: 16px 20px;
+    }
+    .cover-party-role {
+      font-size: 9.5px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: rgba(255,255,255,0.55);
+      margin-bottom: 6px;
+    }
+    .cover-party-name {
+      font-size: 15px; font-weight: 700; color: white; margin-bottom: 3px;
+    }
+    .cover-party-detail { font-size: 11.5px; color: rgba(255,255,255,0.68); }
+
+    .cover-meta-row {
+      display: flex; gap: 32px; margin-top: 20px;
+      position: relative; z-index: 1;
+    }
+    .cover-meta-item { font-size: 10px; text-transform: uppercase;
+      letter-spacing: 1px; color: rgba(255,255,255,0.55); }
+    .cover-meta-item strong {
+      display: block; font-size: 13px; font-weight: 600;
+      color: white; text-transform: none; letter-spacing: 0; margin-top: 3px;
+    }
+
+    /* ── Body layout ───────────────────────────────────────────────────── */
+    .doc-body {
+      background: white;
+      border-radius: 0 0 14px 14px;
+      padding: 44px 52px;
+    }
+
+    @media print {
+      .doc-body { padding: 0; }
+    }
+
+    /* ── Article / Section headings ────────────────────────────────────── */
+    .art-title {
+      font-family: "Cormorant Garamond", serif;
+      font-size: 15px; font-weight: 700;
+      color: var(--dark);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid var(--purple);
+      padding-bottom: 5px;
+      margin-bottom: 12px;
+      margin-top: 28px;
+      break-after: avoid;
+    }
+
+    .art-title:first-of-type { margin-top: 0; }
+
+    /* ── Paragraph ─────────────────────────────────────────────────────── */
+    p { margin-bottom: 10px; font-size: 12.5px; line-height: 1.78; color: #374151; }
+    p:last-child { margin-bottom: 0; }
+
+    /* ── Definition / numbered list ────────────────────────────────────── */
+    .clause {
+      margin-bottom: 10px;
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 6px;
+      font-size: 12.5px; line-height: 1.78; color: #374151;
+    }
+    .clause-num { font-weight: 700; color: var(--dark); }
+
+    ol.sub { padding-left: 28px; margin-top: 6px; margin-bottom: 4px; }
+    ol.sub li { margin-bottom: 5px; font-size: 12.5px; line-height: 1.75; color: #374151; }
+
+    /* ── Pricing table ─────────────────────────────────────────────────── */
+    .price-table {
+      width: 100%; border-collapse: collapse;
+      border-radius: 10px; overflow: hidden;
+      border: 1px solid var(--border);
+      margin: 14px 0;
+      break-inside: avoid; page-break-inside: avoid;
+    }
+    .price-table thead tr {
+      background: linear-gradient(135deg, var(--purple-dark), var(--purple));
+    }
+    .price-table th {
+      padding: 10px 14px; text-align: left;
+      font-size: 11px; font-weight: 600; color: white; letter-spacing: 0.3px;
+    }
+    .price-table td {
+      padding: 9px 14px; font-size: 12px; color: #374151;
+      border-bottom: 1px solid var(--border);
+    }
+    .price-table tbody tr:last-child td { border-bottom: none; }
+    .price-table tbody tr:nth-child(even) td { background: #faf9ff; }
+
+    /* ── Highlight box ─────────────────────────────────────────────────── */
+    .highlight {
+      background: var(--purple-light);
+      border-left: 4px solid var(--purple);
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 14px 0;
+      font-size: 12.5px; line-height: 1.75;
+      color: var(--dark);
+      break-inside: avoid; page-break-inside: avoid;
+    }
+
+    /* ── Signature block ───────────────────────────────────────────────── */
+    .sig-section {
+      margin-top: 36px;
+      break-inside: avoid; page-break-inside: avoid;
+    }
+    .sig-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 32px; margin-top: 20px;
+    }
+    .sig-block { }
+    .sig-party-title {
+      font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--purple); margin-bottom: 4px;
+    }
+    .sig-party-name {
+      font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 2px;
+    }
+    .sig-party-detail { font-size: 11.5px; color: var(--gray); margin-bottom: 28px; }
+
+    .sig-line-label { font-size: 10px; color: var(--gray); margin-bottom: 4px; }
+    .sig-line {
+      border-bottom: 1.5px solid #9ca3af;
+      height: 42px;
+      margin-bottom: 8px;
+      position: relative;
+    }
+    .sig-meta { font-size: 11px; color: var(--gray); }
+
+    /* ── Doc footer ────────────────────────────────────────────────────── */
+    .doc-footer {
+      background: var(--dark);
+      border-radius: 0 0 14px 14px;
+      padding: 13px 52px;
+      display: flex; justify-content: space-between;
+      align-items: center; flex-wrap: wrap; gap: 6px;
+    }
+    .doc-footer span { font-size: 10px; color: rgba(255,255,255,0.4); }
+
+    .divider { height: 1px; background: var(--border); margin: 22px 0; }
+
+    .spacer { height: 28px; }
+    @media print { .spacer { display: none; } }
+  </style>
+</head>
+<body>
+
+<!-- Download bar -->
+<div class="no-print">
+  <span class="print-hint">File → Print → Save as PDF &nbsp;|&nbsp; Enable "Background graphics"</span>
+  <button class="print-btn" onclick="window.print()">⬇ Download / Save as PDF</button>
+</div>
+
+<div class="screen-wrap">
+
+  <!-- ═══════════════════════════════════════════════════
+       COVER
+       ═══════════════════════════════════════════════════ -->
+  <div class="cover">
+    <div class="cover-logo-wrap">
+      <div style="-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+        <img src="/proposal-assets/Logo_1769975575984.png" alt="Einvite" style="height:38px;display:block;" />
+      </div>
+    </div>
+
+    <div class="cover-label">Official Legal Agreement</div>
+    <h1 class="cover-title">White-Label Partnership<br/>Agreement</h1>
+    <p class="cover-sub">Digital Invitation Services · Binding Contract</p>
+
+    <div class="cover-parties">
+      <div class="cover-party">
+        <div class="cover-party-role">Service Provider</div>
+        <div class="cover-party-name">Digicore Solutions SARL</div>
+        <div class="cover-party-detail">Trading as <strong style="color:white;">einvite.me</strong><br/>Represented by: Ahmad Habhab, CEO</div>
+      </div>
+      <div class="cover-party">
+        <div class="cover-party-role">Partner</div>
+        <div class="cover-party-name">Hasan Mokbel</div>
+        <div class="cover-party-detail">White-Label Partner<br/>Event Planning Professional</div>
+      </div>
+    </div>
+
+    <div class="cover-meta-row">
+      <div class="cover-meta-item">Agreement Date<strong id="doc-date"></strong></div>
+      <div class="cover-meta-item">Valid From<strong id="doc-start"></strong></div>
+      <div class="cover-meta-item">Initial Term<strong>12 Months</strong></div>
+      <div class="cover-meta-item">Governing Law<strong>Republic of Lebanon</strong></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       BODY — PAGE 1
+       ═══════════════════════════════════════════════════ -->
+  <div class="doc-body">
+
+    <!-- PREAMBLE -->
+    <div class="art-title no-break">Preamble</div>
+    <p>
+      This White-Label Partnership Agreement (hereinafter "Agreement") is entered into as of the
+      date indicated on the cover page, by and between:
+    </p>
+    <div class="highlight no-break">
+      <strong>Digicore Solutions SARL</strong>, a company duly registered and incorporated under the
+      laws of the Republic of Lebanon, trading under the name <strong>einvite.me</strong>, with its
+      principal place of business in Lebanon, represented by its Chief Executive Officer,
+      <strong>Mr. Ahmad Habhab</strong> (hereinafter referred to as "the Provider" or "Einvite");
+      <br/><br/>
+      AND
+      <br/><br/>
+      <strong>Mr. Hasan Mokbel</strong>, an independent event planning professional operating in Lebanon
+      (hereinafter referred to as "the Partner").
+    </div>
+    <p>
+      The Provider and the Partner are each referred to as a "Party" and collectively as the "Parties."
+      This Agreement sets out the full terms and conditions governing the white-label use of the
+      Einvite digital invitation platform by the Partner.
+    </p>
+
+    <!-- ARTICLE 1 -->
+    <div class="art-title no-break">Article 1 — Definitions</div>
+    <div class="clause no-break"><span class="clause-num">1.1</span><span><strong>"Platform"</strong> means the Einvite digital invitation service, including all software, tools, templates, infrastructure, and technology operated by Digicore Solutions SARL under the domain einvite.me.</span></div>
+    <div class="clause no-break"><span class="clause-num">1.2</span><span><strong>"White-Label Service"</strong> means the right granted to the Partner to resell or incorporate the Platform's outputs (digital invitations) under the Partner's own brand, without disclosing Einvite as the underlying provider.</span></div>
+    <div class="clause no-break"><span class="clause-num">1.3</span><span><strong>"End Client"</strong> means any individual, business, or organisation to whom the Partner delivers digital invitations produced using the Platform.</span></div>
+    <div class="clause no-break"><span class="clause-num">1.4</span><span><strong>"Order"</strong> means a request submitted by the Partner for the creation of a single digital invitation for an End Client.</span></div>
+    <div class="clause no-break"><span class="clause-num">1.5</span><span><strong>"Add-On"</strong> means an optional feature that may be added to an Order for an additional fee, as specified in Article 4.</span></div>
+    <div class="clause no-break"><span class="clause-num">1.6</span><span><strong>"Confidential Information"</strong> means any technical, commercial, pricing, or operational information disclosed by either Party that is not publicly known.</span></div>
+
+    <!-- ARTICLE 2 -->
+    <div class="art-title no-break">Article 2 — Grant of White-Label Rights</div>
+    <div class="clause no-break"><span class="clause-num">2.1</span><span>The Provider hereby grants the Partner a non-exclusive, non-transferable, revocable licence to access and use the Platform solely for the purpose of providing digital invitation services to End Clients under the Partner's own brand.</span></div>
+    <div class="clause no-break"><span class="clause-num">2.2</span><span>The Partner may market and sell digital invitation services to End Clients at any price the Partner determines, without any obligation to disclose the identity of the Provider or the use of the Platform.</span></div>
+    <div class="clause no-break"><span class="clause-num">2.3</span><span>The Partner shall not sub-license, assign, or transfer the rights granted under this Agreement to any third party without the prior written consent of the Provider.</span></div>
+    <div class="clause no-break"><span class="clause-num">2.4</span><span>The Partner shall not reverse-engineer, copy, clone, or attempt to replicate the Platform or any part thereof.</span></div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       PAGE 2
+       ═══════════════════════════════════════════════════ -->
+  <div class="page-start">
+  <div class="doc-body" style="border-radius:0; padding-top: 0;">
+
+    <!-- ARTICLE 3 -->
+    <div class="art-title no-break">Article 3 — Service Plans</div>
+    <p>The Partner shall select one of the following service plans per Order placed:</p>
+
+    <table class="price-table no-break">
+      <thead>
+        <tr>
+          <th>Plan</th>
+          <th>Description</th>
+          <th>Partner Fee (per Event)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Plan A — Self-Design</strong></td>
+          <td>Full platform access; the Partner or their team handles the invitation design for the End Client.</td>
+          <td><strong>USD $48</strong></td>
+        </tr>
+        <tr>
+          <td><strong>Plan B — Full Service</strong></td>
+          <td>Full platform access plus professional invitation design performed by the Einvite design team on behalf of the End Client. Includes up to 3 revisions and a 48-hour delivery commitment.</td>
+          <td><strong>USD $78</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="clause no-break"><span class="clause-num">3.1</span><span>The Partner may freely set their own pricing to End Clients and retain any margin above the fees stated in this Article.</span></div>
+    <div class="clause no-break"><span class="clause-num">3.2</span><span>The applicable plan shall be specified at the time of each Order submission. The Partner may switch plans between Orders at no cost.</span></div>
+    <div class="clause no-break"><span class="clause-num">3.3</span><span>Volume discount evaluations may be requested by the Partner at any time. Any discounts agreed shall be documented in a written amendment to this Agreement.</span></div>
+
+    <!-- ARTICLE 4 -->
+    <div class="art-title no-break">Article 4 — Optional Add-Ons</div>
+    <p>The following optional Add-Ons may be requested per Order at the fees set out below:</p>
+
+    <table class="price-table no-break">
+      <thead>
+        <tr>
+          <th>Add-On</th>
+          <th>Description</th>
+          <th>Fee</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>QR Code</strong></td>
+          <td>A branded QR code generated and linked to the invitation page; includes high-resolution PNG file.</td>
+          <td><strong>USD $20</strong> / event</td>
+        </tr>
+        <tr>
+          <td><strong>WhatsApp Integration</strong></td>
+          <td>Automated sending of invitation links and RSVP reminders to guests via WhatsApp Business API. The integration setup is included at no charge. Meta's per-message fees are passed on to the End Client at cost.</td>
+          <td><strong>Free</strong> (Meta fees apply)</td>
+        </tr>
+        <tr>
+          <td><strong>Custom Domain</strong></td>
+          <td>Hosting of the invitation under a custom domain name chosen by the End Client. Includes DNS configuration and SSL certificate.</td>
+          <td><strong>USD $13</strong> / event + domain registration (~USD $14/year for .com, billed at cost)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ARTICLE 5 -->
+    <div class="art-title no-break">Article 5 — Payment Terms</div>
+    <div class="clause no-break"><span class="clause-num">5.1</span><span>The Partner shall pay the applicable fees to the Provider <strong>prior to</strong> the commencement of work on each Order. No Order shall be processed until full payment is received.</span></div>
+    <div class="clause no-break"><span class="clause-num">5.2</span><span>Payment shall be made via the method(s) agreed between the Parties at the time of each Order (including but not limited to bank transfer or WhatsApp Pay arrangements).</span></div>
+    <div class="clause no-break"><span class="clause-num">5.3</span><span>All fees are stated in United States Dollars (USD). Where payment is made in Lebanese Pounds (LBP), the exchange rate applicable on the date of payment shall be used.</span></div>
+    <div class="clause no-break"><span class="clause-num">5.4</span><span><strong>No Refund Policy:</strong> All fees paid are non-refundable once an Order has been accepted and work has commenced, except in cases of gross negligence or wilful misconduct by the Provider.</span></div>
+    <div class="clause no-break"><span class="clause-num">5.5</span><span>The Provider reserves the right to revise fees upon giving the Partner not less than thirty (30) days' prior written notice. Revised fees shall not apply to Orders already accepted.</span></div>
+
+  </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       PAGE 3
+       ═══════════════════════════════════════════════════ -->
+  <div class="page-start">
+  <div class="doc-body" style="border-radius:0; padding-top: 0;">
+
+    <!-- ARTICLE 6 -->
+    <div class="art-title no-break">Article 6 — Provider Obligations</div>
+    <div class="clause no-break"><span class="clause-num">6.1</span><span>The Provider shall maintain the Platform operational and accessible on a 24/7/365 basis, with commercially reasonable uptime and performance standards.</span></div>
+    <div class="clause no-break"><span class="clause-num">6.2</span><span>The Provider assumes full technical responsibility for all hosting, security, data integrity, SSL certificates, and infrastructure maintenance. The Partner bears no technical liability in relation to the Platform's operation.</span></div>
+    <div class="clause no-break"><span class="clause-num">6.3</span><span>Under Plan B, the Provider shall deliver completed invitation designs within 48 hours of receiving all required assets and content from the Partner. The Provider shall accommodate up to three (3) revision rounds per Order.</span></div>
+    <div class="clause no-break"><span class="clause-num">6.4</span><span>The Provider shall designate a point of contact reachable during business hours via WhatsApp and email to handle partner enquiries and Order submissions.</span></div>
+    <div class="clause no-break"><span class="clause-num">6.5</span><span>The Provider shall keep the identity of the Partner's End Clients strictly confidential and shall not contact End Clients directly without the Partner's prior written consent.</span></div>
+
+    <!-- ARTICLE 7 -->
+    <div class="art-title no-break">Article 7 — Partner Obligations</div>
+    <div class="clause no-break"><span class="clause-num">7.1</span><span>The Partner shall submit accurate and complete information for each Order, including event details, contact names, dates, and any media assets required.</span></div>
+    <div class="clause no-break"><span class="clause-num">7.2</span><span>The Partner shall ensure that all content provided for inclusion in digital invitations does not infringe any third-party intellectual property rights, defame any person, or violate applicable law.</span></div>
+    <div class="clause no-break"><span class="clause-num">7.3</span><span>The Partner shall not represent themselves as the developer or owner of the Platform technology. The Partner may, however, brand the delivered invitations under their own name.</span></div>
+    <div class="clause no-break"><span class="clause-num">7.4</span><span>The Partner shall promptly settle all invoices in accordance with Article 5 and shall not withhold payment on account of any dispute not directly related to the specific Order in question.</span></div>
+    <div class="clause no-break"><span class="clause-num">7.5</span><span>The Partner shall promptly notify the Provider of any technical issue, complaint, or End Client concern that requires the Provider's attention.</span></div>
+
+    <!-- ARTICLE 8 -->
+    <div class="art-title no-break">Article 8 — Intellectual Property</div>
+    <div class="clause no-break"><span class="clause-num">8.1</span><span>All intellectual property rights in the Platform, including its underlying software, templates, design tools, and technology, remain exclusively vested in Digicore Solutions SARL. No rights in the Platform are transferred to the Partner under this Agreement.</span></div>
+    <div class="clause no-break"><span class="clause-num">8.2</span><span>The Partner retains all intellectual property rights in any original content, graphics, or assets they supply for the creation of digital invitations.</span></div>
+    <div class="clause no-break"><span class="clause-num">8.3</span><span>The Provider grants the Partner a limited, royalty-free licence to use the Einvite name and materials solely for internal Order submissions. The Partner shall not use the Einvite brand in any external communications, marketing, or social media without prior written approval.</span></div>
+
+    <!-- ARTICLE 9 -->
+    <div class="art-title no-break">Article 9 — Confidentiality</div>
+    <div class="clause no-break"><span class="clause-num">9.1</span><span>Each Party agrees to hold in strict confidence all Confidential Information received from the other Party and shall not disclose such information to any third party without prior written consent.</span></div>
+    <div class="clause no-break"><span class="clause-num">9.2</span><span>Confidential Information shall be used solely for the purpose of performing obligations under this Agreement.</span></div>
+    <div class="clause no-break"><span class="clause-num">9.3</span><span>The confidentiality obligations in this Article shall survive the termination or expiry of this Agreement for a period of three (3) years.</span></div>
+    <div class="clause no-break"><span class="clause-num">9.4</span><span>This Article shall not apply to information that: (a) is or becomes publicly available through no fault of the receiving Party; (b) was already known to the receiving Party prior to disclosure; or (c) is required to be disclosed by applicable law or court order.</span></div>
+
+  </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       PAGE 4 — FINAL CLAUSES + SIGNATURES
+       ═══════════════════════════════════════════════════ -->
+  <div class="page-start">
+  <div class="doc-body" style="border-radius:0; padding-top:0;">
+
+    <!-- ARTICLE 10 -->
+    <div class="art-title no-break">Article 10 — Term and Termination</div>
+    <div class="clause no-break"><span class="clause-num">10.1</span><span><strong>Term:</strong> This Agreement shall commence on the date of signing and shall remain in force for an initial period of twelve (12) months, unless earlier terminated in accordance with this Article.</span></div>
+    <div class="clause no-break"><span class="clause-num">10.2</span><span><strong>Renewal:</strong> Upon expiry of the initial term, this Agreement shall automatically renew for successive twelve-month periods unless either Party gives the other not less than thirty (30) days' written notice of non-renewal prior to the end of the then-current term.</span></div>
+    <div class="clause no-break"><span class="clause-num">10.3</span><span><strong>Termination for Convenience:</strong> Either Party may terminate this Agreement at any time by giving thirty (30) days' written notice to the other Party. Orders already accepted and paid for at the date of notice shall be completed by the Provider.</span></div>
+    <div class="clause no-break"><span class="clause-num">10.4</span><span><strong>Termination for Cause:</strong> Either Party may terminate this Agreement with immediate effect upon written notice if the other Party: (a) commits a material breach of this Agreement and fails to remedy such breach within fourteen (14) days of receiving written notice; or (b) becomes insolvent, ceases to trade, or is subject to insolvency proceedings.</span></div>
+    <div class="clause no-break"><span class="clause-num">10.5</span><span><strong>Effect of Termination:</strong> Upon termination, the Partner's licence to use the Platform shall immediately cease. All outstanding fees shall become immediately due and payable. Clauses 8, 9, and 12 shall survive termination.</span></div>
+
+    <!-- ARTICLE 11 -->
+    <div class="art-title no-break">Article 11 — Limitation of Liability</div>
+    <div class="clause no-break"><span class="clause-num">11.1</span><span>The Provider's total cumulative liability to the Partner under or in connection with this Agreement shall not exceed the total fees paid by the Partner in the three (3) months immediately preceding the event giving rise to the claim.</span></div>
+    <div class="clause no-break"><span class="clause-num">11.2</span><span>Neither Party shall be liable to the other for any indirect, incidental, special, punitive, or consequential damages, including loss of profits, loss of revenue, or loss of business opportunity, regardless of the cause of action.</span></div>
+    <div class="clause no-break"><span class="clause-num">11.3</span><span>The Provider makes no warranty that the Platform will be uninterrupted or error-free at all times, but commits to using commercially reasonable efforts to maintain availability as stated in Article 6.1.</span></div>
+
+    <!-- ARTICLE 12 -->
+    <div class="art-title no-break">Article 12 — Governing Law &amp; Dispute Resolution</div>
+    <div class="clause no-break"><span class="clause-num">12.1</span><span>This Agreement shall be governed by and construed in accordance with the laws of the Republic of Lebanon.</span></div>
+    <div class="clause no-break"><span class="clause-num">12.2</span><span>In the event of any dispute arising out of or in connection with this Agreement, the Parties shall first attempt to resolve the matter amicably through good-faith negotiation within thirty (30) days of written notice of the dispute.</span></div>
+    <div class="clause no-break"><span class="clause-num">12.3</span><span>If the dispute is not resolved through negotiation, it shall be submitted to the exclusive jurisdiction of the competent courts of Beirut, Lebanon.</span></div>
+
+    <!-- ARTICLE 13 -->
+    <div class="art-title no-break">Article 13 — General Provisions</div>
+    <div class="clause no-break"><span class="clause-num">13.1</span><span><strong>Entire Agreement:</strong> This Agreement constitutes the entire agreement between the Parties with respect to its subject matter and supersedes all prior negotiations, representations, and understandings.</span></div>
+    <div class="clause no-break"><span class="clause-num">13.2</span><span><strong>Amendments:</strong> No amendment to this Agreement shall be valid unless made in writing and signed by authorised representatives of both Parties.</span></div>
+    <div class="clause no-break"><span class="clause-num">13.3</span><span><strong>Waiver:</strong> Failure by either Party to enforce any provision of this Agreement shall not constitute a waiver of that Party's right to enforce such provision in the future.</span></div>
+    <div class="clause no-break"><span class="clause-num">13.4</span><span><strong>Severability:</strong> If any provision of this Agreement is held to be invalid or unenforceable, the remaining provisions shall continue in full force and effect.</span></div>
+    <div class="clause no-break"><span class="clause-num">13.5</span><span><strong>Force Majeure:</strong> Neither Party shall be liable for failure to perform its obligations resulting from events beyond its reasonable control, including acts of God, war, civil unrest, or government actions.</span></div>
+    <div class="clause no-break"><span class="clause-num">13.6</span><span><strong>Notices:</strong> All formal notices under this Agreement shall be in writing and delivered via email or registered mail to the contact details agreed between the Parties.</span></div>
+
+    <div class="divider"></div>
+
+    <!-- SIGNATURES -->
+    <div class="sig-section no-break">
+      <div class="art-title" style="margin-top:0;">Signatures</div>
+      <p>
+        IN WITNESS WHEREOF, the Parties have executed this Agreement as of the date first written above.
+        By signing below, each Party confirms that they have read, understood, and agree to be bound
+        by all terms and conditions of this Agreement.
+      </p>
+
+      <div class="sig-grid">
+
+        <!-- Provider -->
+        <div class="sig-block">
+          <div class="sig-party-title">Service Provider</div>
+          <div class="sig-party-name">Digicore Solutions SARL</div>
+          <div class="sig-party-detail">Trading as einvite.me &nbsp;·&nbsp; Beirut, Lebanon</div>
+
+          <div class="sig-line-label">Authorised Signature</div>
+          <div class="sig-line"></div>
+          <div class="sig-meta">
+            <strong>Ahmad Habhab</strong><br/>
+            Chief Executive Officer<br/>
+            Digicore Solutions SARL
+          </div>
+
+          <div style="margin-top:20px;">
+            <div class="sig-line-label">Date</div>
+            <div class="sig-line" style="height:32px;"></div>
+          </div>
+
+          <div style="margin-top:16px;">
+            <div class="sig-line-label">Company Stamp (if applicable)</div>
+            <div class="sig-line" style="height:56px;border-style:dashed;border-color:#d1d5db;"></div>
+          </div>
+        </div>
+
+        <!-- Partner -->
+        <div class="sig-block">
+          <div class="sig-party-title">Partner</div>
+          <div class="sig-party-name">Hasan Mokbel</div>
+          <div class="sig-party-detail">White-Label Partner</div>
+
+          <div class="sig-line-label">Authorised Signature</div>
+          <div class="sig-line"></div>
+          <div class="sig-meta">
+            <strong>Hasan Mokbel</strong><br/>
+            Event Planning Professional
+          </div>
+
+          <div style="margin-top:20px;">
+            <div class="sig-line-label">Date</div>
+            <div class="sig-line" style="height:32px;"></div>
+          </div>
+
+          <div style="margin-top:16px;">
+            <div class="sig-line-label">Stamp (if applicable)</div>
+            <div class="sig-line" style="height:56px;border-style:dashed;border-color:#d1d5db;"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+  </div>
+
+  <!-- Doc footer -->
+  <div class="doc-footer no-break">
+    <span>© <span id="footer-year"></span> Digicore Solutions SARL · einvite.me · All rights reserved</span>
+    <span>Confidential — binding legal document · Governed by Lebanese law</span>
+  </div>
+
+</div><!-- /screen-wrap -->
+
+<script>
+  const now = new Date();
+  const months = ["January","February","March","April","May","June",
+                  "July","August","September","October","November","December"];
+  const formatted = months[now.getMonth()] + " " + now.getDate() + ", " + now.getFullYear();
+  document.getElementById("doc-date").textContent = formatted;
+  document.getElementById("doc-start").textContent = formatted;
+  document.getElementById("footer-year").textContent = now.getFullYear();
+</script>
+</body>
+</html>

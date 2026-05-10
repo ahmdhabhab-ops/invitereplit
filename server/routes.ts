@@ -160,6 +160,12 @@ export async function registerRoutes(
     res.sendFile(proposalPath);
   });
 
+  // Serve Hasan Mokbel white-label contract
+  app.get("/contract/hasan-mokbel", (req, res) => {
+    const contractPath = path.join(process.cwd(), "proposals", "hasan-mokbel-contract.html");
+    res.sendFile(contractPath);
+  });
+
   // Seed initial admin user on startup
   await seedInitialAdmin();
   
