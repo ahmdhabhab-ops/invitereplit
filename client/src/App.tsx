@@ -16,6 +16,12 @@ import TermsAndConditions from "@/pages/TermsAndConditions";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import NotFound from "@/pages/not-found";
 
+// Forces a real HTTP request to the server for server-rendered HTML pages
+function ServerPage() {
+  window.location.replace(window.location.href);
+  return null;
+}
+
 function Router() {
   return (
     <Switch>
@@ -29,6 +35,8 @@ function Router() {
       <Route path="/referral" component={ReferralPage} />
       <Route path="/terms" component={TermsAndConditions} />
       <Route path="/privacy" component={PrivacyPolicy} />
+      <Route path="/proposal/:rest*" component={ServerPage} />
+      <Route path="/contract/:rest*" component={ServerPage} />
       <Route component={NotFound} />
     </Switch>
   );
