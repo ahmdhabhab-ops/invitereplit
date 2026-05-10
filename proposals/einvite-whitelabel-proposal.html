@@ -420,6 +420,62 @@
     .step-body  { font-size: 12.5px; line-height: 1.65; color: var(--gray); }
 
     /* ════════════════════════════════════════════════════════════════════
+       ADD-ONS GRID
+       ════════════════════════════════════════════════════════════════════ */
+    .addons-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .addon-card {
+      border: 1.5px solid var(--border);
+      border-radius: 13px;
+      overflow: hidden;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .addon-header {
+      background: var(--light);
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .addon-icon  { font-size: 26px; margin-bottom: 8px; line-height: 1; }
+    .addon-name  { font-weight: 700; font-size: 12.5px; color: var(--dark); margin-bottom: 4px; }
+    .addon-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 9.5px; font-weight: 700; letter-spacing: 0.5px;
+      padding: 3px 9px; border-radius: 100px;
+      text-transform: uppercase;
+    }
+    .addon-badge.optional { background: #fef3c7; color: #92400e; }
+    .addon-badge.free     { background: #d1fae5; color: #065f46; }
+
+    .addon-price-row {
+      display: flex; align-items: baseline; gap: 3px; margin: 12px 0 0;
+    }
+    .addon-amount {
+      font-size: 28px; font-weight: 800; color: var(--purple); line-height: 1;
+    }
+    .addon-amount.free-text {
+      font-size: 22px; color: #059669;
+    }
+    .addon-per { font-size: 11px; color: var(--gray); font-weight: 500; }
+
+    .addon-body { padding: 14px 20px; }
+    .addon-desc { font-size: 12px; line-height: 1.7; color: #374151; margin-bottom: 10px; }
+
+    .addon-note {
+      background: #faf9ff; border: 1px solid #e8e3ff;
+      border-radius: 7px; padding: 8px 12px;
+      font-size: 11px; line-height: 1.6; color: var(--gray);
+    }
+    .addon-note strong { color: var(--dark); }
+
+    /* ════════════════════════════════════════════════════════════════════
        TAG PILLS
        ════════════════════════════════════════════════════════════════════ */
     .tag-pill {
@@ -681,6 +737,88 @@
             <div class="plan-feature"><div class="check"></div>Up to 3 design revisions</div>
             <div class="plan-feature"><div class="check"></div>48-hour delivery guarantee</div>
             <div class="plan-feature"><div class="check"></div>Priority design queue</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Add-ons -->
+    <div class="section">
+      <div class="section-label">Optional Add-Ons</div>
+      <h2 class="section-title">Enhance Every Event with Powerful Extras</h2>
+      <p class="section-body">
+        All add-ons below are optional and can be selected per event at the time of order.
+        They stack on top of either Plan A or Plan B.
+      </p>
+
+      <div class="addons-grid">
+
+        <!-- QR Code -->
+        <div class="addon-card no-break">
+          <div class="addon-header">
+            <div class="addon-icon">📲</div>
+            <div class="addon-name">QR Code</div>
+            <div class="addon-badge optional">Optional</div>
+            <div class="addon-price-row">
+              <span style="font-size:16px;font-weight:700;color:var(--purple);">$</span>
+              <span class="addon-amount">20</span>
+              <span class="addon-per">/ event</span>
+            </div>
+          </div>
+          <div class="addon-body">
+            <div class="addon-desc">
+              A unique, branded QR code generated for the invitation. Clients can display it on printed materials, 
+              venues, or menus for instant digital access.
+            </div>
+            <div class="addon-note">
+              <strong>Includes:</strong> high-res QR PNG file + direct link to the invitation.
+            </div>
+          </div>
+        </div>
+
+        <!-- WhatsApp Integration -->
+        <div class="addon-card no-break">
+          <div class="addon-header">
+            <div class="addon-icon">💬</div>
+            <div class="addon-name">WhatsApp Integration</div>
+            <div class="addon-badge free">Free</div>
+            <div class="addon-price-row">
+              <span class="addon-amount free-text">Free</span>
+            </div>
+          </div>
+          <div class="addon-body">
+            <div class="addon-desc">
+              Send invitation links and RSVP reminders automatically via WhatsApp to each guest — 
+              directly from the platform.
+            </div>
+            <div class="addon-note">
+              <strong>Note:</strong> The integration itself is free. However, Meta charges a per-message fee 
+              for the WhatsApp Business API. This cost is billed directly by Meta and passed on to the client.
+            </div>
+          </div>
+        </div>
+
+        <!-- Custom Domain -->
+        <div class="addon-card no-break">
+          <div class="addon-header">
+            <div class="addon-icon">🌐</div>
+            <div class="addon-name">Custom Domain</div>
+            <div class="addon-badge optional">Optional</div>
+            <div class="addon-price-row">
+              <span style="font-size:16px;font-weight:700;color:var(--purple);">$</span>
+              <span class="addon-amount">10</span>
+              <span class="addon-per">/ event + domain cost</span>
+            </div>
+          </div>
+          <div class="addon-body">
+            <div class="addon-desc">
+              Host the invitation under a custom domain name (e.g. <em>john-and-sarah.com</em>) for a 
+              premium, personal touch your clients will love.
+            </div>
+            <div class="addon-note">
+              <strong>Setup fee:</strong> $10/event &nbsp;|&nbsp; <strong>.com domain:</strong> ~$14/year (registration cost, billed at cost — no markup).
+            </div>
           </div>
         </div>
 
