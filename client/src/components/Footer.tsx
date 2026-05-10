@@ -145,6 +145,24 @@ export function Footer() {
                   💰 {t.footer.makeMoneyWithUs}
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/terms"
+                  className="text-muted-foreground hover:text-foreground transition-colors text-sm"
+                  data-testid="link-footer-quick-terms"
+                >
+                  {t.footer.termsAndConditions}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/privacy"
+                  className="text-muted-foreground hover:text-foreground transition-colors text-sm"
+                  data-testid="link-footer-quick-privacy"
+                >
+                  {t.footer.privacyPolicy}
+                </Link>
+              </li>
             </ul>
           </div>
 
