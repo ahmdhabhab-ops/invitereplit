@@ -180,6 +180,23 @@ export function Header() {
               >
                 {t.nav.careers}
               </a>
+              <div className="border-t border-border my-1" />
+              <a
+                href="/terms"
+                className="text-left py-3 px-4 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
+                data-testid="link-terms-mobile"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {t.footer.termsAndConditions}
+              </a>
+              <a
+                href="/privacy"
+                className="text-left py-3 px-4 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
+                data-testid="link-privacy-mobile"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {t.footer.privacyPolicy}
+              </a>
               <Button
                 onClick={() => scrollToSection("pricing")}
                 className="mt-2 font-medium"
