@@ -93,6 +93,21 @@ export function Header() {
             >
               {t.nav.careers}
             </a>
+            <span className="h-4 w-px bg-border" aria-hidden="true" />
+            <a
+              href="/terms"
+              className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+              data-testid="link-terms-desktop"
+            >
+              {t.footer.termsAndConditions}
+            </a>
+            <a
+              href="/privacy"
+              className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+              data-testid="link-privacy-desktop"
+            >
+              {t.footer.privacyPolicy}
+            </a>
             <Button
               variant="outline"
               size="sm"
