@@ -201,6 +201,10 @@ export function Footer() {
                 <Phone className="w-4 h-4 shrink-0" />
                 <span>{settings?.phoneNumber || "+961 81 82 47 82"}</span>
               </li>
+              <li className="flex items-center gap-3 text-muted-foreground text-sm">
+                <Phone className="w-4 h-4 shrink-0" />
+                <span>+961 3 079 143</span>
+              </li>
               <li className="flex items-start gap-3 text-muted-foreground text-sm">
                 <MapPin className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>{t.footer.location}</span>
