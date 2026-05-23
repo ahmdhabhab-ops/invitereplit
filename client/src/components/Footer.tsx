@@ -212,7 +212,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            {new Date().getFullYear()} einvite.me. {t.footer.rights}
+            © {new Date().getFullYear()} Digicore Solutions SARL · einvite.me. {t.footer.rights}
           </p>
           <div className="flex items-center gap-4 flex-wrap justify-center">
             <Link
