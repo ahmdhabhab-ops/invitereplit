@@ -66,6 +66,8 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
   const [step, setStep] = useState<FormStep>(1);
   const [eventType, setEventType] = useState<string>("wedding");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [addOnLanguage, setAddOnLanguage] = useState(false);
+  const [addOnQrCode, setAddOnQrCode] = useState(false);
   const { toast } = useToast();
   const { t, language, formatPrice } = useLanguage();
   const tf = t.orderForm;
@@ -675,6 +677,48 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                     )}
                   />
 
+                  {/* Optional Add-Ons */}
+                  <div>
+                    <p className="text-sm font-medium mb-3">{tf.addOnsTitle}</p>
+                    <div className="space-y-3">
+                      {/* Additional Language */}
+                      <button
+                        type="button"
+                        onClick={() => setAddOnLanguage((v) => !v)}
+                        data-testid="addon-additional-language"
+                        className={`w-full flex items-center justify-between px-4 py-3 rounded-md border transition-colors cursor-pointer text-left ${
+                          addOnLanguage
+                            ? "border-primary bg-primary/10"
+                            : "border-input hover:border-primary/50"
+                        }`}
+                      >
+                        <div>
+                          <p className="text-sm font-medium">{tf.addOnAdditionalLanguage}</p>
+                          <p className="text-xs text-muted-foreground">{tf.addOnAdditionalLanguageDesc}</p>
+                        </div>
+                        <span className="text-sm font-semibold text-primary shrink-0 ml-4">+{formatPrice(10)}</span>
+                      </button>
+
+                      {/* QR Code Photo Sharing */}
+                      <button
+                        type="button"
+                        onClick={() => setAddOnQrCode((v) => !v)}
+                        data-testid="addon-qr-code"
+                        className={`w-full flex items-center justify-between px-4 py-3 rounded-md border transition-colors cursor-pointer text-left ${
+                          addOnQrCode
+                            ? "border-primary bg-primary/10"
+                            : "border-input hover:border-primary/50"
+                        }`}
+                      >
+                        <div>
+                          <p className="text-sm font-medium">{tf.addOnQrCode}</p>
+                          <p className="text-xs text-muted-foreground">{tf.addOnQrCodeDesc}</p>
+                        </div>
+                        <span className="text-sm font-semibold text-primary shrink-0 ml-4">+{formatPrice(35)}</span>
+                      </button>
+                    </div>
+                  </div>
+
                   <div className="flex justify-between pt-4">
                     <Button
                       type="button"
@@ -852,9 +896,29 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                   {/* Order Summary */}
                   <div className="mt-6 p-4 bg-muted/50 rounded-lg">
                     <h4 className="font-semibold mb-2">{tf.orderSummary}</h4>
-                    <div className="flex justify-between text-sm">
-                      <span>{selectedTier?.name} {tf.package}</span>
-                      <span className="font-semibold">{formatPrice(selectedTier?.price ?? 0)}</span>
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-sm">
+                        <span>{selectedTier?.name} {tf.package}</span>
+                        <span className="font-semibold">{formatPrice(selectedTier?.price ?? 0)}</span>
+                      </div>
+                      {addOnLanguage && (
+                        <div className="flex justify-between text-sm text-muted-foreground">
+                          <span>{tf.addOnAdditionalLanguage}</span>
+                          <span>+{formatPrice(10)}</span>
+                        </div>
+                      )}
+                      {addOnQrCode && (
+                        <div className="flex justify-between text-sm text-muted-foreground">
+                          <span>{tf.addOnQrCode}</span>
+                          <span>+{formatPrice(35)}</span>
+                        </div>
+                      )}
+                      {(addOnLanguage || addOnQrCode) && (
+                        <div className="flex justify-between text-sm font-semibold border-t border-border pt-1 mt-1">
+                          <span>{tf.total}</span>
+                          <span>{formatPrice((selectedTier?.price ?? 0) + (addOnLanguage ? 10 : 0) + (addOnQrCode ? 35 : 0))}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
