@@ -150,7 +150,7 @@ export default function PrivacyPolicy() {
                     <strong className="text-foreground">{t.privacy.sections.contact.emailLabel}:</strong> info@einvite.me
                   </li>
                   <li>
-                    <strong className="text-foreground">{t.privacy.sections.contact.addressLabel}:</strong> Sodeco Square Building, Beirut, Lebanon
+                    <strong className="text-foreground">{t.privacy.sections.contact.addressLabel}:</strong> Office 305, Tower 44, Dekweneh, Beirut, Lebanon
                   </li>
                 </ul>
               </div>

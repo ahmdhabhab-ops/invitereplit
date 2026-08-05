@@ -88,7 +88,7 @@ export default function AboutUs() {
                   <MapPin className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
                   <div>
                     <p className="font-medium text-foreground">Our Location</p>
-                    <p>Sodeco Square Building, Beirut, Lebanon</p>
+                    <p>Office 305, Tower 44, Dekweneh, Beirut, Lebanon</p>
                   </div>
                 </div>
               </div>

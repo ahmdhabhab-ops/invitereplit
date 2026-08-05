@@ -146,7 +146,7 @@ export default function TermsAndConditions() {
                     <strong className="text-foreground">{t.terms.sections.contact.emailLabel}:</strong> info@einvite.me
                   </li>
                   <li>
-                    <strong className="text-foreground">{t.terms.sections.contact.addressLabel}:</strong> Sodeco Square Building, Beirut, Lebanon
+                    <strong className="text-foreground">{t.terms.sections.contact.addressLabel}:</strong> Office 305, Tower 44, Dekweneh, Beirut, Lebanon
                   </li>
                 </ul>
               </div>
