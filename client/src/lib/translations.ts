@@ -10,6 +10,7 @@ export const translations = {
       eventPlanners: "Event Planners",
       careers: "Careers",
       getStarted: "Get Started",
+      login: "Login",
     },
     langToggle: "FR",
 
@@ -591,6 +592,7 @@ export const translations = {
       eventPlanners: "Organisateurs",
       careers: "Carrières",
       getStarted: "Commencer",
+      login: "Connexion",
     },
     langToggle: "EN",
 

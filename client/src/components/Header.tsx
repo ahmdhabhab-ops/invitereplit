@@ -117,6 +117,16 @@ export function Header() {
             >
               {t.langToggle}
             </Button>
+            <a
+              href="https://build.einvite.me/login"
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="button-login"
+            >
+              <Button variant="outline" className="font-medium">
+                {t.nav.login}
+              </Button>
+            </a>
             <Button
               onClick={() => scrollToSection("pricing")}
               className="font-medium"
@@ -211,6 +221,17 @@ export function Header() {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {t.footer.privacyPolicy}
+              </a>
+              <a
+                href="https://build.einvite.me/login"
+                target="_blank"
+                rel="noopener noreferrer"
+                data-testid="button-login-mobile"
+                className="w-full"
+              >
+                <Button variant="outline" className="w-full mt-2 font-medium">
+                  {t.nav.login}
+                </Button>
               </a>
               <Button
                 onClick={() => scrollToSection("pricing")}
