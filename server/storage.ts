@@ -1,4 +1,4 @@
-import { type Order, type InsertOrder, type SiteSettings, type InsertSiteSettings, type PartnershipRequest, type InsertPartnershipRequest, type JobOpening, type InsertJobOpening, type JobApplication, type InsertJobApplication, type Invoice, type InsertInvoice, type Proposal, type InsertProposal, type AdminUser, type AdminUserSafe, type SpinPrize, type InsertSpinPrize, type SpinEntry, type InsertSpinEntry, type ReferralUser, type InsertReferralUser, type ReferralCommission, type InsertReferralCommission, orders, siteSettings, partnershipRequests, jobOpenings, jobApplications, invoices, proposals, adminUsers, spinPrizes, spinEntries, referralUsers, referralCommissions } from "@shared/schema";
+import { type Order, type InsertOrder, type SiteSettings, type InsertSiteSettings, type PartnershipRequest, type InsertPartnershipRequest, type JobOpening, type InsertJobOpening, type JobApplication, type InsertJobApplication, type Invoice, type InsertInvoice, type Proposal, type InsertProposal, type AdminUser, type AdminUserSafe, type SpinPrize, type InsertSpinPrize, type SpinEntry, type InsertSpinEntry, type ReferralUser, type InsertReferralUser, type ReferralCommission, type InsertReferralCommission, type GallerySession, type InsertGallerySession, type GalleryPhoto, type InsertGalleryPhoto, orders, siteSettings, partnershipRequests, jobOpenings, jobApplications, invoices, proposals, adminUsers, spinPrizes, spinEntries, referralUsers, referralCommissions, gallerySessions, galleryPhotos } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, asc } from "drizzle-orm";
 
@@ -83,6 +83,16 @@ export interface IStorage {
   getReferralCommissions(referralUserId?: string): Promise<ReferralCommission[]>;
   createReferralCommission(commission: InsertReferralCommission): Promise<ReferralCommission>;
   updateReferralCommissionStatus(id: string, status: string): Promise<ReferralCommission | undefined>;
+
+  // Gallery operations
+  createGallerySession(session: InsertGallerySession): Promise<GallerySession>;
+  getGallerySessionByOrderId(orderId: string): Promise<GallerySession | undefined>;
+  getGallerySession(id: string): Promise<GallerySession | undefined>;
+  getAllGallerySessions(): Promise<GallerySession[]>;
+  updateGallerySessionActive(id: string, isActive: boolean): Promise<GallerySession | undefined>;
+  createGalleryPhoto(photo: InsertGalleryPhoto): Promise<GalleryPhoto>;
+  getGalleryPhotos(sessionId: string): Promise<GalleryPhoto[]>;
+  deleteGalleryPhoto(id: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -415,6 +425,50 @@ export class DatabaseStorage implements IStorage {
       .where(eq(referralCommissions.id, id))
       .returning();
     return updated;
+  }
+
+  // ── Gallery ───────────────────────────────────────────────────────────────
+  async createGallerySession(session: InsertGallerySession): Promise<GallerySession> {
+    const [created] = await db.insert(gallerySessions).values(session as any).returning();
+    return created;
+  }
+
+  async getGallerySessionByOrderId(orderId: string): Promise<GallerySession | undefined> {
+    const [session] = await db.select().from(gallerySessions).where(eq(gallerySessions.orderId, orderId));
+    return session;
+  }
+
+  async getGallerySession(id: string): Promise<GallerySession | undefined> {
+    const [session] = await db.select().from(gallerySessions).where(eq(gallerySessions.id, id));
+    return session;
+  }
+
+  async getAllGallerySessions(): Promise<GallerySession[]> {
+    return db.select().from(gallerySessions).orderBy(desc(gallerySessions.createdAt));
+  }
+
+  async updateGallerySessionActive(id: string, isActive: boolean): Promise<GallerySession | undefined> {
+    const [updated] = await db.update(gallerySessions)
+      .set({ isActive })
+      .where(eq(gallerySessions.id, id))
+      .returning();
+    return updated;
+  }
+
+  async createGalleryPhoto(photo: InsertGalleryPhoto): Promise<GalleryPhoto> {
+    const [created] = await db.insert(galleryPhotos).values(photo as any).returning();
+    return created;
+  }
+
+  async getGalleryPhotos(sessionId: string): Promise<GalleryPhoto[]> {
+    return db.select().from(galleryPhotos)
+      .where(eq(galleryPhotos.sessionId, sessionId))
+      .orderBy(desc(galleryPhotos.uploadedAt));
+  }
+
+  async deleteGalleryPhoto(id: string): Promise<boolean> {
+    await db.delete(galleryPhotos).where(eq(galleryPhotos.id, id));
+    return true;
   }
 }
 

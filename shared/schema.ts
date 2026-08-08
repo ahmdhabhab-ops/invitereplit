@@ -24,7 +24,9 @@ export const orders = pgTable("orders", {
   songChoice: text("song_choice"),
   rsvpPreference: text("rsvp_preference"), // yes, no, maybe
   additionalNotes: text("additional_notes"),
-  
+  addOnQrCode: boolean("add_on_qr_code").default(false),
+  addOnLanguage: boolean("add_on_language").default(false),
+
   // Step 4: Contact & Payment
   contactName: text("contact_name").notNull(),
   contactEmail: text("contact_email").notNull(),
@@ -384,6 +386,38 @@ export const insertProposalSchema = createInsertSchema(proposals).omit({
 
 export type InsertProposal = z.infer<typeof insertProposalSchema>;
 export type Proposal = typeof proposals.$inferSelect;
+
+// ── Live Gallery ─────────────────────────────────────────────────────────────
+
+export const gallerySessions = pgTable("gallery_sessions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  orderId: varchar("order_id").notNull(),
+  eventName: text("event_name").notNull(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const galleryPhotos = pgTable("gallery_photos", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sessionId: varchar("session_id").notNull(),
+  uploaderName: text("uploader_name"),
+  fileUrl: text("file_url").notNull(),
+  uploadedAt: timestamp("uploaded_at").defaultNow(),
+});
+
+export const insertGallerySessionSchema = createInsertSchema(gallerySessions).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertGalleryPhotoSchema = createInsertSchema(galleryPhotos).omit({
+  id: true,
+  uploadedAt: true,
+});
+
+export type InsertGallerySession = z.infer<typeof insertGallerySessionSchema>;
+export type GallerySession = typeof gallerySessions.$inferSelect;
+export type InsertGalleryPhoto = z.infer<typeof insertGalleryPhotoSchema>;
+export type GalleryPhoto = typeof galleryPhotos.$inferSelect;
 
 // Spin the Wheel - Prize configuration
 export const spinPrizes = pgTable("spin_prizes", {

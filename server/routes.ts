@@ -10,6 +10,8 @@ import connectPg from "connect-pg-simple";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import QRCode from "qrcode";
+import { broadcastNewPhoto } from "./gallery-ws";
 
 // Configure multer for file uploads
 const uploadsDir = path.join(process.cwd(), "uploads");
@@ -257,6 +259,20 @@ export async function registerRoutes(
       // Validate request body
       const validatedData = insertOrderSchema.parse(req.body);
       const order = await storage.createOrder(validatedData);
+
+      // Auto-create gallery session if QR Code add-on was selected
+      if (validatedData.addOnQrCode) {
+        try {
+          await storage.createGallerySession({
+            orderId: order.id,
+            eventName: validatedData.names || "Event Gallery",
+            isActive: true,
+          });
+        } catch (galleryErr) {
+          // Non-fatal: log but don't fail the order
+          console.error("Failed to create gallery session:", galleryErr);
+        }
+      }
 
       // If a referral code was provided, record commission (anti-self-referral: check different email)
       if (validatedData.referralCode) {
@@ -1124,6 +1140,133 @@ export async function registerRoutes(
       res.json(updated);
     } catch (error) {
       res.status(500).json({ error: "Failed to update commission status" });
+    }
+  });
+
+  // ========== Live Gallery Endpoints ==========
+
+  // Gallery photo multer (reuse image filter, field name "photo")
+  const galleryPhotoUpload = multer({
+    storage: storage_multer,
+    limits: { fileSize: 10 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+      const allowedTypes = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.heic', '.heif'];
+      const ext = path.extname(file.originalname).toLowerCase();
+      if (allowedTypes.includes(ext)) cb(null, true);
+      else cb(new Error('Only image files are allowed'));
+    },
+  });
+
+  // GET /api/gallery/:sessionId — public: session info + photos
+  app.get("/api/gallery/:sessionId", async (req, res) => {
+    try {
+      const session = await storage.getGallerySession(req.params.sessionId);
+      if (!session) return res.status(404).json({ error: "Gallery session not found" });
+      const photos = await storage.getGalleryPhotos(session.id);
+      res.json({ session, photos });
+    } catch (error) {
+      console.error("Error fetching gallery session:", error);
+      res.status(500).json({ error: "Failed to fetch gallery" });
+    }
+  });
+
+  // GET /api/gallery/:sessionId/qr — returns QR PNG for the guest upload URL
+  app.get("/api/gallery/:sessionId/qr", async (req, res) => {
+    try {
+      const session = await storage.getGallerySession(req.params.sessionId);
+      if (!session) return res.status(404).json({ error: "Gallery session not found" });
+
+      // Build the guest upload URL from the request host
+      const rawHost = req.headers["x-forwarded-host"] || req.headers.host;
+      const host = Array.isArray(rawHost) ? rawHost[0] : (rawHost || "einvite.me");
+      const rawProto = req.headers["x-forwarded-proto"];
+      const proto = Array.isArray(rawProto) ? rawProto[0] : (rawProto || (req.secure ? "https" : "http"));
+      const guestUrl = `${proto}://${host}/gallery/${session.id}`;
+
+      const qrPng = await QRCode.toBuffer(guestUrl, { width: 400, margin: 2 });
+      res.setHeader("Content-Type", "image/png");
+      res.setHeader("Cache-Control", "public, max-age=86400");
+      res.send(qrPng);
+    } catch (error) {
+      console.error("Error generating QR code:", error);
+      res.status(500).json({ error: "Failed to generate QR code" });
+    }
+  });
+
+  // POST /api/gallery/:sessionId/photos — public: guests upload photos
+  app.post("/api/gallery/:sessionId/photos", galleryPhotoUpload.single("photo"), async (req, res) => {
+    try {
+      const session = await storage.getGallerySession(req.params.sessionId);
+      if (!session) return res.status(404).json({ error: "Gallery session not found" });
+      if (!session.isActive) return res.status(403).json({ error: "This gallery is no longer accepting photos" });
+      if (!req.file) return res.status(400).json({ error: "No photo uploaded" });
+
+      const fileUrl = `/uploads/${req.file.filename}`;
+      const uploaderName = (req.body.uploaderName as string) || null;
+
+      const photo = await storage.createGalleryPhoto({
+        sessionId: session.id,
+        uploaderName,
+        fileUrl,
+      });
+
+      // Broadcast to all display screens watching this session
+      broadcastNewPhoto(session.id, {
+        id: photo.id,
+        fileUrl: photo.fileUrl,
+        uploaderName: photo.uploaderName,
+        uploadedAt: photo.uploadedAt,
+      });
+
+      res.status(201).json(photo);
+    } catch (error) {
+      console.error("Error uploading gallery photo:", error);
+      res.status(500).json({ error: "Failed to upload photo" });
+    }
+  });
+
+  // GET /api/admin/gallery — admin: list all sessions
+  app.get("/api/admin/gallery", isAdmin, async (req, res) => {
+    try {
+      const sessions = await storage.getAllGallerySessions();
+      res.json(sessions);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch gallery sessions" });
+    }
+  });
+
+  // GET /api/admin/gallery/order/:orderId — admin: session for a specific order
+  app.get("/api/admin/gallery/order/:orderId", isAdmin, async (req, res) => {
+    try {
+      const session = await storage.getGallerySessionByOrderId(req.params.orderId);
+      if (!session) return res.status(404).json({ error: "No gallery session for this order" });
+      const photos = await storage.getGalleryPhotos(session.id);
+      res.json({ session, photos });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch gallery" });
+    }
+  });
+
+  // PATCH /api/admin/gallery/:sessionId/active — admin: toggle active
+  app.patch("/api/admin/gallery/:sessionId/active", isAdmin, async (req, res) => {
+    try {
+      const { isActive } = req.body;
+      if (typeof isActive !== "boolean") return res.status(400).json({ error: "isActive must be boolean" });
+      const session = await storage.updateGallerySessionActive(req.params.sessionId, isActive);
+      if (!session) return res.status(404).json({ error: "Gallery session not found" });
+      res.json(session);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update gallery session" });
+    }
+  });
+
+  // DELETE /api/admin/gallery/photos/:photoId — admin: delete a photo
+  app.delete("/api/admin/gallery/photos/:photoId", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteGalleryPhoto(req.params.photoId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete photo" });
     }
   });
 

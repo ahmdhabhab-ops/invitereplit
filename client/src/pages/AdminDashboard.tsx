@@ -81,13 +81,163 @@ import {
   ToggleLeft,
   ToggleRight,
   Table2,
-  Info
+  Info,
+  QrCode,
+  Monitor,
+  Wifi,
+  WifiOff
 } from "lucide-react";
 import { SiTiktok } from "react-icons/si";
-import type { SiteSettings, Order, JobOpening, JobApplication, PartnershipRequest, AdminUserSafe, SpinPrize, SpinEntry, ReferralUser, ReferralCommission } from "@shared/schema";
+import type { SiteSettings, Order, JobOpening, JobApplication, PartnershipRequest, AdminUserSafe, SpinPrize, SpinEntry, ReferralUser, ReferralCommission, GallerySession, GalleryPhoto } from "@shared/schema";
 import { InvoiceManager } from "@/components/InvoiceManager";
 import { ProposalManager } from "@/components/ProposalManager";
 import logoPath from "@assets/Logo_1769975575984.png";
+
+// ── Live Gallery admin panel (per-order) ─────────────────────────────────────
+function OrderGallerySection({ orderId }: { orderId: string }) {
+  const { toast } = useToast();
+
+  const { data, isLoading, refetch } = useQuery<{ session: GallerySession; photos: GalleryPhoto[] }>({
+    queryKey: [`/api/admin/gallery/order/${orderId}`],
+    queryFn: async () => {
+      const res = await fetch(`/api/admin/gallery/order/${orderId}`, { credentials: "include" });
+      if (res.status === 404) return null as any;
+      if (!res.ok) throw new Error("Failed to fetch gallery");
+      return res.json();
+    },
+    retry: false,
+  });
+
+  const toggleActiveMutation = useMutation({
+    mutationFn: async (isActive: boolean) => {
+      const res = await fetch(`/api/admin/gallery/${data?.session.id}/active`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ isActive }),
+      });
+      if (!res.ok) throw new Error("Failed to toggle gallery");
+      return res.json();
+    },
+    onSuccess: () => refetch(),
+    onError: () => toast({ title: "Error", description: "Failed to update gallery status", variant: "destructive" }),
+  });
+
+  const deletePhotoMutation = useMutation({
+    mutationFn: async (photoId: string) => {
+      const res = await fetch(`/api/admin/gallery/photos/${photoId}`, { method: "DELETE", credentials: "include" });
+      if (!res.ok) throw new Error("Failed to delete photo");
+      return res.json();
+    },
+    onSuccess: () => refetch(),
+    onError: () => toast({ title: "Error", description: "Failed to delete photo", variant: "destructive" }),
+  });
+
+  if (isLoading) {
+    return <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Loading gallery…</div>;
+  }
+
+  if (!data?.session) {
+    return (
+      <div className="p-4 bg-background rounded-lg border text-sm text-muted-foreground italic">
+        No Live Gallery for this order. (Gallery is created automatically when the QR Code Photo Sharing add-on is selected.)
+      </div>
+    );
+  }
+
+  const { session, photos } = data;
+  const displayUrl = `/gallery/${session.id}/display`;
+  const uploadUrl = `${window.location.origin}/gallery/${session.id}`;
+
+  return (
+    <div className="space-y-4">
+      {/* Top row: QR + controls */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-background rounded-lg border">
+        {/* QR code */}
+        <div className="flex flex-col items-center gap-2">
+          <p className="text-xs text-muted-foreground font-medium mb-1">Guest Upload QR Code</p>
+          <img
+            src={`/api/gallery/${session.id}/qr`}
+            alt="QR Code"
+            className="w-36 h-36 rounded-lg border"
+          />
+          <a
+            href={uploadUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-primary hover:underline flex items-center gap-1"
+          >
+            <ExternalLink className="h-3 w-3" />
+            Guest Upload Link
+          </a>
+        </div>
+
+        {/* Controls */}
+        <div className="flex flex-col gap-3 justify-center">
+          {/* Display screen link */}
+          <a href={displayUrl} target="_blank" rel="noopener noreferrer">
+            <Button variant="outline" size="sm" className="w-full gap-2">
+              <Monitor className="h-4 w-4" />
+              Open Display Screen
+            </Button>
+          </a>
+
+          {/* Active toggle */}
+          <div className="flex items-center justify-between rounded-lg border px-3 py-2">
+            <div className="flex items-center gap-2 text-sm">
+              {session.isActive ? (
+                <><Wifi className="h-4 w-4 text-green-500" /><span className="text-green-600 font-medium">Gallery Open</span></>
+              ) : (
+                <><WifiOff className="h-4 w-4 text-muted-foreground" /><span className="text-muted-foreground">Gallery Closed</span></>
+              )}
+            </div>
+            <Button
+              size="sm"
+              variant={session.isActive ? "destructive" : "default"}
+              disabled={toggleActiveMutation.isPending}
+              onClick={() => toggleActiveMutation.mutate(!session.isActive)}
+              className="h-7 text-xs"
+            >
+              {session.isActive ? "Close" : "Open"}
+            </Button>
+          </div>
+
+          {/* Photo count */}
+          <p className="text-xs text-muted-foreground text-center">
+            {photos.length} photo{photos.length !== 1 ? "s" : ""} uploaded
+          </p>
+        </div>
+      </div>
+
+      {/* Photos grid */}
+      {photos.length > 0 && (
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+          {photos.map((photo) => (
+            <div key={photo.id} className="relative group aspect-square rounded-lg overflow-hidden border">
+              <img src={photo.fileUrl} alt="Guest photo" className="w-full h-full object-cover" />
+              {photo.uploaderName && (
+                <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-1.5 py-0.5">
+                  <p className="text-[10px] text-white truncate">{photo.uploaderName}</p>
+                </div>
+              )}
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                <button
+                  onClick={() => deletePhotoMutation.mutate(photo.id)}
+                  disabled={deletePhotoMutation.isPending}
+                  className="opacity-0 group-hover:opacity-100 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 transition-all"
+                  title="Delete photo"
+                >
+                  <Trash2 className="h-3 w-3" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 type JobFormData = {
   title: string;
@@ -1112,6 +1262,15 @@ export default function AdminDashboard() {
                                 <p className="text-sm text-muted-foreground italic">No media files uploaded</p>
                               )}
                             </div>
+                          </div>
+
+                          {/* Live Gallery */}
+                          <div>
+                            <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
+                              <QrCode className="h-4 w-4" />
+                              Live Photo Gallery
+                            </h4>
+                            <OrderGallerySection orderId={order.id} />
                           </div>
 
                           {/* Payment Status */}

@@ -188,6 +188,8 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
         ...data.contact,
         mediaUrls,
         paymentStatus: "pending",
+        addOnQrCode,
+        addOnLanguage,
         ...(storedRef ? { referralCode: storedRef } : {}),
       };
       
