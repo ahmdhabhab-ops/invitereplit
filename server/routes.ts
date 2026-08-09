@@ -1259,6 +1259,33 @@ export async function registerRoutes(
     }
   });
 
+  // POST /api/admin/gallery/create — admin: manually create a gallery for an existing order
+  app.post("/api/admin/gallery/create", isAdmin, async (req, res) => {
+    try {
+      const { orderId } = req.body;
+      if (!orderId) return res.status(400).json({ error: "orderId is required" });
+
+      // Verify the order exists
+      const order = await storage.getOrder(orderId);
+      if (!order) return res.status(404).json({ error: "Order not found" });
+
+      // Prevent duplicate sessions
+      const existing = await storage.getGallerySessionByOrderId(orderId);
+      if (existing) return res.status(409).json({ error: "A gallery session already exists for this order" });
+
+      const gallerySession = await storage.createGallerySession({
+        orderId,
+        eventName: (order as any).names || "Event Gallery",
+        isActive: true,
+      });
+
+      res.status(201).json(gallerySession);
+    } catch (error) {
+      console.error("Error creating gallery session:", error);
+      res.status(500).json({ error: "Failed to create gallery session" });
+    }
+  });
+
   // PATCH /api/admin/gallery/:sessionId/active — admin: toggle active
   app.patch("/api/admin/gallery/:sessionId/active", isAdmin, async (req, res) => {
     try {

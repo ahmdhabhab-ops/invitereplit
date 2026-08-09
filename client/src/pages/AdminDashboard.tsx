@@ -108,6 +108,27 @@ function OrderGallerySection({ orderId }: { orderId: string }) {
     retry: false,
   });
 
+  const createGalleryMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(`/api/admin/gallery/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ orderId }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || "Failed to create gallery");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      refetch();
+      toast({ title: "Live Gallery created successfully" });
+    },
+    onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+  });
+
   const toggleActiveMutation = useMutation({
     mutationFn: async (isActive: boolean) => {
       const res = await fetch(`/api/admin/gallery/${data?.session.id}/active`, {
@@ -139,8 +160,22 @@ function OrderGallerySection({ orderId }: { orderId: string }) {
 
   if (!data?.session) {
     return (
-      <div className="p-4 bg-background rounded-lg border text-sm text-muted-foreground italic">
-        No Live Gallery for this order. (Gallery is created automatically when the QR Code Photo Sharing add-on is selected.)
+      <div className="p-4 bg-background rounded-lg border flex flex-col items-start gap-3">
+        <p className="text-sm text-muted-foreground italic">
+          No Live Gallery for this order.
+        </p>
+        <Button
+          size="sm"
+          className="gap-2"
+          disabled={createGalleryMutation.isPending}
+          onClick={() => createGalleryMutation.mutate()}
+        >
+          {createGalleryMutation.isPending ? (
+            <><Loader2 className="h-4 w-4 animate-spin" /> Creating…</>
+          ) : (
+            <><QrCode className="h-4 w-4" /> Create Live Gallery</>
+          )}
+        </Button>
       </div>
     );
   }
