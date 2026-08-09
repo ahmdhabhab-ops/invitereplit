@@ -86,28 +86,6 @@ export function Header() {
             >
               {t.nav.eventPlanners}
             </a>
-            <a
-              href="/careers"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-              data-testid="link-careers"
-            >
-              {t.nav.careers}
-            </a>
-            <span className="h-4 w-px bg-border" aria-hidden="true" />
-            <a
-              href="/terms"
-              className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
-              data-testid="link-terms-desktop"
-            >
-              {t.footer.termsAndConditions}
-            </a>
-            <a
-              href="/privacy"
-              className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
-              data-testid="link-privacy-desktop"
-            >
-              {t.footer.privacyPolicy}
-            </a>
             <Button
               variant="outline"
               size="sm"
@@ -197,30 +175,6 @@ export function Header() {
                 data-testid="link-event-planners-mobile"
               >
                 {t.nav.eventPlanners}
-              </a>
-              <a
-                href="/careers"
-                className="text-left py-3 px-4 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
-                data-testid="link-careers-mobile"
-              >
-                {t.nav.careers}
-              </a>
-              <div className="border-t border-border my-1" />
-              <a
-                href="/terms"
-                className="text-left py-3 px-4 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
-                data-testid="link-terms-mobile"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                {t.footer.termsAndConditions}
-              </a>
-              <a
-                href="/privacy"
-                className="text-left py-3 px-4 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
-                data-testid="link-privacy-mobile"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                {t.footer.privacyPolicy}
               </a>
               <a
                 href="https://build.einvite.me/login"
