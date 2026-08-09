@@ -261,8 +261,8 @@ export async function registerRoutes(
       const validatedData = insertOrderSchema.parse(req.body);
       const order = await storage.createOrder(validatedData);
 
-      // Auto-create gallery session if QR Code add-on was selected
-      if (validatedData.addOnQrCode) {
+      // Auto-create gallery session if Live Event Gallery add-on was selected
+      if (validatedData.addOnLiveGallery) {
         try {
           const gallerySession = await storage.createGallerySession({
             orderId: order.id,

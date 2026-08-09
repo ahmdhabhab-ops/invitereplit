@@ -26,6 +26,7 @@ export const orders = pgTable("orders", {
   additionalNotes: text("additional_notes"),
   addOnQrCode: boolean("add_on_qr_code").default(false),
   addOnLanguage: boolean("add_on_language").default(false),
+  addOnLiveGallery: boolean("add_on_live_gallery").default(false),
 
   // Step 4: Contact & Payment
   contactName: text("contact_name").notNull(),

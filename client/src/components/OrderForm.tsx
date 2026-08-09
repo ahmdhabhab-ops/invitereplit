@@ -68,6 +68,7 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [addOnLanguage, setAddOnLanguage] = useState(false);
   const [addOnQrCode, setAddOnQrCode] = useState(false);
+  const [addOnLiveGallery, setAddOnLiveGallery] = useState(false);
   const { toast } = useToast();
   const { t, language, formatPrice } = useLanguage();
   const tf = t.orderForm;
@@ -190,6 +191,7 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
         paymentStatus: "pending",
         addOnQrCode,
         addOnLanguage,
+        addOnLiveGallery,
         ...(storedRef ? { referralCode: storedRef } : {}),
       };
       
@@ -701,7 +703,7 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                         <span className="text-sm font-semibold text-primary shrink-0 ml-4">+{formatPrice(10)}</span>
                       </button>
 
-                      {/* QR Code Photo Sharing */}
+                      {/* QR Code (invitation QR) */}
                       <button
                         type="button"
                         onClick={() => setAddOnQrCode((v) => !v)}
@@ -717,6 +719,24 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                           <p className="text-xs text-muted-foreground">{tf.addOnQrCodeDesc}</p>
                         </div>
                         <span className="text-sm font-semibold text-primary shrink-0 ml-4">+{formatPrice(35)}</span>
+                      </button>
+
+                      {/* Live Event Gallery */}
+                      <button
+                        type="button"
+                        onClick={() => setAddOnLiveGallery((v) => !v)}
+                        data-testid="addon-live-gallery"
+                        className={`w-full flex items-center justify-between px-4 py-3 rounded-md border transition-colors cursor-pointer text-left ${
+                          addOnLiveGallery
+                            ? "border-primary bg-primary/10"
+                            : "border-input hover:border-primary/50"
+                        }`}
+                      >
+                        <div>
+                          <p className="text-sm font-medium">{tf.addOnLiveGallery}</p>
+                          <p className="text-xs text-muted-foreground">{tf.addOnLiveGalleryDesc}</p>
+                        </div>
+                        <span className="text-sm font-semibold text-primary shrink-0 ml-4">+{formatPrice(50)}</span>
                       </button>
                     </div>
                   </div>
@@ -915,10 +935,16 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
                           <span>+{formatPrice(35)}</span>
                         </div>
                       )}
-                      {(addOnLanguage || addOnQrCode) && (
+                      {addOnLiveGallery && (
+                        <div className="flex justify-between text-sm text-muted-foreground">
+                          <span>{tf.addOnLiveGallery}</span>
+                          <span>+{formatPrice(50)}</span>
+                        </div>
+                      )}
+                      {(addOnLanguage || addOnQrCode || addOnLiveGallery) && (
                         <div className="flex justify-between text-sm font-semibold border-t border-border pt-1 mt-1">
                           <span>{tf.total}</span>
-                          <span>{formatPrice((selectedTier?.price ?? 0) + (addOnLanguage ? 10 : 0) + (addOnQrCode ? 35 : 0))}</span>
+                          <span>{formatPrice((selectedTier?.price ?? 0) + (addOnLanguage ? 10 : 0) + (addOnQrCode ? 35 : 0) + (addOnLiveGallery ? 50 : 0))}</span>
                         </div>
                       )}
                     </div>
