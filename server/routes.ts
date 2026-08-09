@@ -1205,8 +1205,39 @@ export async function registerRoutes(
     }
   });
 
+  // Per-IP rate limiter for guest gallery uploads (runs BEFORE Multer so rejected requests never touch disk)
+  // Configurable via env: GALLERY_RATE_LIMIT (default 10) and GALLERY_RATE_WINDOW_MS (default 10 min)
+  const GALLERY_RATE_LIMIT = parseInt(process.env.GALLERY_RATE_LIMIT || "10", 10);
+  const GALLERY_RATE_WINDOW_MS = parseInt(process.env.GALLERY_RATE_WINDOW_MS || String(10 * 60 * 1000), 10);
+  // Map<ip, { count: number; windowStart: number }>
+  const galleryUploadCounts = new Map<string, { count: number; windowStart: number }>();
+
+  const galleryRateLimiter: RequestHandler = (req, res, next) => {
+    // Admins are never rate-limited
+    if (req.session?.isAdmin) return next();
+
+    // req.ip is resolved by Express using the trusted proxy chain (app.set("trust proxy", 1) above)
+    const ip = req.ip || "unknown";
+    const now = Date.now();
+    const entry = galleryUploadCounts.get(ip);
+    if (!entry || now - entry.windowStart >= GALLERY_RATE_WINDOW_MS) {
+      // New or expired window — reset
+      galleryUploadCounts.set(ip, { count: 1, windowStart: now });
+      return next();
+    }
+    if (entry.count >= GALLERY_RATE_LIMIT) {
+      const remainingSec = Math.ceil((GALLERY_RATE_WINDOW_MS - (now - entry.windowStart)) / 1000);
+      return res.status(429).json({
+        error: `Too many uploads. Please slow down and try again in ${remainingSec} second${remainingSec !== 1 ? "s" : ""}.`,
+      });
+    }
+    entry.count += 1;
+    return next();
+  };
+
   // POST /api/gallery/:sessionId/photos — public: guests upload photos
-  app.post("/api/gallery/:sessionId/photos", galleryPhotoUpload.single("photo"), async (req, res) => {
+  // Rate limiter runs first (before Multer) so rejected requests never write files to disk
+  app.post("/api/gallery/:sessionId/photos", galleryRateLimiter, galleryPhotoUpload.single("photo"), async (req, res) => {
     try {
       const session = await storage.getGallerySession(req.params.sessionId);
       if (!session) return res.status(404).json({ error: "Gallery session not found" });
