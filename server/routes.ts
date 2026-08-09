@@ -12,6 +12,7 @@ import path from "path";
 import fs from "fs";
 import QRCode from "qrcode";
 import { broadcastNewPhoto } from "./gallery-ws";
+import { sendGalleryQrEmail } from "./email";
 
 // Configure multer for file uploads
 const uploadsDir = path.join(process.cwd(), "uploads");
@@ -263,11 +264,22 @@ export async function registerRoutes(
       // Auto-create gallery session if QR Code add-on was selected
       if (validatedData.addOnQrCode) {
         try {
-          await storage.createGallerySession({
+          const gallerySession = await storage.createGallerySession({
             orderId: order.id,
             eventName: validatedData.names || "Event Gallery",
             isActive: true,
           });
+
+          // Send QR code email to organizer (non-fatal)
+          if (validatedData.contactEmail) {
+            sendGalleryQrEmail({
+              to: validatedData.contactEmail,
+              eventName: gallerySession.eventName,
+              sessionId: gallerySession.id,
+            }).catch((emailErr) => {
+              console.error("Failed to send gallery QR email:", emailErr);
+            });
+          }
         } catch (galleryErr) {
           // Non-fatal: log but don't fail the order
           console.error("Failed to create gallery session:", galleryErr);
