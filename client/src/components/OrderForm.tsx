@@ -51,6 +51,8 @@ import {
   Plus,
   Trash2,
   Info,
+  QrCode,
+  ExternalLink,
 } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -69,6 +71,21 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
   const [addOnLanguage, setAddOnLanguage] = useState(false);
   const [addOnQrCode, setAddOnQrCode] = useState(false);
   const [addOnLiveGallery, setAddOnLiveGallery] = useState(false);
+  // After successful submission: stores the order ID so we can show the gallery CTA
+  const [submittedOrderId, setSubmittedOrderId] = useState<string | null>(null);
+  const [submittedHadQrCode, setSubmittedHadQrCode] = useState(false);
+
+  // Always reset submission state on close so re-opening shows a fresh form
+  const handleClose = () => {
+    setSubmittedOrderId(null);
+    setSubmittedHadQrCode(false);
+    setStep(1);
+    setAddOnQrCode(false);
+    setAddOnLanguage(false);
+    setAddOnLiveGallery(false);
+    onClose();
+  };
+
   const { toast } = useToast();
   const { t, language, formatPrice } = useLanguage();
   const tf = t.orderForm;
@@ -208,13 +225,11 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
         const whatsappNum = settings?.whatsappNumber?.replace(/[^0-9]/g, "") || "96181824782";
         window.open(`https://wa.me/${whatsappNum}?text=${message}`, "_blank");
       }
-      
-      toast({
-        title: tf.successTitle,
-        description: tf.successDesc,
-      });
-      
-      onClose();
+
+      // Show a confirmation screen instead of immediately closing,
+      // so the organizer can see their order ID and gallery access link.
+      setSubmittedOrderId(data.id);
+      setSubmittedHadQrCode(addOnQrCode);
     },
     onError: () => {
       toast({
@@ -285,8 +300,59 @@ export function OrderForm({ selectedPackage, onClose }: OrderFormProps) {
       ? tf.namePlaceholder.wedding
       : tf.namePlaceholder.other;
 
+  // Post-submission confirmation screen
+  if (submittedOrderId) {
+    const galleryAccessUrl = `/gallery-access?orderId=${encodeURIComponent(submittedOrderId)}`;
+    return (
+      <Dialog open={!!selectedPackage} onOpenChange={() => handleClose()}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-2xl flex items-center gap-2">
+              <Check className="w-6 h-6 text-green-500" />
+              Order Submitted!
+            </DialogTitle>
+            <DialogDescription>
+              Thank you — we'll be in touch shortly to get started.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div className="bg-muted rounded-lg px-4 py-3">
+              <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wide mb-1">Your Order ID</p>
+              <code className="text-sm font-mono break-all select-all">{submittedOrderId}</code>
+              <p className="text-xs text-muted-foreground mt-1">Keep this for your records.</p>
+            </div>
+
+            {submittedHadQrCode && (
+              <div className="border border-primary/30 bg-primary/5 rounded-lg px-4 py-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <QrCode className="w-5 h-5 text-primary" />
+                  <span className="font-semibold text-sm">Your Live Gallery QR Code</span>
+                </div>
+                <p className="text-sm text-muted-foreground mb-3">
+                  We've emailed your gallery QR code to the address you provided. You can also view
+                  or re-send it anytime from the gallery access page.
+                </p>
+                <a href={galleryAccessUrl} target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" size="sm" className="w-full">
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    View My Gallery QR Code
+                  </Button>
+                </a>
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-end pt-2">
+            <Button onClick={handleClose}>Close</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
-    <Dialog open={!!selectedPackage} onOpenChange={() => onClose()}>
+    <Dialog open={!!selectedPackage} onOpenChange={() => handleClose()}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-serif text-2xl flex items-center gap-3">

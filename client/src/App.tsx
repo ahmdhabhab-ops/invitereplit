@@ -16,6 +16,7 @@ import TermsAndConditions from "@/pages/TermsAndConditions";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import GalleryUpload from "@/pages/GalleryUpload";
 import GalleryDisplay from "@/pages/GalleryDisplay";
+import GalleryAccess from "@/pages/GalleryAccess";
 import NotFound from "@/pages/not-found";
 
 // Forces a real HTTP request to the server for server-rendered HTML pages
@@ -37,6 +38,7 @@ function Router() {
       <Route path="/referral" component={ReferralPage} />
       <Route path="/terms" component={TermsAndConditions} />
       <Route path="/privacy" component={PrivacyPolicy} />
+      <Route path="/gallery-access" component={GalleryAccess} />
       <Route path="/gallery/:sessionId/display" component={GalleryDisplay} />
       <Route path="/gallery/:sessionId" component={GalleryUpload} />
       <Route path="/proposal/:rest*" component={ServerPage} />

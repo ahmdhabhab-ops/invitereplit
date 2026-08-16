@@ -1340,5 +1340,169 @@ export async function registerRoutes(
     }
   });
 
+  // ========== Public Gallery Access (self-service QR retrieval) ==========
+  //
+  // Authorization model: caller must supply both orderId (UUID from their order
+  // confirmation) AND the contact email they registered with. Either factor alone
+  // is insufficient; together they constitute a two-factor ownership check without
+  // requiring a separate database token.
+  //
+  // All invalid/mismatched cases return the same generic message to prevent
+  // information leakage about whether an order ID exists.
+
+  const GALLERY_ACCESS_DENIED = "No Live Gallery found. Please check your order ID and email address and try again.";
+
+  // Helper: resolve base URL (mirrors email.ts logic)
+  function getGalleryBaseUrl(): string {
+    if (process.env.SITE_BASE_URL) return process.env.SITE_BASE_URL.replace(/\/$/, "");
+    if (process.env.REPLIT_DOMAINS) return `https://${process.env.REPLIT_DOMAINS.split(",")[0].trim()}`;
+    if (process.env.REPLIT_DEV_DOMAIN) return `https://${process.env.REPLIT_DEV_DOMAIN}`;
+    return "https://einvite.me";
+  }
+
+  // Shared per-IP rate-limit state for both lookup and resend endpoints.
+  // Per-IP: max 10 requests per 15 minutes (covers lookup + resend together).
+  // Per-order: 5-minute cooldown between resends of the same order.
+  const galleryAccessIpCounts = new Map<string, { count: number; windowStart: number }>();
+  const resendOrderLastSent = new Map<string, number>(); // orderId → epoch ms
+  const GALLERY_IP_MAX = 10;
+  const GALLERY_IP_WINDOW_MS = 15 * 60 * 1000;    // 15-minute window
+  const RESEND_ORDER_COOLDOWN_MS = 5 * 60 * 1000; // 5-minute per-order cooldown
+
+  function galleryAccessIpRateLimit(req: express.Request, res: express.Response): boolean {
+    const ip = (req.ip ?? req.socket.remoteAddress ?? "unknown").replace(/^::ffff:/, "");
+    const now = Date.now();
+    const entry = galleryAccessIpCounts.get(ip);
+    if (entry && now - entry.windowStart < GALLERY_IP_WINDOW_MS) {
+      if (entry.count >= GALLERY_IP_MAX) {
+        res.status(429).json({ error: "Too many requests. Please try again later." });
+        return true; // rate limited
+      }
+      entry.count += 1;
+    } else {
+      galleryAccessIpCounts.set(ip, { count: 1, windowStart: now });
+    }
+    return false; // not rate limited
+  }
+
+  // GET /api/gallery-access?orderId=<id>&email=<email>
+  // Public: retrieve gallery info after verifying orderId + contact email.
+  app.get("/api/gallery-access", async (req, res) => {
+    try {
+      if (galleryAccessIpRateLimit(req, res)) return;
+
+      const { orderId, email } = req.query;
+      if (!orderId || typeof orderId !== "string") {
+        return res.status(400).json({ error: "orderId query parameter is required" });
+      }
+      if (!email || typeof email !== "string") {
+        return res.status(400).json({ error: "email query parameter is required" });
+      }
+
+      // Look up order — use identical response for all auth-failure cases
+      const order = await storage.getOrder(orderId);
+      const contactEmail = (order as any)?.contactEmail as string | undefined;
+
+      // Case-insensitive email comparison; always do the comparison even if order
+      // was not found to avoid timing-based order-ID enumeration.
+      const emailMatches = !!contactEmail && contactEmail.toLowerCase() === email.trim().toLowerCase();
+      if (!order || !emailMatches) {
+        return res.status(403).json({ error: GALLERY_ACCESS_DENIED });
+      }
+
+      const session = await storage.getGallerySessionByOrderId(orderId);
+      if (!session) {
+        return res.status(403).json({ error: GALLERY_ACCESS_DENIED });
+      }
+
+      const baseUrl = getGalleryBaseUrl();
+      const uploadUrl = `${baseUrl}/gallery/${session.id}`;
+      const displayUrl = `${baseUrl}/gallery/${session.id}/display`;
+
+      const qrDataUrl = await QRCode.toDataURL(uploadUrl, {
+        width: 300,
+        margin: 2,
+        color: { dark: "#1a1a2e", light: "#ffffff" },
+      });
+
+      const smtpAvailable = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+
+      res.json({
+        sessionId: session.id,
+        eventName: session.eventName,
+        isActive: session.isActive,
+        uploadUrl,
+        displayUrl,
+        qrCodeDataUrl: qrDataUrl,
+        smtpAvailable,
+        // Redact most of the email — show only first char and domain
+        contactEmailHint: (() => {
+          const [local, domain] = contactEmail.split("@");
+          return `${local[0]}***@${domain}`;
+        })(),
+      });
+    } catch (error) {
+      console.error("Error fetching gallery access:", error);
+      res.status(500).json({ error: "Failed to retrieve gallery information" });
+    }
+  });
+
+  // POST /api/gallery-access/resend?orderId=<id>&email=<email>
+  // Public: re-send QR email after verifying orderId + contact email.
+  // Rate-limited: shared IP cap + per-order 5-minute cooldown.
+  app.post("/api/gallery-access/resend", async (req, res) => {
+    try {
+      if (galleryAccessIpRateLimit(req, res)) return;
+
+      const { orderId, email } = req.query;
+      if (!orderId || typeof orderId !== "string") {
+        return res.status(400).json({ error: "orderId query parameter is required" });
+      }
+      if (!email || typeof email !== "string") {
+        return res.status(400).json({ error: "email query parameter is required" });
+      }
+
+      // Per-order resend cooldown
+      const now = Date.now();
+      const lastSent = resendOrderLastSent.get(orderId);
+      if (lastSent && now - lastSent < RESEND_ORDER_COOLDOWN_MS) {
+        const waitSec = Math.ceil((RESEND_ORDER_COOLDOWN_MS - (now - lastSent)) / 1000);
+        return res.status(429).json({
+          error: `A resend was already requested recently. Please wait ${waitSec} seconds before trying again.`,
+        });
+      }
+
+      // SMTP must be configured — fail explicitly rather than silently
+      if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+        return res.status(503).json({ error: "Email delivery is not configured on this server. Please contact support." });
+      }
+
+      // Verify orderId + email (same uniform error for all auth-failure cases)
+      const order = await storage.getOrder(orderId);
+      const contactEmail = (order as any)?.contactEmail as string | undefined;
+      const emailMatches = !!contactEmail && contactEmail.toLowerCase() === email.trim().toLowerCase();
+      if (!order || !emailMatches) {
+        return res.status(403).json({ error: GALLERY_ACCESS_DENIED });
+      }
+
+      const session = await storage.getGallerySessionByOrderId(orderId);
+      if (!session) {
+        return res.status(403).json({ error: GALLERY_ACCESS_DENIED });
+      }
+
+      resendOrderLastSent.set(orderId, now);
+      await sendGalleryQrEmail({
+        to: contactEmail,
+        eventName: session.eventName,
+        sessionId: session.id,
+      });
+
+      res.json({ success: true, message: "Gallery QR code email re-sent successfully." });
+    } catch (error) {
+      console.error("Error resending gallery QR email:", error);
+      res.status(500).json({ error: "Failed to re-send gallery email. Please try again." });
+    }
+  });
+
   return httpServer;
 }
