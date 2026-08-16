@@ -538,20 +538,18 @@ export const pricingTiers = [
 // Sample invitations for the gallery
 export const sampleInvitations = {
   weddings: [
-    { id: "emma-and-lucas", name: "Emma & Lucas", url: "https://app.einvite.me/emma-and-lucas" },
-    { id: "georges-rita", name: "Georges & Rita", url: "https://app.einvite.me/georges-rita" },
-    { id: "yyouhanna-vanessa", name: "Youhanna & Vanessa", url: "https://app.einvite.me/yyouhanna-vanessa" },
-    { id: "john-jane", name: "John & Jane", url: "https://app.einvite.me/john-jane" },
-    { id: "ahmad-rim", name: "Ahmad & Rim", url: "https://app.einvite.me/ahmad-rim" },
+    { id: "wedding-1", name: "Wedding Invitation", url: "https://build.einvite.me/73f051ff-dc35-5c84-aac3-00224f37181c" },
+    { id: "wedding-2", name: "Wedding Invitation", url: "https://build.einvite.me/efa8bbab-d681-5275-a424-0270b5de1c98" },
+    { id: "wedding-3", name: "Wedding Invitation", url: "https://build.einvite.me/00b66f20-d126-5873-a79d-5c92d867d947" },
   ],
   events: [
-    { id: "dj-camp", name: "DJ Camp 2024", url: "https://app.einvite.me/dj-camp" },
+    { id: "event-1", name: "Event Invitation", url: "https://build.einvite.me/bc3e3951-877b-5667-bce1-4ac82a2a17e9" },
   ],
   birthdays: [
-    { id: "itta", name: "Itta's Birthday", url: "https://app.einvite.me/itta" },
+    { id: "birthday-1", name: "Birthday Invitation", url: "https://build.einvite.me/a896bdad-167b-5941-84f3-390aafc0700f" },
   ],
   baptisms: [
-    { id: "roy", name: "Roy's Baptism", url: "https://app.einvite.me/roy" },
+    { id: "baptism-1", name: "Baptism Invitation", url: "https://build.einvite.me/3283409c-da01-542a-8d57-40ec11504bde" },
   ],
 } as const;
 
