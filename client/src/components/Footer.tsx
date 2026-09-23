@@ -1,6 +1,7 @@
 import { Heart, Mail, Phone, MapPin } from "lucide-react";
 import { Link } from "wouter";
-import { SiInstagram, SiFacebook, SiWhatsapp, SiTiktok, SiLinkedin } from "react-icons/si";
+import { SiInstagram, SiFacebook, SiWhatsapp, SiTiktok } from "react-icons/si";
+import { FaLinkedin } from "react-icons/fa6";
 import { useQuery } from "@tanstack/react-query";
 import logoImage from "@assets/Logo_1769975575984.png";
 import type { SiteSettings } from "@shared/schema";
@@ -77,7 +78,7 @@ export function Footer() {
                   className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
                   data-testid="link-linkedin"
                 >
-                  <SiLinkedin className="w-5 h-5" />
+                  <FaLinkedin className="w-5 h-5" />
                 </a>
               )}
               {settings?.tiktokUrl && (

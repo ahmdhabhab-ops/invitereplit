@@ -127,6 +127,24 @@ async function seedInitialAdmin() {
   }
 }
 
+// Retries seeding with capped exponential backoff so a database that isn't
+// reachable yet at boot (e.g. cold start on Autoscale) doesn't crash the server.
+async function seedDatabaseWithRetry() {
+  let attempt = 0;
+  while (true) {
+    try {
+      await seedInitialAdmin();
+      await storage.seedSpinPrizesIfEmpty();
+      return;
+    } catch (err) {
+      attempt++;
+      const delay = Math.min(1000 * 2 ** attempt, 30_000);
+      console.error(`Database seeding failed (attempt ${attempt}), retrying in ${delay}ms:`, err);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+}
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -169,11 +187,11 @@ export async function registerRoutes(
     res.sendFile(contractPath);
   });
 
-  // Seed initial admin user on startup
-  await seedInitialAdmin();
-  
-  // Seed spin prizes if empty
-  await storage.seedSpinPrizesIfEmpty();
+  // Seed initial admin user + spin prizes in the background so a slow or
+  // not-yet-ready database doesn't block the server from listening.
+  seedDatabaseWithRetry().catch((err) => {
+    console.error("Unexpected error during database seeding:", err);
+  });
 
   // Admin login endpoint
   app.post("/api/admin/login", async (req, res) => {

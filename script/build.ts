@@ -62,6 +62,8 @@ async function buildAll() {
 }
 
 buildAll().catch((err) => {
-  console.error(err);
+  console.error(err?.message ?? err);
+  if (err?.frame) console.error(err.frame);
+  if (err?.loc) console.error(err.loc);
   process.exit(1);
 });
