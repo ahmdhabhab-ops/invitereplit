@@ -86,6 +86,13 @@ export function Header() {
             >
               {t.nav.eventPlanners}
             </a>
+            <a
+              href="/careers"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              data-testid="link-careers"
+            >
+              {t.nav.careers}
+            </a>
             <Button
               variant="outline"
               size="sm"
@@ -175,6 +182,13 @@ export function Header() {
                 data-testid="link-event-planners-mobile"
               >
                 {t.nav.eventPlanners}
+              </a>
+              <a
+                href="/careers"
+                className="text-left py-3 px-4 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
+                data-testid="link-careers-mobile"
+              >
+                {t.nav.careers}
               </a>
               <a
                 href="https://build.einvite.me/login"

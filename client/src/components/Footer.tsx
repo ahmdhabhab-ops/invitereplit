@@ -139,6 +139,15 @@ export function Footer() {
               </li>
               <li>
                 <Link
+                  href="/careers"
+                  className="text-muted-foreground hover:text-foreground transition-colors text-sm"
+                  data-testid="link-footer-careers"
+                >
+                  {t.nav.careers}
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/referral"
                   className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium"
                   data-testid="link-footer-referral"
