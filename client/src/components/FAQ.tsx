@@ -1,12 +1,28 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import type { SiteSettings } from "@shared/schema";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export function FAQ() {
-  const { t } = useLanguage();
-  const tf = t.faq;
+  const { t, formatPrice } = useLanguage();
+  const { data: settings } = useQuery<SiteSettings>({ queryKey: ["/api/settings"] });
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  // Same source and fallbacks as PricingSection, so the FAQ always quotes the prices shown on the cards.
+  const prices: Record<string, string> = {
+    essential: formatPrice(settings?.essentialPrice ?? 49),
+    premium: formatPrice(settings?.premiumPrice ?? 99),
+    royal: formatPrice(settings?.royalPrice ?? 199),
+  };
+  const tf = {
+    ...t.faq,
+    items: t.faq.items.map((item) => ({
+      ...item,
+      answer: item.answer.replace(/\{(essential|premium|royal)\}/g, (_, plan: string) => prices[plan]),
+    })),
+  };
 
   const toggleFAQ = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);

@@ -492,7 +492,7 @@ export const translations = {
         },
         {
           question: "What's included in each pricing package?",
-          answer: "Our Essential package ($49) includes a beautiful digital invitation with RSVP tracking. Premium ($99) adds custom animations, music, and a photo gallery. Royal ($199) offers unlimited customization, video integration, and priority support.",
+          answer: "Essential ({essential}) is a single-page, mobile-responsive invitation with your date & location, a shareable link, and 3 design revisions. Premium ({premium}) is a multi-page interactive design with a photo gallery, background music, RSVP tracking, a live countdown timer, 1 language, and 5 design revisions. Royal ({royal}) includes everything in Premium plus video backgrounds, guest messaging, unlimited revisions, priority support, and a custom domain option.",
         },
         {
           question: "How do I share my digital invitation with guests?",
@@ -523,7 +523,6 @@ export const translations = {
       },
       openingsTitle: "Open Positions",
       openingsSubtitle: "Find your perfect role and help us create magical moments",
-      viewAll: "View All Positions",
       noOpenings: "No open positions at the moment",
       noOpeningsSubtitle: "Check back soon or send us your resume directly.",
       viewDetails: "View Details",
@@ -1077,7 +1076,7 @@ export const translations = {
         },
         {
           question: "Qu'est-ce qui est inclus dans chaque forfait ?",
-          answer: "Notre forfait Essentiel (€45) comprend une belle invitation numérique avec suivi RSVP. Premium (€91) ajoute des animations personnalisées, de la musique et une galerie de photos. Royal (€183) offre une personnalisation illimitée, l'intégration vidéo et un support prioritaire.",
+          answer: "Essentiel ({essential}) est une invitation d'une page, adaptée au mobile, avec votre date et lieu, un lien partageable et 3 révisions du design. Premium ({premium}) est un design interactif de plusieurs pages avec galerie photos, musique de fond, suivi RSVP, compte à rebours en direct, 1 langue et 5 révisions. Royal ({royal}) comprend tout le Premium, plus des arrière-plans vidéo, la messagerie invités, des révisions illimitées, un support prioritaire et l'option de domaine personnalisé.",
         },
         {
           question: "Comment partager mon invitation numérique avec mes invités ?",
@@ -1108,7 +1107,6 @@ export const translations = {
       },
       openingsTitle: "Postes Ouverts",
       openingsSubtitle: "Trouvez votre rôle idéal et aidez-nous à créer des moments magiques",
-      viewAll: "Voir Tous les Postes",
       noOpenings: "Aucun poste ouvert pour le moment",
       noOpeningsSubtitle: "Revenez bientôt ou envoyez-nous votre CV directement.",
       viewDetails: "Voir les Détails",
