@@ -46,8 +46,8 @@ export default function LandingPage() {
         <PricingSection onSelectPackage={handleSelectPackage} />
         <SpinBanner onOpen={() => setSpinOpen(true)} />
         <WhyChooseUs />
-        <JobOpenings />
         <FAQ />
+        <JobOpenings />
       </main>
       <Footer />
       
