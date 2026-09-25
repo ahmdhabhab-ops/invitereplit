@@ -14,6 +14,20 @@ export const translations = {
     },
     langToggle: "FR",
 
+    // Live chat
+    chat: {
+      open: "Chat with us",
+      title: "Chat with einvite.me",
+      subtitle: "We usually reply within a few minutes",
+      greeting: "Hi! 👋 How can we help with your invitation?",
+      namePlaceholder: "Your name (optional)",
+      contactPlaceholder: "Phone or email (optional)",
+      contactHint: "Leave your number in case you close this page before we reply.",
+      messagePlaceholder: "Type your message…",
+      send: "Send",
+      error: "Couldn't send your message. Please try again.",
+    },
+
     // Hero
     hero: {
       badge: "#1 Digital Invitations in Lebanon",
@@ -597,6 +611,20 @@ export const translations = {
       login: "Connexion",
     },
     langToggle: "EN",
+
+    // Live chat
+    chat: {
+      open: "Discutez avec nous",
+      title: "Discuter avec einvite.me",
+      subtitle: "Nous répondons généralement en quelques minutes",
+      greeting: "Bonjour ! 👋 Comment pouvons-nous vous aider pour votre invitation ?",
+      namePlaceholder: "Votre nom (facultatif)",
+      contactPlaceholder: "Téléphone ou e-mail (facultatif)",
+      contactHint: "Laissez votre numéro au cas où vous fermeriez la page avant notre réponse.",
+      messagePlaceholder: "Écrivez votre message…",
+      send: "Envoyer",
+      error: "Impossible d'envoyer votre message. Veuillez réessayer.",
+    },
 
     // Hero
     hero: {

@@ -91,6 +91,7 @@ import { SiTiktok } from "react-icons/si";
 import type { SiteSettings, Order, JobOpening, JobApplication, PartnershipRequest, AdminUserSafe, SpinPrize, SpinEntry, ReferralUser, ReferralCommission, GallerySession, GalleryPhoto } from "@shared/schema";
 import { InvoiceManager } from "@/components/InvoiceManager";
 import { ProposalManager } from "@/components/ProposalManager";
+import { ChatInbox } from "@/components/ChatInbox";
 import logoPath from "@assets/Logo_1769975575984.png";
 
 // ── Live Gallery admin panel (per-order) ─────────────────────────────────────
@@ -311,7 +312,8 @@ type ActiveSection =
   | "users"
   | "spin"
   | "referrals"
-  | "general" 
+  | "chat"
+  | "general"
   | "pricing" 
   | "contact" 
   | "social" 
@@ -322,6 +324,7 @@ type UserRole = "admin" | "sales";
 const allMenuItems = [
   { id: "dashboard" as ActiveSection, label: "Dashboard", icon: LayoutDashboard, roles: ["admin"] as UserRole[] },
   { id: "orders" as ActiveSection, label: "Orders", icon: FileText, roles: ["admin", "sales"] as UserRole[] },
+  { id: "chat" as ActiveSection, label: "Live Chat", icon: MessageSquare, roles: ["admin", "sales"] as UserRole[] },
   { id: "invoices" as ActiveSection, label: "Invoices", icon: Receipt, roles: ["admin", "sales"] as UserRole[] },
   { id: "proposals" as ActiveSection, label: "Proposals", icon: Send, roles: ["admin", "sales"] as UserRole[] },
   { id: "jobs" as ActiveSection, label: "Job Openings", icon: Briefcase, roles: ["admin"] as UserRole[] },
@@ -1366,6 +1369,17 @@ export default function AdminDashboard() {
               <p className="text-muted-foreground">Create and manage invoices for your customers</p>
             </div>
             <InvoiceManager />
+          </div>
+        );
+
+      case "chat":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight">Live Chat</h2>
+              <p className="text-muted-foreground">Messages from the website chat. Replies appear to the visitor within a few seconds.</p>
+            </div>
+            <ChatInbox canTestTelegram={isAdminUser} />
           </div>
         );
 

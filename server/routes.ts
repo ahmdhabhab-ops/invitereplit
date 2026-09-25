@@ -13,6 +13,7 @@ import fs from "fs";
 import QRCode from "qrcode";
 import { broadcastNewPhoto } from "./gallery-ws";
 import { sendGalleryQrEmail } from "./email";
+import { ensureChatTables, registerChatRoutes } from "./chat";
 
 // Configure multer for file uploads
 const uploadsDir = path.join(process.cwd(), "uploads");
@@ -133,6 +134,7 @@ async function seedDatabaseWithRetry() {
   let attempt = 0;
   while (true) {
     try {
+      await ensureChatTables();
       await seedInitialAdmin();
       await storage.seedSpinPrizesIfEmpty();
       return;
@@ -192,6 +194,8 @@ export async function registerRoutes(
   seedDatabaseWithRetry().catch((err) => {
     console.error("Unexpected error during database seeding:", err);
   });
+
+  registerChatRoutes(app, isAuthenticated, isAdminRole);
 
   // Admin login endpoint
   app.post("/api/admin/login", async (req, res) => {

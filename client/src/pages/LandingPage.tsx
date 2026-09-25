@@ -10,6 +10,7 @@ import { WhyChooseUs } from "@/components/WhyChooseUs";
 import { FAQ } from "@/components/FAQ";import { OrderForm } from "@/components/OrderForm";
 import { Footer } from "@/components/Footer";
 import { SpinWheel, SpinBanner, SpinFloatingButton } from "@/components/SpinWheel";
+import { LiveChat } from "@/components/LiveChat";
 
 export default function LandingPage() {
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
@@ -59,6 +60,8 @@ export default function LandingPage() {
 
       {/* Floating spin button */}
       <SpinFloatingButton onOpen={() => setSpinOpen(true)} />
+
+      <LiveChat />
     </div>
   );
 }

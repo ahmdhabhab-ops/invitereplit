@@ -591,3 +591,27 @@ export const insertReferralCommissionSchema = createInsertSchema(referralCommiss
 });
 export type InsertReferralCommission = z.infer<typeof insertReferralCommissionSchema>;
 export type ReferralCommission = typeof referralCommissions.$inferSelect;
+
+// ─── Website Live Chat ───────────────────────────────────────────────────────
+
+export const chatConversations = pgTable("chat_conversations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  visitorToken: text("visitor_token").notNull().unique(),
+  visitorName: text("visitor_name"),
+  visitorContact: text("visitor_contact"),
+  adminUnread: integer("admin_unread").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  lastMessageAt: timestamp("last_message_at").notNull().defaultNow(),
+});
+export type ChatConversation = typeof chatConversations.$inferSelect;
+
+export const chatMessages = pgTable("chat_messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  conversationId: varchar("conversation_id").notNull(),
+  sender: text("sender").notNull(), // visitor | admin
+  body: text("body").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+export type ChatMessage = typeof chatMessages.$inferSelect;
+
+export type ChatConversationSummary = Omit<ChatConversation, "visitorToken"> & { lastMessage: string | null; lastSender: string | null };

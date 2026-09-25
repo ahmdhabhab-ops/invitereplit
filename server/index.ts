@@ -47,7 +47,8 @@ app.use((req, res, next) => {
 
   res.on("finish", () => {
     const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
+    // Chat is polled every few seconds and carries visitors' messages, so keep it out of the logs.
+    if (path.startsWith("/api") && !path.startsWith("/api/chat")) {
       let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
       if (capturedJsonResponse) {
         logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
