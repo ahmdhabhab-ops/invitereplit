@@ -733,7 +733,7 @@ export function SpinFloatingButton({ onOpen }: SpinFloatingButtonProps) {
       `}</style>
 
       <div
-        className="fixed bottom-6 right-6 z-50 flex flex-col items-center gap-2"
+        className="fixed bottom-6 left-6 z-50 flex flex-col items-center gap-2"
         style={{ pointerEvents: "none" }}
       >
         {/* Bouncing badge label */}
