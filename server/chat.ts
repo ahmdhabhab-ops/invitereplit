@@ -4,6 +4,7 @@ import { z } from "zod";
 import { asc, desc, eq, sql } from "drizzle-orm";
 import { db } from "./db";
 import { chatConversations, chatMessages, type ChatConversationSummary } from "@shared/schema";
+import { isValidContact } from "@shared/contact";
 
 const MAX_BODY = 2000;
 
@@ -110,6 +111,9 @@ export function registerChatRoutes(app: Express, requireStaff: RequestHandler, r
     try {
       let conversation = await findConversationByToken(visitorToken(req));
       const isNew = !conversation;
+      if (!conversation && !isValidContact(contact)) {
+        return res.status(400).json({ error: "Please enter your phone number or email so we can reply." });
+      }
       if (!conversation) {
         [conversation] = await db
           .insert(chatConversations)

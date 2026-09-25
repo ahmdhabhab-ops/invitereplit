@@ -4,6 +4,7 @@ import { Loader2, MessageCircle, Send, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { isValidContact } from "@shared/contact";
 
 type Message = { id: string; sender: "visitor" | "admin"; body: string; createdAt: string };
 
@@ -78,6 +79,10 @@ export function LiveChat() {
     e.preventDefault();
     const body = draft.trim();
     if (!body || sending) return;
+    if (!token && !isValidContact(contact)) {
+      setError(tc.contactRequired);
+      return;
+    }
     setSending(true);
     setError(null);
     try {
@@ -148,7 +153,7 @@ export function LiveChat() {
                 <>
                   <div className="grid grid-cols-2 gap-2">
                     <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={tc.namePlaceholder} maxLength={80} className="h-9 text-sm" data-testid="input-chat-name" />
-                    <Input value={contact} onChange={(e) => setContact(e.target.value)} placeholder={tc.contactPlaceholder} maxLength={120} className="h-9 text-sm" data-testid="input-chat-contact" />
+                    <Input value={contact} onChange={(e) => setContact(e.target.value)} placeholder={tc.contactPlaceholder} maxLength={120} required aria-required="true" className="h-9 text-sm" data-testid="input-chat-contact" />
                   </div>
                   <p className="text-[11px] text-muted-foreground">{tc.contactHint}</p>
                 </>
